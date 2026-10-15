@@ -17,6 +17,7 @@ The delivery phases in the reports are numbered by session and do not map one-to
 | 6 — Full 25-level path, zones and quests | Content, rules and interface done; **human content review pending** before public release (DEC-011) | Phase 2, 3 and 5 reports |
 | 7 — XP, achievements, profile and leaderboard | Done locally (rules, persistence, interface) | Phase 3, 4 and 5 reports |
 | 8 — Art and world polish | Original SVG design system and zone scenes done; owner review of the slice and any larger art set pending (P-006) | `docs/DESIGN_SYSTEM.md`, `docs/ASSETS.md` |
+| 6b — Security, account lifecycle, polish and QA (Phase 6 session) | Done locally: account deletion, shared rate limit, security headers, HttpOnly cookies, UI polish, 26 browser tests incl. mocked Supabase journeys, curriculum review checklist | `docs/PHASE_6_REPORT.md`, `docs/issues.md` |
 | 9–12 | Not started (hosting needs approval: DEC-013) | — |
 
 Nothing is deployed. No external service or cloud resource has been created.

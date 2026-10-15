@@ -227,3 +227,18 @@ Rules:
 - **Development sign-in stays development-only.** `AUTH_MODE=dev` is refused when `NODE_ENV=production`; never set it in a hosted environment. Supabase credentials are added only after approval, through the environment's secret settings — never committed.
 - **Run one `next dev` per folder.** Stop your own dev server before `npm run test:e2e`; reach the dev server via `localhost` (Next.js blocks dev resources for other hostnames).
 - **UI changes** keep the design tokens (`docs/DESIGN_SYSTEM.md`), visible focus, keyboard operation and reduced-motion behaviour; new art is original and recorded in `docs/ASSETS.md`. Check 390px and desktop widths; the axe scan must stay free of serious/critical violations.
+
+## 17. Phase 6 additions
+
+```bash
+npm run content:review-checklist            # regenerate the human-review checklist after content edits
+TEST_DATABASE_URL=... npm run test:e2e -- --project=dev-signin      # game journeys (next dev)
+TEST_DATABASE_URL=... npm run test:e2e -- --project=supabase-mock   # production build + MOCK Supabase Auth
+```
+
+- **Before e2e:** stop every other `next dev` in this folder (`ps -eo pid,args | grep next-server`); the suite starts its own servers on 3100, 3101 and 54400.
+- **Mock vs real:** never describe `supabase-mock` results as real Google or Supabase coverage. When the Supabase project exists, repeat those journeys manually against it and record the result.
+- **Every e2e test** uses `e2e/fixtures.ts`, which fails on browser console errors, page errors, 5xx responses and real network failures. Opt out only where failure is the point (`test.use({ allowNetworkFailures: true })`).
+- **Human review:** only a person sets `review.kind: human`, with their own name; validation rejects AI-looking names. Regenerate the checklist and commit it with the content change.
+- **Secrets:** server-only keys (`SUPABASE_SECRET_KEY`, `DATABASE_URL`, `DEV_AUTH_SECRET`) must never use a `NEXT_PUBLIC_` name; the app refuses to run if one does.
+- **Pipelines:** never pipe a check through `tail`/`grep` when its exit code decides whether to commit; check `$?` of the command itself.

@@ -85,3 +85,14 @@ interface SessionResolver {
 | Tests | `tests/auth/*.test.ts` (config, tokens, identity, age, redirects, action boundary); `e2e/game.spec.ts` (signed-out redirects, forged cookie, under-13 refusal, two-account isolation) |
 
 Still to do once a project is approved: Supabase dashboard settings (Site URL, redirect allow-list for `/auth/callback`, email template, Google OAuth client), an end-to-end check against the real project, account deletion with an admin credential (R-46), and production rate limits.
+
+## 7. Phase 6 additions
+
+| Item | Implementation |
+|---|---|
+| Session cookies | `supabaseCookieOptions()`: HttpOnly, SameSite=Lax, Secure in production (overrides the `@supabase/ssr` default of readable cookies) |
+| Account deletion | `deleteAccount` server action → `PostgresPlayerAccounts.deleteAccount` (one transaction) → `deleteSupabaseUser` (server-only admin client, `SUPABASE_SECRET_KEY`); refuses without the key; identity must match the session (DEC-015) |
+| Unverified email | The sign-in page offers sign-out to a session whose email is not verified |
+| Secret exposure guard | Sign-in is disabled if any `NEXT_PUBLIC_*` variable name contains SECRET, SERVICE_ROLE, PRIVATE or PASSWORD |
+| URLs | `APP_URL` and the Supabase URL must be https in production, except loopback hosts used for local testing |
+| Tests | `e2e/supabase-auth.spec.ts` against `e2e/mock-supabase/server.ts` (a MOCK; DEC-017): PKCE Google flow, unverified email, magic link with hostile `next`, forged codes, sign-out, deletion |

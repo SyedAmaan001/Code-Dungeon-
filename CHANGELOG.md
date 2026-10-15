@@ -1,5 +1,16 @@
 # Changelog
 
+## Phase 6 — Security, account lifecycle, polish and QA (2026-10-15)
+
+- Audit baseline recorded (`docs/issues.md`): every check green before changes; found and fixed a 97px phone overflow in encounter rooms, an unreachable sticky challenge column on laptops, cramped rooms on landscape tablets and non-HttpOnly Supabase cookies.
+- Account deletion (Profile): typed-handle confirmation; game data and the Supabase user deleted in one transaction (nothing deleted if Supabase refuses or the server-only key is missing). Confirmation page.
+- Shared per-player rate limit in PostgreSQL (migration 0003, additive) behind a process-local flood guard.
+- Hardening: security headers (anti-framing, nosniff, referrer and permissions policies, COOP, HSTS in production); HttpOnly/Secure Supabase cookies; refusal to run with secrets in `NEXT_PUBLIC_*` variables; sign-out for unverified-email sessions; https required for Supabase/app URLs in production except loopback.
+- Interface: distinct checkpoint/major/boss seals, mastered halo, won badge, zone progress meters and a map legend; level progress strip (required challenges, XP earned of available, mastery); two-column rooms from 900px; offline notice and Retry; room loading skeleton.
+- QA: 26 Playwright tests in two projects — `dev-signin` (19) and `supabase-mock` (7, production build against a local mock of Supabase Auth: Google OAuth and magic-link code paths, sessions, deletion). Every test fails on console errors or failed requests; all 25 rooms checked at phone width.
+- Curriculum: generated human-review checklist for all 25 levels (`docs/CURRICULUM_REVIEW_CHECKLIST.md`); validation rejects AI reviewers recorded as human; release gate unchanged (0 of 25 human-reviewed).
+- Tests: 270 Vitest with a database (224 without). Runtime audit 0 vulnerabilities. Curriculum, answer checking, XP, progression, quests, achievements and encounter rules unchanged.
+
 ## Phase 5 — First playable slice: sign-in, interface and decisions (2026-10-15)
 
 - Decisions recorded (DEC-009 to DEC-013, owner-confirmed): Supabase Auth with Google OAuth and email magic link, verified email, no passwords; 13+ audience with jurisdiction questions documented; distinct AI/human review statuses with human review required for public release; game rules locked; local-first hosting with Supabase and Vercel intended but nothing provisioned. DEC-014 (leaderboard opt-in) proposed.

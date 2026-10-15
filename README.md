@@ -2,7 +2,7 @@
 
 A gamified programming-learning experience: learn Python by exploring an illustrated fantasy dungeon. This repository holds the application (Next.js, PostgreSQL) and its documentation pack — the product contract, decisions, development workflow and execution plan. What is verified to work is stated in the phase reports under `docs/`; documentation alone is never evidence that a feature works.
 
-## Develop and play the game (Phase 5)
+## Develop and play the game (Phases 5–6)
 
 Code Dungeon is playable locally: sign in, create an adventurer, explore the dungeon map, play the 25 Python Fundamentals levels (lessons, six server-checked challenge formats, hints, encounter lives), follow quests, collect rewards and see the leaderboard. Progress is saved in PostgreSQL. Nothing is deployed or hosted. See `docs/PHASE_5_REPORT.md` for what is verified and what is not.
 
@@ -30,6 +30,8 @@ npm run dev                     # http://localhost:3000 — sign in with any sho
 
 **Sign-in.** The product uses Supabase Auth with Google and email magic links (DEC-009). It is implemented (`AUTH_MODE=supabase`) but **not configured**: creating the Supabase project and its credentials needs the owner's approval. Until then, `AUTH_MODE=dev` provides a clearly labelled development sign-in that the app refuses to enable in a production build. Variable names are listed in `.env.example`; only the Supabase *publishable* key may ever reach the browser.
 
+**Account deletion.** Players can delete their account from their profile (typed confirmation). Game data and the Supabase sign-in are deleted together in one transaction; in Supabase mode this needs the server-only `SUPABASE_SECRET_KEY` (not yet provisioned), and without it nothing is deleted.
+
 **Content release.** `CONTENT_RELEASE=development` (default) plays all 25 levels. `public` serves only human-reviewed levels; `npm run content:release-check` lists what still needs human review (DEC-011). All 25 levels are currently AI-reviewed only.
 
 ### Checks
@@ -43,11 +45,12 @@ TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:54329/postgres npm test   # in
 TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:54329/postgres npm run test:e2e   # browser tests (Playwright)
 npm run content:validate        # validate content packs in content/
 npm run content:verify-python   # run curriculum examples with real Python
+npm run content:review-checklist # regenerate docs/CURRICULUM_REVIEW_CHECKLIST.md (human review)
 npm run build                   # production build
 npm run db:status               # migration state
 ```
 
-The end-to-end tests start `next dev` on port 3100 with the development sign-in and a fresh `code_dungeon_e2e` database, so stop any other `next dev` in the same folder first. Playwright needs Chromium (`npx playwright install chromium`; preinstalled in Claude cloud sessions).
+The end-to-end tests run two projects against a fresh `code_dungeon_e2e` database: `dev-signin` (`next dev` on port 3100 with the development sign-in) and `supabase-mock` (a production build on port 3101 in Supabase mode, talking to `e2e/mock-supabase/server.ts`, a local **mock** of Supabase Auth on port 54400 — it tests our sign-in code, not real Google or Supabase). Stop any other `next dev` in the same folder first. Playwright needs Chromium (`npx playwright install chromium`; preinstalled in Claude cloud sessions).
 
 ### Layout
 

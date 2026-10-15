@@ -232,3 +232,26 @@
 - Why: high-privacy defaults are expected for services that minors may use (e.g. UK Age Appropriate Design Code), and the leaderboard still works for everyone who opts in.
 - Consequences: an emptier leaderboard early on; no fake players are added to compensate.
 - Revisit trigger: owner prefers visible-by-default, or legal review of launch jurisdictions.
+
+### DEC-015 — Account deletion is all-or-nothing and needs a server-only Supabase key
+- Status: DEFAULT (implemented in Phase 6). Configuring `SUPABASE_SECRET_KEY` for a real project needs owner approval (DEC-013).
+- Date: 2026-10-15
+- Decision: Profile › Delete account requires typing the exact handle and ticking an acknowledgement. The server deletes the player row (cascading to every learning and game table, including rate-limit rows) and, inside the same database transaction, deletes the Supabase Auth user with the server-only secret key; the transaction commits only if Supabase confirms. In Supabase mode without the key the action refuses and deletes nothing. The identity deleted must be the one the current session signed in with. After deletion the session is signed out and the player sees a confirmation page.
+- Why: a partial deletion would either leave personal game data behind or leave a sign-in that recreates an empty account; doing both in one transaction avoids both.
+- Consequences: a failure at commit time after Supabase confirmed (very unlikely) would leave game data without a sign-in; it would be visible in logs and removable by an operator. The secret key must never use a `NEXT_PUBLIC_` name (enforced).
+- Evidence: `tests/db/account-deletion.test.ts`, `e2e/supabase-auth.spec.ts`, `e2e/game.spec.ts`.
+
+### DEC-016 — Shared rate limit in PostgreSQL
+- Status: DEFAULT (implemented in Phase 6; no new service)
+- Decision: answers and hints are limited to 40 per player per minute in a PostgreSQL table (`action_rate_limits`, migration 0003, row-level security), shared by every server instance; a process-local limiter (60/minute) runs first to stop floods without touching the database. Fixed one-minute windows; old windows are removed as players act.
+- Why: PostgreSQL is already the approved store, so this needs no extra service or cost; a hosted multi-instance deployment needs a shared limit.
+- Revisit trigger: measured load, or a platform-level limiter becomes available on the approved host.
+
+### DEC-017 — Sign-in tests use a local mock of Supabase Auth until a real project exists
+- Status: DEFAULT (Phase 6)
+- Decision: the `supabase-mock` Playwright project runs a production build in Supabase mode against `e2e/mock-supabase/server.ts`, a GoTrue-compatible test double (mocked Google consent page, PKCE code exchange, user lookup, magic-link outbox, logout, admin deletion, redirect allow-list). These tests prove Code Dungeon's integration code; they are never reported as real Google or Supabase coverage.
+- Revisit trigger: the Supabase project is approved — then run the same journeys manually against it (R-47, R-51).
+
+### DEC-018 — Session cookies and response headers baseline
+- Status: DEFAULT (Phase 6)
+- Decision: Supabase session cookies are HttpOnly, SameSite=Lax and Secure in production (the app uses Supabase only on the server). Every response carries `frame-ancestors 'none'`/`X-Frame-Options: DENY`, `nosniff`, a strict referrer policy, a permissions policy and COOP; HSTS in production. A nonce-based script CSP is still to do (R-52).

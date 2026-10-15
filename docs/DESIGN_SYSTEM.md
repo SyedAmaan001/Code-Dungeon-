@@ -44,7 +44,8 @@ All text pairs pass AA (4.5:1). The locked-room numeral (#6e6676, 3.1–3.5:1) i
 
 ## 4. States and feedback
 
-- Room states: locked (dashed seal + lock + "Locked"), open (teal ring that slowly beckons), in progress (teal + spark), complete (gold seal + check), mastered (star). Kind badges: checkpoint flag, major swords, boss crown.
+- Room states: locked (dashed seal + lock + "Locked"), open (teal ring that slowly beckons), in progress (teal + spark), complete (gold seal + check), mastered (gold seal with a bright halo and a gold star badge). Encounter rooms (Phase 6) carry an outer ring and a kind tag above the title: checkpoint = double moss ring, major = ember ring, boss = larger seal with an ember ring and a gold outer line; a won encounter turns its kind badge gold. Each room shows one status word. A collapsible legend on the map explains all of it.
+- Level room (Phase 6): a progress strip under the header shows required challenges solved, XP earned of the level's maximum, and mastery; error feedback offers Retry; an offline notice appears when the connection drops.
 - Feedback: correct (check, green border, explanation), not quite (cross, warm-red border, targeted hint text), not counted / not sent / signed out / slow down / error — each with an icon and a sentence, never colour alone.
 - Loading skeletons, empty states (no quests, no items, no ranked players, no released levels), sealed-room page, not-found and error boundaries.
 
