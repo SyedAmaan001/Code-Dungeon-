@@ -19,6 +19,7 @@ import {
   levelView,
   totalXp,
   type DomainError,
+  type LearnerProgress,
   type LevelView,
   type PathRules,
   type ProgressionEvent,
@@ -112,6 +113,8 @@ export interface PathView {
     description?: string;
     zone: string;
     kind: Level["kind"];
+    /** Who reviewed the content: an AI agent only, a human, or nobody yet. */
+    review: "agent" | "human" | "none";
   })[];
 }
 
@@ -234,8 +237,22 @@ export class LearningService {
         ...(l.description !== undefined && { description: l.description }),
         zone: l.zone,
         kind: l.kind,
+        review: l.review?.kind ?? "none",
       })),
     };
+  }
+
+  /**
+   * Read-only snapshot of a learner's verified progress, for other server-side
+   * engines (the game engine evaluates quests and achievements from it).
+   */
+  async progressSnapshot(learnerId: string): Promise<LearnerProgress> {
+    return (await this.record(learnerId)).progress;
+  }
+
+  /** Whether progress survives a restart (false for the in-memory store). */
+  get progressIsDurable(): boolean {
+    return this.store.durable;
   }
 
   async getLevel(learnerId: string, levelId: string): Promise<LevelResult> {

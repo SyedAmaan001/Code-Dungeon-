@@ -214,3 +214,94 @@ describe("content/python-fundamentals — XP under the default policy", () => {
     expect(path.progressIsDurable).toBe(false);
   });
 });
+
+describe("content/python-fundamentals — game layer (Phase 3)", () => {
+  async function newGame() {
+    const { GameService } = await import("@/services/game-service");
+    const { InMemoryGameStateStore } = await import("@/services/game-store");
+    let tick = 0;
+    const now = () => new Date(Date.UTC(2026, 9, 15, 0, 0, tick++));
+    const learning = new LearningService({ pack, store: new InMemoryProgressStore(), now });
+    return new GameService({ pack, learning, store: new InMemoryGameStateStore(), now });
+  }
+
+  it("declares no quest or achievement XP (rewards are cosmetic items)", () => {
+    for (const r of [...pack.meta.quests, ...pack.meta.achievements])
+      expect(r.reward.xp, r.id).toBe(0);
+    expect(pack.meta.quests.every((q) => q.reward.item)).toBe(true);
+  });
+
+  it("a perfect playthrough completes every quest (incl. optional objectives) and unlocks every achievement", async () => {
+    const game = await newGame();
+    let n = 0;
+    for (const level of pack.levels)
+      for (const c of level.challenges)
+        await game.submit("hero", {
+          submissionId: `hero-${String(n++).padStart(4, "0")}`,
+          levelId: level.id,
+          challengeId: c.id,
+          answer: correctSubmission(c),
+        });
+    const view = await game.getView("hero");
+    expect(view.quests.map((q) => [q.id, q.state])).toEqual(
+      pack.meta.quests.map((q) => [q.id, "completed"]),
+    );
+    expect(view.quests.flatMap((q) => q.objectives).every((o) => o.met)).toBe(true);
+    expect(view.achievements.filter((a) => !a.unlocked).map((a) => a.id)).toEqual([]);
+    expect(view.encounters.map((e) => [e.levelId, e.status, e.flawless])).toEqual([
+      ["py.L005", "won", true],
+      ["py.L010", "won", true],
+      ["py.L015", "won", true],
+      ["py.L020", "won", true],
+      ["py.L025", "won", true],
+    ]);
+    expect(view.checkpoints).toEqual(["py.L005", "py.L015"]);
+    expect(view.items).toHaveLength(10);
+    expect(view.totalXp).toBe(maxPathXp(buildPathRules(pack))); // the game layer added no XP
+    expect(view.resumeLevelId).toBeNull();
+    expect(view.levels.every((l) => l.review === "agent")).toBe(true);
+  });
+
+  it("the final boss can be lost and retried without losing learning progress", async () => {
+    const game = await newGame();
+    let n = 0;
+    const send = (levelId: string, challengeId: string, answer: unknown) =>
+      game.submit("rook", {
+        submissionId: `rook-${String(n++).padStart(4, "0")}`,
+        levelId,
+        challengeId,
+        answer,
+      });
+    for (const level of pack.levels.slice(0, 24))
+      for (const c of level.challenges) await send(level.id, c.id, correctSubmission(c));
+    const boss = pack.levels[24]!;
+    const first = boss.challenges[0]!;
+    await send(boss.id, first.id, correctSubmission(first));
+    const events = [];
+    for (let i = 0; i < 3; i++)
+      events.push(
+        ...(await send(boss.id, boss.challenges[1]!.id, wrongSubmission(boss.challenges[1]!))).game
+          .events,
+      );
+    expect(events.map((e) => e.type)).toEqual([
+      "encounter_life_lost",
+      "encounter_life_lost",
+      "encounter_life_lost",
+      "encounter_defeated",
+    ]);
+    let view = await game.getView("rook");
+    expect(view.encounters.at(-1)).toMatchObject({
+      levelId: "py.L025",
+      status: "defeated",
+      defeats: 1,
+    });
+    const xpAfterDefeat = view.totalXp;
+    for (const c of boss.challenges) await send(boss.id, c.id, correctSubmission(c));
+    view = await game.getView("rook");
+    expect(view.encounters.at(-1)).toMatchObject({ status: "won", runs: 2 });
+    expect(view.achievements.find((a) => a.id === "py.ach.expedition-complete")!.unlocked).toBe(
+      true,
+    );
+    expect(view.totalXp).toBeGreaterThan(xpAfterDefeat); // XP earned in the lost run was kept, new firsts still pay
+  });
+});

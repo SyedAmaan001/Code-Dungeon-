@@ -1,6 +1,6 @@
 # Python Fundamentals — the first Code Dungeon learning path (content schema v2).
 # Level order follows the owner's Phase 2 topic sequence (docs/decision.md DEC-003).
-# Quests and achievements are defined in a later phase (game engine).
+# Quests and achievements (Phase 3) give cosmetic item rewards only; XP comes from the progression policy (DEC-002, DEC-005).
 schemaVersion: 2
 subject:
   id: python
@@ -42,5 +42,146 @@ zones:
     order: 5
     themeKey: world-tree-citadel
     artTitle: The World-Tree Citadel
-quests: []
-achievements: []
+quests:
+  - id: py.quest.repair-the-gate
+    title: Repair the Gate
+    description: The camp's gate is broken. Learn the basics of Python and prove them at the Strings checkpoint to repair it.
+    status: published
+    objectives:
+      - id: learn-basics
+        title: Complete levels 1 to 4
+        predicate: { kind: complete_levels, levels: [py.L001, py.L002, py.L003, py.L004] }
+      - id: clear-checkpoint
+        title: Clear the Strings checkpoint
+        predicate: { kind: encounter_won, level: py.L005 }
+    reward: { item: gate-key }
+  - id: py.quest.cross-the-ember-hall
+    title: Cross the Ember Hall
+    description: Numbers, input and decisions light the way through the Ember Hall. Win the Conditional Statements encounter to cross it.
+    status: published
+    activation: { kind: level_unlocked, level: py.L006 }
+    objectives:
+      - id: light-the-braziers
+        title: Complete levels 6 to 9
+        predicate: { kind: complete_levels, levels: [py.L006, py.L007, py.L008, py.L009] }
+      - id: win-encounter
+        title: Win the Conditional Statements encounter
+        predicate: { kind: encounter_won, level: py.L010 }
+      - id: without-a-scratch
+        title: "Optional: win a major encounter without losing a life or using a hint"
+        optional: true
+        predicate: { kind: flawless_encounters, encounterKind: major, count: 1 }
+    reward: { item: ember-lantern }
+  - id: py.quest.kindle-the-forge
+    title: Kindle the Looping Forge
+    description: Master conditions and loops, then clear the Lists checkpoint to bring the forge back to life.
+    status: published
+    activation: { kind: level_unlocked, level: py.L011 }
+    objectives:
+      - id: stoke-the-fires
+        title: Complete levels 11 to 14
+        predicate: { kind: complete_levels, levels: [py.L011, py.L012, py.L013, py.L014] }
+      - id: clear-checkpoint
+        title: Clear the Lists checkpoint
+        predicate: { kind: encounter_won, level: py.L015 }
+    reward: { item: forge-hammer }
+  - id: py.quest.restore-the-archive
+    title: Restore the Archive
+    description: Sort the archive's records into the right structures, then win the Functions encounter.
+    status: published
+    activation: { kind: level_unlocked, level: py.L016 }
+    objectives:
+      - id: sort-the-records
+        title: Complete levels 16 to 19
+        predicate: { kind: complete_levels, levels: [py.L016, py.L017, py.L018, py.L019] }
+      - id: win-encounter
+        title: Win the Functions encounter
+        predicate: { kind: encounter_won, level: py.L020 }
+    reward: { item: archive-tome }
+  - id: py.quest.ascend-the-world-tree
+    title: Ascend the World-Tree
+    description: Climb the citadel and defeat the final boss by completing the Expedition Ledger.
+    status: published
+    activation: { kind: level_unlocked, level: py.L021 }
+    objectives:
+      - id: climb
+        title: Complete levels 21 to 24
+        predicate: { kind: complete_levels, levels: [py.L021, py.L022, py.L023, py.L024] }
+      - id: defeat-boss
+        title: Defeat the Expedition Ledger boss
+        predicate: { kind: encounter_won, level: py.L025 }
+    reward: { item: world-tree-seed }
+  - id: py.quest.debuggers-apprentice
+    title: The Debugger's Apprentice
+    description: "Side quest: hunt down bugs in broken programs wherever you find them."
+    status: published
+    activation: { kind: level_unlocked, level: py.L003 }
+    objectives:
+      - id: five-bugs
+        title: Fix 5 bugs in find-the-bug challenges
+        predicate: { kind: correct_challenges_of_type, challengeType: find_fix_bug, count: 5 }
+      - id: every-bug
+        title: "Optional: fix all 13 bugs on the path"
+        optional: true
+        predicate: { kind: correct_challenges_of_type, challengeType: find_fix_bug, count: 13 }
+    reward: { item: magnifying-lens }
+achievements:
+  - id: py.ach.first-steps
+    title: First Steps
+    description: Complete your first level.
+    status: published
+    predicate: { kind: complete_level_count, count: 1 }
+    reward: { item: copper-ring }
+  - id: py.ach.camp-cleared
+    title: Camp Cleared
+    description: Complete every level in the Adventurer's Camp.
+    status: published
+    predicate: { kind: complete_zone, zone: py.zone.camp }
+  - id: py.ach.checkpoint-keeper
+    title: Checkpoint Keeper
+    description: Clear both checkpoints on the path.
+    status: published
+    predicate: { kind: encounters_won, encounterKind: checkpoint, count: 2 }
+  - id: py.ach.giant-slayer
+    title: Giant Slayer
+    description: Win both major encounters.
+    status: published
+    predicate: { kind: encounters_won, encounterKind: major, count: 2 }
+  - id: py.ach.expedition-complete
+    title: Expedition Complete
+    description: Defeat the final boss.
+    status: published
+    predicate: { kind: encounter_won, level: py.L025 }
+    reward: { item: explorer-goggles }
+  - id: py.ach.flawless-boss
+    title: Flawless Victory
+    description: Defeat the final boss without losing a life or using a hint.
+    status: published
+    predicate: { kind: flawless_encounters, encounterKind: boss, count: 1 }
+    reward: { item: golden-key }
+  - id: py.ach.sharp-mind
+    title: Sharp Mind
+    description: Complete 5 levels with every required challenge right on the first try and no hints.
+    status: published
+    predicate: { kind: level_no_hints_first_try, count: 5 }
+  - id: py.ach.scholar
+    title: Scholar
+    description: Master 10 levels.
+    status: published
+    predicate: { kind: master_level_count, count: 10 }
+    reward: { item: scholar-book }
+  - id: py.ach.seasoned
+    title: Seasoned Adventurer
+    description: Earn 1,000 XP.
+    status: published
+    predicate: { kind: earn_xp, amount: 1000 }
+  - id: py.ach.bug-hunter
+    title: Bug Hunter
+    description: Fix 10 bugs in find-the-bug challenges.
+    status: published
+    predicate: { kind: correct_challenges_of_type, challengeType: find_fix_bug, count: 10 }
+  - id: py.ach.path-complete
+    title: Python Pathfinder
+    description: Complete all 25 levels of Python Fundamentals.
+    status: published
+    predicate: { kind: complete_level_count, count: 25 }
