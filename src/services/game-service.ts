@@ -20,7 +20,9 @@ import {
   DEFAULT_POLICY,
   emptyGameState,
   gameView,
+  isEncounterKind,
   leaderboardRecord,
+  maxPathXp,
   rankLeaderboard,
   reconcile,
   type GameEvent,
@@ -44,6 +46,7 @@ import {
   SubmitRequest,
   type HintResult,
   type LearningService,
+  type LevelResult,
   type PathView,
   type SubmitResult,
 } from "./learning-service";
@@ -108,8 +111,32 @@ export interface GameHintResult {
   game: GameUpdate;
 }
 
+export interface EncounterRoom {
+  encounterKind: "checkpoint" | "major" | "boss";
+  status: "not_started" | "active" | "defeated" | "won";
+  runs: number;
+  defeats: number;
+  /** Number of the active run, if one is in progress. */
+  run: number | null;
+  /** Lives left in the active run (or a fresh run); null = this encounter cannot be lost. */
+  livesRemaining: number | null;
+  maxLives: number | null;
+  /** Challenges answered correctly in the active run. */
+  solvedThisRun: string[];
+  flawless: boolean;
+}
+
+/** Everything the level room shows, for one learner. */
+export type LevelRoomResult =
+  | (Extract<LevelResult, { status: "ok" }> & { encounter?: EncounterRoom })
+  | Exclude<LevelResult, { status: "ok" }>;
+
 export interface PlayerGameView extends GameView {
   pathId: string;
+  pathTitle: string;
+  zones: PathView["zones"];
+  /** Most XP the published path can award (2,455 for Python Fundamentals). */
+  maxXp: number;
   /** False while in-memory stores are used: nothing here survives a restart. */
   persistent: boolean;
   totalXp: number;
@@ -350,6 +377,9 @@ export class GameService {
     return {
       ...view,
       pathId: this.pathId,
+      pathTitle: path.title,
+      zones: path.zones,
+      maxXp: maxPathXp(this.learning.rules, this.progressionPolicy),
       persistent: this.store.durable && this.learning.progressIsDurable,
       totalXp: path.totalXp,
       resumeLevelId: resume?.levelId ?? null,
@@ -364,6 +394,30 @@ export class GameService {
         title: achievements.get(a.id)!.title,
         description: achievements.get(a.id)!.description,
       })),
+    };
+  }
+
+  /** A level with the learner's progress and, for encounter levels, the current run. */
+  async levelRoom(learnerId: string, levelId: string): Promise<LevelRoomResult> {
+    const result = await this.learning.getLevel(learnerId, levelId);
+    if (result.status !== "ok") return result;
+    const rule = this.rules.levels.find((l) => l.id === levelId);
+    if (!rule || !isEncounterKind(rule.kind)) return result;
+    const state = (await this.load(learnerId)).state.encounters[levelId];
+    const maxLives = this.policy.encounters[rule.kind].lives;
+    return {
+      ...result,
+      encounter: {
+        encounterKind: rule.kind,
+        status: state?.status ?? "not_started",
+        runs: state?.runs ?? 0,
+        defeats: state?.defeats ?? 0,
+        run: state?.current?.run ?? null,
+        livesRemaining: state?.current ? state.current.livesRemaining : maxLives,
+        maxLives,
+        solvedThisRun: [...(state?.current?.solved ?? [])],
+        flawless: state?.flawless === true,
+      },
     };
   }
 

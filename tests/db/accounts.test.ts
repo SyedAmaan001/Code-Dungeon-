@@ -51,10 +51,13 @@ describeDb("player accounts", () => {
     });
   });
 
+  const ageCheck = { policy: "13plus-v1", at: new Date("2026-10-15T09:00:00Z") };
+
   it("links a provider identity once and resolves it to the player", async () => {
     const r = await accounts.create({
       handle: "Linked",
       identity: { provider: "example-idp", subject: "sub-123" },
+      ageCheck,
     });
     if (!r.ok) throw new Error(r.reason);
     expect(await accounts.playerIdForIdentity("example-idp", "sub-123")).toBe(r.profile.playerId);
@@ -63,11 +66,35 @@ describeDb("player accounts", () => {
       await accounts.create({
         handle: "Linked2",
         identity: { provider: "example-idp", subject: "sub-123" },
+        ageCheck,
       }),
     ).toEqual({
       ok: false,
       reason: "that sign-in is already linked to a player",
     });
+  });
+
+  it("requires the age check for identity-linked players, in code and in the database", async () => {
+    expect(
+      await accounts.create({
+        handle: "NoAgeCheck",
+        identity: { provider: "example-idp", subject: "sub-noage" },
+      }),
+    ).toEqual({ ok: false, reason: "the age check must be completed first" });
+    await expect(
+      db.sql`INSERT INTO players (handle, auth_provider, auth_subject)
+             VALUES ('NoAgeCheck', 'example-idp', 'sub-noage')`,
+    ).rejects.toMatchObject({ code: "23514" });
+    await expect(
+      db.sql`INSERT INTO players (handle, age_check_policy) VALUES ('HalfCheck', '13plus-v1')`,
+    ).rejects.toMatchObject({ code: "23514" });
+    const [row] = await db.sql`
+      SELECT age_check_policy, age_checked_at FROM players WHERE handle = 'Linked'`;
+    expect(row).toEqual({ age_check_policy: "13plus-v1", age_checked_at: ageCheck.at });
+    // No birth date is stored anywhere.
+    const columns = await db.sql<{ column_name: string }[]>`
+      SELECT column_name FROM information_schema.columns WHERE table_name = 'players'`;
+    expect(columns.map((c) => c.column_name).filter((c) => /birth|dob|email/.test(c))).toEqual([]);
   });
 
   it("deletes a player and all of their data", async () => {

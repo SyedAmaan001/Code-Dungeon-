@@ -28,11 +28,12 @@ describeDb("migrations", () => {
 
   it("apply to an empty database, then re-run as a no-op", async () => {
     const first = await migrate(db.sql, MIGRATIONS_DIR);
-    expect(first).toEqual({ applied: ["0001_initial"], alreadyApplied: [] });
+    expect(first).toEqual({ applied: ["0001_initial", "0002_age_check"], alreadyApplied: [] });
     const second = await migrate(db.sql, MIGRATIONS_DIR);
-    expect(second).toEqual({ applied: [], alreadyApplied: ["0001_initial"] });
+    expect(second).toEqual({ applied: [], alreadyApplied: ["0001_initial", "0002_age_check"] });
     expect(await migrationStatus(db.sql, MIGRATIONS_DIR)).toEqual([
       { migration: "0001_initial", state: "applied" },
+      { migration: "0002_age_check", state: "applied" },
     ]);
   });
 

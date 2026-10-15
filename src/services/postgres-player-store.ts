@@ -460,18 +460,24 @@ export class PostgresPlayerAccounts {
     handle: string;
     visible?: boolean;
     identity?: { provider: string; subject: string };
+    /** Outcome of the onboarding age check (DEC-010); required with an identity. */
+    ageCheck?: { policy: string; at: Date };
   }): Promise<AccountResult> {
     const check = validateHandle(input.handle);
     if (!check.ok) return { ok: false, reason: check.reason };
+    if (input.identity && !input.ageCheck)
+      return { ok: false, reason: "the age check must be completed first" };
     const playerId = randomUUID();
     try {
       await scoped(
         this.sql,
         playerId,
         (tx) => tx`
-        INSERT INTO players (id, handle, leaderboard_visible, auth_provider, auth_subject)
+        INSERT INTO players (id, handle, leaderboard_visible, auth_provider, auth_subject,
+          age_check_policy, age_checked_at)
         VALUES (${playerId}, ${check.handle}, ${input.visible ?? true},
-          ${input.identity?.provider ?? null}, ${input.identity?.subject ?? null})`,
+          ${input.identity?.provider ?? null}, ${input.identity?.subject ?? null},
+          ${input.ageCheck?.policy ?? null}, ${input.ageCheck?.at ?? null})`,
       );
     } catch (err) {
       if (pgCode(err) === "23505") {

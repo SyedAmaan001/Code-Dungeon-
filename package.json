@@ -26,6 +26,8 @@
     "content:release-check": "tsx scripts/content-release-check.ts"
   },
   "dependencies": {
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.117.2",
     "next": "16.4.1",
     "postgres": "3.4.9",
     "react": "19.3.1",

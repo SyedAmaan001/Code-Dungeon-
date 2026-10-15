@@ -128,7 +128,16 @@ export type LevelResult =
       status: "ok";
       level: PublicLevel;
       view: LevelView;
-      challenges: Record<string, { attempts: number; correct: boolean; hints: string[] }>;
+      challenges: Record<
+        string,
+        {
+          attempts: number;
+          correct: boolean;
+          hints: string[];
+          /** Shown only once the learner has answered correctly (same as the feedback then). */
+          explanation?: string;
+        }
+      >;
     }
   | Rejection;
 
@@ -280,6 +289,7 @@ export class LearningService {
               attempts: cp?.attempts ?? 0,
               correct: cp?.correct ?? false,
               hints: c.hints.slice(0, cp?.hintsRevealed ?? 0),
+              ...(cp?.correct && c.explanation !== undefined && { explanation: c.explanation }),
             },
           ];
         }),
