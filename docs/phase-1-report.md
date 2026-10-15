@@ -1,6 +1,6 @@
 # Phase report — Phase 1: Foundation
 
-- **Status:** PASS locally (all checks green from a clean `npm ci`). GitHub Actions CI has not run yet — it will run on the first push of this branch.
+- **Status:** PASS — all checks green from a clean `npm ci`, and GitHub Actions CI run #1 ([38732862389](https://github.com/SyedAmaan001/Code-Dungeon-/actions/runs/38732862389)) succeeded on `c4411d6`.
 - **Date:** 15 October 2026
 - **Branch:** `claude/tender-cerf-ooekni` (review branch; not merged to `main`)
 - **Goal and acceptance criteria:** `docs/next-steps.md` §1.
@@ -22,7 +22,7 @@
 | Python Fundamentals path skeleton: 5 zones, 25 **draft** level outlines from the documented curriculum plan | `content/python-fundamentals/` | `tests/content/python-fundamentals.test.ts` (numbering, zones, kinds at 5/10/15/20/25, nothing published) |
 | Synthetic 100-level path (20 zones, 25 published + 75 draft, non-linear prerequisites, quests) | `tests/support/synthetic-pack.ts` | `tests/learning/synthetic-100.test.ts` (loads from YAML, validates, topological order, real-Python sample) |
 | Disabled `CodeRunner` | `src/runner/index.ts` | `tests/runner.test.ts` |
-| CI workflow (read-only permissions, no deploy) | `.github/workflows/ci.yml` | Every step run locally (below); not yet run on GitHub |
+| CI workflow (read-only permissions, no deploy) | `.github/workflows/ci.yml` | Every step run locally (below) and on GitHub (run #1: success) |
 | `.env.example` (names only) | `.env.example` | contains no values |
 
 ## Partial / deferred (by design)
