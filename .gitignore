@@ -10,3 +10,5 @@ coverage/
 Thumbs.db
 /Code_Dungeon_GitHub_Pack/
 /Reference images/
+next-env.d.ts
+*.tsbuildinfo

@@ -1,0 +1,10 @@
+id: py.L008
+version: 1
+number: 8
+zone: py.zone.caverns
+title: "Branching Paths"
+status: draft
+kind: standard
+outline: "if, elif, else and branching."
+prerequisites:
+  - py.L007

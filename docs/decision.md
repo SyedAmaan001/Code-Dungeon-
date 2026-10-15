@@ -44,7 +44,7 @@
 
 | ID | Open question | Recommendation | Why it remains open | Required before |
 |---|---|---|---|---|
-| P-001 | What framework/build system actually exists in GitHub? | Audit first; preserve a viable existing stack. | The provided file set mixed static HTML/CSS/JS with legacy compiled CodeClash artifacts; actual repo may differ. **Audit 2026-10-15 (`initial-audit.md`): the repository contains documentation only — no framework, manifest or legacy source files. Stack proposal awaiting owner approval in `architecture-proposal.md` (open item O-1 in `next-steps.md`).** | Architecture choice. |
+| P-001 | What framework/build system actually exists in GitHub? | **RESOLVED 2026-10-15** — see DEC-001. | Audit (`initial-audit.md`) found documentation only; owner approved the proposed stack for Phase 1. | — |
 | P-002 | Which production hosting provider/project is available? | Identify from owner account/access; Claude cloud is not assumed to host the app. | No production provider was confirmed. | External deployment. |
 | P-003 | Which auth/database vendor will be used? | Managed auth + managed relational DB if cost/fit/access checks pass. | Credentials, current pricing and provider not yet confirmed. | Provisioning and integration. |
 | P-004 | Is arbitrary Python execution required in the first public MVP? | Launch deterministic challenge modes first; add safe sandbox only if feasible. | Security, service availability and current provider prices need research. | Exposing code-runner UI. |
@@ -75,3 +75,22 @@
 - Revisit trigger:
 - Links/tests/evidence:
 ```
+
+## 7. Decision records
+
+### DEC-001 — Application foundation stack
+- Status: CONFIRMED (owner approval of Phase 1 as described in `next-steps.md` / `architecture-proposal.md`)
+- Date: 2026-10-15
+- Context/problem: The repository contained documentation only (P-001); the MVP needs a maintainable full-stack TypeScript foundation with content kept separate from game rules and UI.
+- Options considered: see `architecture-proposal.md` §2 and §14.
+- Decision: Next.js 16 (App Router) + React 19 + TypeScript (strict, pinned 6.0.3), npm with committed lockfile, Node 22 LTS (`.nvmrc`, `engines >=22.12`), Zod 4 schemas, YAML content packs, Vitest, ESLint 9 (Next config + layer-boundary rules), Prettier, GitHub Actions CI with a real CPython 3.13 for content verification.
+- Why: one language across content schemas, engines and UI; reviewable content diffs; no external services required for the foundation.
+- Consequences/trade-offs: TypeScript 7 and ESLint 10 exist but are not yet supported by `typescript-eslint` / Next's ESLint plugins, so they are pinned one major back. Tailwind, Radix, Shiki, Supabase, Drizzle and Playwright remain the documented baseline but are **not installed** until the phase that needs them (each to be confirmed then).
+- Security/privacy/cost impact: no secrets, no external services, $0 infrastructure. `npm audit --omit=dev`: 0 vulnerabilities; 5 high findings exist only in dev lint tooling (see risk R-31).
+- Revisit trigger: `typescript-eslint` supports TypeScript 7; Next.js major release; any need for a second backend.
+- Links/tests/evidence: `docs/phase-1-report.md`, `.github/workflows/ci.yml`.
+
+### Defaults applied in Phase 1 (not owner-confirmed; change by recording a new decision)
+- **O-3 Python version:** content targets Python ≥ 3.10 (`minLanguageVersion` in `path.yaml`); CI verifies with CPython 3.13. Status: DEFAULT.
+- **O-7 Docs naming:** existing UPPER_SNAKE docs stay canonical; new docs use lower-kebab; `decision.md` remains the decision log. Status: DEFAULT.
+- **Content storage:** curriculum lives in Git as YAML content packs (`content/<pack>/`); the database will later hold only a registry of IDs/versions. Status: DEFAULT (architecture-proposal §6.2).

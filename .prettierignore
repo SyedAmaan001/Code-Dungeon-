@@ -1,0 +1,8 @@
+node_modules/
+.next/
+coverage/
+next-env.d.ts
+package-lock.json
+# Owner-authored documentation pack: kept byte-for-byte as supplied.
+*.md
+docs/

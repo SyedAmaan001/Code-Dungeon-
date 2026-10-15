@@ -1,0 +1,10 @@
+id: py.L012
+version: 1
+number: 12
+zone: py.zone.forge
+title: "Working with Lists"
+status: draft
+kind: standard
+outline: "List operations and iteration over collections."
+prerequisites:
+  - py.L011

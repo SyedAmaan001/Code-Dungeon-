@@ -1,0 +1,10 @@
+id: py.L025
+version: 1
+number: 25
+zone: py.zone.citadel
+title: "The Expedition"
+status: draft
+kind: boss
+outline: "Final boss: complete, test and explain a small program using several earlier concepts; post-boss review and suggested next path."
+prerequisites:
+  - py.L024

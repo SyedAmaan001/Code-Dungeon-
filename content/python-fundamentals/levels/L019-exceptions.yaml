@@ -1,0 +1,10 @@
+id: py.L019
+version: 1
+number: 19
+zone: py.zone.archive
+title: "Exceptions and Debugging Habits"
+status: draft
+kind: standard
+outline: "Exceptions, common errors and useful debugging habits."
+prerequisites:
+  - py.L018

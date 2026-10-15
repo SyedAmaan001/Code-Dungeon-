@@ -1,0 +1,10 @@
+id: py.L013
+version: 1
+number: 13
+zone: py.zone.forge
+title: "Strings in Depth"
+status: draft
+kind: standard
+outline: "Strings, indexing and common string methods."
+prerequisites:
+  - py.L012

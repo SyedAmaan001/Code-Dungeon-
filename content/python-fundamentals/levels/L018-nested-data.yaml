@@ -1,0 +1,10 @@
+id: py.L018
+version: 1
+number: 18
+zone: py.zone.archive
+title: "Nested Data"
+status: draft
+kind: standard
+outline: "Nested data and processing realistic records."
+prerequisites:
+  - py.L017

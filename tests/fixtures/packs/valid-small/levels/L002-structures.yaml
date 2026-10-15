@@ -1,0 +1,83 @@
+id: fx.L002
+version: 1
+number: 2
+zone: fx.zone.one
+title: Fixture Structures
+status: published
+kind: checkpoint
+prerequisites: [fx.L001]
+estimatedMinutes: 10
+lesson:
+  objective: Recognise that dividing by zero raises ZeroDivisionError.
+  explanation: Python stops the program and reports an exception when an operation is impossible.
+  example:
+    code: print(10 / 0)
+    expectedException: ZeroDivisionError
+challenges:
+  - id: fx.L002.c1
+    version: 1
+    type: fill_blank
+    difficulty: 1
+    prompt: Complete the line so it displays Hello.
+    template: '{{blank:b1}}("Hello")'
+    blanks:
+      - { id: b1, label: function name }
+    answer:
+      accepted:
+        b1: [print]
+    feedback: { correct: Correct., incorrect: Which built-in function displays output? }
+    explanation: print() displays its argument.
+  - id: fx.L002.c2
+    version: 1
+    type: order_lines
+    difficulty: 2
+    prompt: Arrange the lines so the program prints 3, 2, 1 on separate lines.
+    lines:
+      - { id: l1, text: "count = 3" }
+      - { id: l2, text: "while count > 0:" }
+      - { id: l3, text: "print(count)", indent: 1 }
+      - { id: l4, text: "count = count - 1", indent: 1 }
+    answer:
+      orders: [[l1, l2, l3, l4]]
+    feedback: { correct: Correct., incorrect: The value must be printed before it is decreased. }
+    explanation: The loop prints count, then decreases it, until the condition is false.
+  - id: fx.L002.c3
+    version: 1
+    type: trace
+    difficulty: 1
+    prompt: What are the values of x and y after these lines run?
+    code: |-
+      x = 3
+      x = x + 2
+      y = x * 2
+    fields:
+      - { id: x, label: x }
+      - { id: y, label: y }
+    answer:
+      values:
+        x: ["5"]
+        y: ["10"]
+    feedback: { correct: Correct., incorrect: x changes before y is computed. }
+    explanation: x becomes 5, so y is 5 * 2 = 10.
+  - id: fx.L002.c4
+    version: 1
+    type: find_fix_bug
+    difficulty: 2
+    prompt: Which fix makes this program print 6?
+    code: |-
+      total = 0
+      for n in [1, 2, 3]:
+      total = total + n
+      print(total)
+    fixes:
+      - { id: f1, text: Indent line 3 so it is inside the loop. }
+      - { id: f2, text: "Change [1, 2, 3] to (1, 2, 3)." }
+    answer: { line: 3, fix: f1 }
+    feedback: { correct: Correct., incorrect: Python needs an indented block after a for line. }
+    explanation: Line 3 must be indented to form the loop body; otherwise Python raises IndentationError.
+sources:
+  - source: python-tutorial-3.13
+review:
+  reviewer: fixture
+  date: "2026-10-15"
+  pythonVersion: "3.13"

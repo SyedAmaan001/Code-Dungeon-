@@ -1,0 +1,10 @@
+id: py.L004
+version: 1
+number: 4
+zone: py.zone.camp
+title: "The Type-Smith"
+status: draft
+kind: standard
+outline: "Integers, floats, strings and booleans."
+prerequisites:
+  - py.L003

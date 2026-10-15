@@ -1,0 +1,40 @@
+# TEST FIXTURE — not curriculum. Exercises every challenge type and the publication gate.
+schemaVersion: 1
+subject:
+  id: fixture-python
+  title: Fixture Python
+  description: Test fixture subject.
+path:
+  id: fixture-path
+  title: Fixture Path
+  description: Small pack used by automated tests.
+  version: 1
+  status: draft
+  audience: Automated tests.
+  learningGoal: Exercise the content schema and validators.
+  language: python
+  minLanguageVersion: "3.10"
+zones:
+  - id: fx.zone.one
+    title: Fixture Zone
+    order: 1
+    themeKey: overgrown-gate
+quests:
+  - id: fx.quest.first-steps
+    title: First Steps
+    description: Complete the first two fixture levels.
+    status: draft
+    objectives:
+      - id: o1
+        title: Complete level 1
+        predicate: { kind: complete_levels, levels: [fx.L001] }
+      - id: o2
+        title: Complete the fixture zone
+        predicate: { kind: complete_zone, zone: fx.zone.one }
+    reward: { xp: 50, item: gate-key }
+achievements:
+  - id: fx.ach.first-level
+    title: First Level
+    description: Complete any level.
+    status: draft
+    predicate: { kind: complete_level_count, count: 1 }

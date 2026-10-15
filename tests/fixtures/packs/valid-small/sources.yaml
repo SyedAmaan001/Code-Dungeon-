@@ -1,0 +1,9 @@
+sources:
+  - id: python-tutorial-3.13
+    title: The Python Tutorial
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/tutorial/
+    licence: PSF documentation licence (verify before quoting; write original prose)
+    reviewed: "2026-10-15"
+    notes: Test fixture entry.

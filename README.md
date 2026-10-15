@@ -2,6 +2,27 @@
 
 This folder is a **documentation and operating-system pack** for the Code Dungeon repository. It is intentionally not a claim that the application has already been implemented. It captures the product contract, decisions, development workflow, execution plan and enough information to reconstruct the project from an empty repository.
 
+## Develop the app (Phase 1 foundation)
+
+The application skeleton exists; gameplay, accounts and published lessons do not yet. See `docs/phase-1-report.md` for what is verified.
+
+Requirements: Node.js 22 (`.nvmrc`) and Python 3.10+ (CI uses 3.13) for verifying curriculum examples.
+
+```bash
+npm ci                          # install exact locked dependencies
+npm run dev                     # local server at http://localhost:3000
+npm run lint                    # ESLint incl. layer-boundary rules
+npm run format:check            # Prettier
+npm run typecheck               # TypeScript
+npm test                        # Vitest (runs real Python for content checks)
+npm run content:validate        # validate content packs in content/
+npm run content:verify-python   # run curriculum examples with real Python
+npm run build                   # production build
+npm run check                   # all of the above
+```
+
+Layout: `content/` curriculum data · `src/learning/` learning engine · `src/domain/` game engine (Phase 2) · `src/app/` + `src/services/` interface and server services · `src/runner/` disabled code runner · `tests/` unit, content and synthetic 100-level tests. No environment variables are needed yet; `.env.example` lists future names only.
+
 ## Add it to GitHub
 
 1. Download and extract `Code_Dungeon_GitHub_Pack.zip`.

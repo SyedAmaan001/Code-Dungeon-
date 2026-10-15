@@ -5,6 +5,8 @@
 - **Respects:** D-001…D-012 (confirmed) and defaults R-001…R-007. Where this proposal goes beyond them it says so and lists the item under "Open decisions" in `docs/next-steps.md`.
 - **After approval:** promote §3–§8 to `docs/architecture.md` and §6 to `docs/data-model.md` (or extend `DATA_MODEL.md`), and record the stack choice as a `DEC-` entry in `docs/decision.md`.
 
+- **Implementation status (2026-10-15):** the foundation (§2 core tooling, §3 layout and boundaries, §4 content model) is implemented — see `docs/phase-1-report.md` and DEC-001. Differences from this proposal: TypeScript pinned to 6.0.3 and ESLint to 9.x (newer majors not yet supported by `typescript-eslint`/Next lint plugins); Tailwind, Radix, Shiki, Supabase, Drizzle and Playwright deferred until needed; levels gained an optional draft-only `outline` field; predicates gained `complete_level_count`; `sources.yaml` lives inside each pack; Python examples may declare `expectedException`.
+
 ---
 
 ## 1. Starting point

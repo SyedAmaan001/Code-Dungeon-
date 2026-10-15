@@ -1,0 +1,66 @@
+/* Starting tokens from docs/VISUAL_DIRECTION.md (contrast to be tested in the UI phase). */
+:root {
+  --world-night: #17171d;
+  --panel-obsidian: #27232b;
+  --panel-stone: #37333a;
+  --text-parchment: #f2ebdd;
+  --text-muted: #bdb5a7;
+  --quest-gold: #d7b46a;
+  --ember-amber: #f08a46;
+  --magic-teal: #44c9c2;
+  --moss-green: #829c76;
+  --rune-violet: #9b82cf;
+  --ice-blue: #8bd6f0;
+
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-code: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--world-night);
+  color: var(--text-parchment);
+  font-family: var(--font-ui);
+  line-height: 1.6;
+}
+
+main {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+}
+
+h1 {
+  font-family: var(--font-display);
+  color: var(--quest-gold);
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
+  margin: 0 0 0.5rem;
+  letter-spacing: 0.02em;
+}
+
+.panel {
+  background: var(--panel-obsidian);
+  border: 1px solid var(--panel-stone);
+  border-radius: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  margin-top: 2rem;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+a {
+  color: var(--magic-teal);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--magic-teal);
+  outline-offset: 2px;
+}

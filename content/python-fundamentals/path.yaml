@@ -1,0 +1,48 @@
+# Python Fundamentals — the first Code Dungeon learning path.
+# Level outlines come from docs/00_TO_100.md §6 and the product blueprint §5.
+# Every level is a DRAFT outline: no lesson content has been authored or reviewed yet.
+schemaVersion: 1
+subject:
+  id: python
+  title: Python
+  description: Programming with the Python language.
+path:
+  id: python-fundamentals
+  title: Python Fundamentals
+  description: >-
+    Learn Python fundamentals by exploring a quest-driven game world, solving increasingly
+    useful challenges and building up to a small real-world project.
+  version: 1
+  status: draft
+  audience: Beginners learning practical Python (students and self-directed learners).
+  learningGoal: Write, read and debug small Python programs using core language features.
+  language: python
+  minLanguageVersion: "3.10"
+zones:
+  - id: py.zone.camp
+    title: Adventurer's Camp
+    order: 1
+    themeKey: overgrown-gate
+    artTitle: The Overgrown Gate
+  - id: py.zone.caverns
+    title: Branching Caverns
+    order: 2
+    themeKey: ember-hall
+    artTitle: The Ember Hall
+  - id: py.zone.forge
+    title: Function Forge
+    order: 3
+    themeKey: sigil-sanctum
+    artTitle: The Sigil Sanctum
+  - id: py.zone.archive
+    title: Archive of Structures
+    order: 4
+    themeKey: rootbound-deep
+    artTitle: The Rootbound Deep
+  - id: py.zone.citadel
+    title: Runtime Citadel
+    order: 5
+    themeKey: world-tree-citadel
+    artTitle: The World-Tree Citadel
+quests: []
+achievements: []

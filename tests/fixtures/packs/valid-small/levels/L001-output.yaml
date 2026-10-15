@@ -1,0 +1,54 @@
+id: fx.L001
+version: 1
+number: 1
+zone: fx.zone.one
+title: Fixture Output
+status: published
+estimatedMinutes: 5
+lesson:
+  objective: Predict what print() displays for a string.
+  explanation: print() writes its argument to the console, followed by a newline.
+  example:
+    code: print("Hello, dungeon!")
+    expectedOutput: Hello, dungeon!
+  misconceptions:
+    - The quotation marks are printed too.
+challenges:
+  - id: fx.L001.c1
+    version: 1
+    type: predict_output
+    difficulty: 1
+    prompt: What does this program print?
+    code: print("2" + "3")
+    answer:
+      output: "23"
+    feedback:
+      correct: Joining two strings places them side by side.
+      incorrect: Both values are strings, so + joins the text instead of adding numbers.
+      byAnswer:
+        "5": That would be true for the numbers 2 and 3, but these are strings.
+    hints:
+      - Look at the quotation marks.
+    explanation: '"2" and "3" are strings; + concatenates strings, giving "23".'
+  - id: fx.L001.c2
+    version: 1
+    type: multiple_choice
+    difficulty: 1
+    prompt: Which line prints the text Ready?
+    options:
+      - { id: a, text: 'print("Ready")' }
+      - { id: b, text: "print(Ready)" }
+      - { id: c, text: 'Print("Ready")' }
+    answer:
+      correct: [a]
+    feedback:
+      correct: Strings need quotes, and Python names are case-sensitive.
+      incorrect: Check the quotes and the capital letter.
+    explanation: Without quotes Ready is a variable name; Print is not the built-in print.
+sources:
+  - source: python-tutorial-3.13
+    topic: "3.1 Using Python as a Calculator — text"
+review:
+  reviewer: fixture
+  date: "2026-10-15"
+  pythonVersion: "3.13"

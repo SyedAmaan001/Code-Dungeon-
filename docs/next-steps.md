@@ -4,6 +4,8 @@
 - **Where we are:** "0" on the `00_TO_100.md` scale — the audit is complete and the truth is documented (`docs/initial-audit.md`). No application code exists.
 - **Companion docs:** `docs/architecture-proposal.md` (stack and design), `docs/risk-register.md` (risks), `docs/EXECUTION.md` (phase gates, unchanged).
 
+> **Update 2026-10-15:** Phase 1 was approved and implemented on `claude/tender-cerf-ooekni` — see `docs/phase-1-report.md`. The next phase is **Phase 2 — Domain/game engine** (§2). O-1 is resolved (DEC-001); O-3 and O-7 have defaults applied (see `decision.md` §7).
+
 ## 1. Recommended next phase (single best choice)
 
 ### Phase 1 — Foundation: scaffold, quality tooling, CI and the content-pack schema
