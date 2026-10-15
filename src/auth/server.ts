@@ -14,13 +14,14 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { getRuntime } from "@/services/runtime";
 import type { AccountProfile } from "@/services/postgres-player-store";
-import { authConfig, type AuthConfig } from "./config";
+import { authConfig, supabaseCookieOptions, type AuthConfig } from "./config";
 import { DEV_SESSION_COOKIE } from "./dev-session";
 import { resolveDevIdentity, resolveSupabaseIdentity, type IdentityResult } from "./identity";
 
 export async function supabaseServerClient(config: Extract<AuthConfig, { mode: "supabase" }>) {
   const store = await cookies();
   return createServerClient(config.supabaseUrl, config.publishableKey, {
+    cookieOptions: supabaseCookieOptions(process.env),
     cookies: {
       getAll: () => store.getAll(),
       setAll: (list) => {

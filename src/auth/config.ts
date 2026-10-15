@@ -92,6 +92,12 @@ export function readAuthConfig(env: Env): AuthConfig {
       };
     if (env.NODE_ENV === "production" && !appUrl.startsWith("https:") && !isLoopback(appUrl))
       return { mode: "disabled", reason: "APP_URL must use https in production." };
+    if (
+      env.NODE_ENV === "production" &&
+      !supabaseUrl.startsWith("https:") &&
+      !isLoopback(supabaseUrl)
+    )
+      return { mode: "disabled", reason: "NEXT_PUBLIC_SUPABASE_URL must use https in production." };
     return { mode: "supabase", supabaseUrl, publishableKey, appUrl };
   }
 
@@ -116,4 +122,17 @@ export function readAdminConfig(env: Env): AdminConfig {
   if (config.mode !== "supabase" || !secretKey) return null;
   if (secretKey.startsWith("sb_publishable_") || secretKey === config.publishableKey) return null;
   return { url: config.supabaseUrl, secretKey };
+}
+
+/**
+ * Cookie options for Supabase sessions. Code Dungeon only uses Supabase on the server, so
+ * session cookies are HttpOnly (scripts cannot read them) and Secure in production.
+ */
+export function supabaseCookieOptions(env: Env) {
+  return {
+    path: "/",
+    sameSite: "lax" as const,
+    httpOnly: true,
+    secure: env.NODE_ENV === "production",
+  };
 }

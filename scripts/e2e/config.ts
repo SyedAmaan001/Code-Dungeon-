@@ -9,3 +9,13 @@ export function e2eDatabaseUrl(adminUrl: string): string {
   url.pathname = `/${E2E_DATABASE}`;
   return url.toString();
 }
+
+/** Production-build app in Supabase mode, pointed at the local MOCK of Supabase Auth. */
+export const SUPABASE_E2E_PORT = 3101;
+export const MOCK_SUPABASE = {
+  port: 54400,
+  url: "http://localhost:54400",
+  /** Fixed test values for the mock only. Not credentials. */
+  publishableKey: "sb_publishable_e2e_mock",
+  secretKey: "sb_secret_e2e_mock",
+};

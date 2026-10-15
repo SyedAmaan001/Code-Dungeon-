@@ -6,3 +6,6 @@ package-lock.json
 # Owner-authored documentation pack: kept byte-for-byte as supplied.
 *.md
 docs/
+.next-e2e/
+test-results/
+playwright-report/

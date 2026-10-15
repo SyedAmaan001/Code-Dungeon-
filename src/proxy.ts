@@ -7,7 +7,7 @@
  */
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { authConfig } from "@/auth/config";
+import { authConfig, supabaseCookieOptions } from "@/auth/config";
 import { DEV_SESSION_COOKIE, verifyDevSession } from "@/auth/dev-session";
 import { isProtectedPath } from "@/auth/redirect";
 
@@ -25,6 +25,7 @@ export async function proxy(request: NextRequest) {
   if (config.mode === "supabase") {
     let response = NextResponse.next({ request });
     const supabase = createServerClient(config.supabaseUrl, config.publishableKey, {
+      cookieOptions: supabaseCookieOptions(process.env),
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll: (list) => {
