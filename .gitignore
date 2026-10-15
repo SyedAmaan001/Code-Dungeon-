@@ -1,0 +1,12 @@
+﻿node_modules/
+.next/
+dist/
+build/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+Thumbs.db
+/Code_Dungeon_GitHub_Pack/
+/Reference images/
