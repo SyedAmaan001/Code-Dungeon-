@@ -119,7 +119,7 @@ export function syntheticPathFile(): Record<string, unknown> {
           predicate: { kind: "complete_zone", zone: zoneId(i + 1) },
         },
       ],
-      reward: { xp: 50 },
+      reward: { item: "zone-token" },
     })),
     achievements: [
       {

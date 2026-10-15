@@ -31,7 +31,7 @@ quests:
       - id: o2
         title: Complete the fixture zone
         predicate: { kind: complete_zone, zone: fx.zone.one }
-    reward: { xp: 50, item: gate-key }
+    reward: { item: gate-key }
 achievements:
   - id: fx.ach.first-level
     title: First Level

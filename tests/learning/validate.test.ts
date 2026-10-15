@@ -263,3 +263,59 @@ describe("validatePack — Phase 2 learning-engine rules", () => {
     ]);
   });
 });
+
+describe("validatePack — Phase 3 game-rule references", () => {
+  it("rejects quest or achievement XP unless the policy allows it (DEC-005)", () => {
+    const p = clonePack(base);
+    p.meta.quests[0]!.reward = { xp: 50, item: "gate-key" };
+    expect(errorsOf(p)).toContainEqual(
+      expect.stringContaining("quest and achievement XP is disabled"),
+    );
+    expect(
+      validatePack(p, { rewardXpAllowed: true }).filter((i) => i.severity === "error"),
+    ).toEqual([]);
+  });
+
+  it("checks encounter, unlock and activation references", () => {
+    const p = clonePack(base);
+    const q = p.meta.quests[0]!;
+    q.activation = { kind: "level_unlocked", level: "fx.L999" };
+    q.objectives.push({
+      id: "o3",
+      title: "Win",
+      optional: false,
+      predicate: { kind: "encounter_won", level: "fx.L001" },
+    });
+    q.objectives.push({
+      id: "o3",
+      title: "Dup",
+      optional: true,
+      predicate: { kind: "earn_xp", amount: 1 },
+    });
+    const errors = errorsOf(p);
+    expect(errors).toContainEqual(expect.stringContaining('unknown level "fx.L999"'));
+    expect(errors).toContainEqual(
+      expect.stringContaining('"fx.L001" is a standard level, not an encounter'),
+    );
+    expect(errors).toContainEqual(expect.stringContaining('duplicate objective id "o3"'));
+  });
+
+  it("requires a required objective, and published entries to reference published levels", () => {
+    const p = clonePack(base);
+    const q = p.meta.quests[0]!;
+    q.status = "published";
+    q.objectives = [
+      {
+        id: "o1",
+        title: "Draft",
+        optional: true,
+        predicate: { kind: "complete_levels", levels: ["fx.L003"] },
+      },
+    ];
+    const errors = errorsOf(p);
+    expect(errors).toContainEqual(expect.stringContaining("at least one required objective"));
+    expect(errors).toContainEqual(
+      expect.stringContaining('references unpublished level "fx.L003"'),
+    );
+  });
+});

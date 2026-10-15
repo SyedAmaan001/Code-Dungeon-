@@ -16,11 +16,14 @@ export interface ValidateOptions {
   codeRunnerEnabled: boolean;
   /** Challenge formats that have a registered evaluator. */
   evaluatorTypes: readonly string[];
+  /** Whether quests/achievements may grant XP. False: XP comes only from DEC-002 (see DEC-005). */
+  rewardXpAllowed: boolean;
 }
 
 export const DEFAULT_VALIDATE_OPTIONS: ValidateOptions = {
   codeRunnerEnabled: false,
   evaluatorTypes: BUILT_IN_EVALUATORS.map((e) => e.type),
+  rewardXpAllowed: false,
 };
 
 /** Published challenges carry exactly this many progressive hints (nudge, clue, strong hint). */
@@ -148,15 +151,63 @@ export function validatePack(
   }
 
   // ---- Quests and achievements reference real content ----
-  const checkPredicate = (p: Predicate, at: string) => {
-    if (p.kind === "complete_levels")
-      p.levels.forEach((id) => levelById.has(id) || pathErr(at, `unknown level "${id}"`));
-    if (p.kind === "complete_zone" && !zoneIds.has(p.zone)) pathErr(at, `unknown zone "${p.zone}"`);
+  const ENCOUNTER_KINDS = new Set(["checkpoint", "major", "boss"]);
+  const checkPredicate = (p: Predicate, at: string, published: boolean) => {
+    const level = (id: string) => {
+      const l = levelById.get(id);
+      if (!l) pathErr(at, `unknown level "${id}"`);
+      else if (published && l.status !== "published")
+        pathErr(at, `published entry references unpublished level "${id}"`);
+      return l;
+    };
+    switch (p.kind) {
+      case "complete_levels":
+        p.levels.forEach(level);
+        break;
+      case "level_unlocked":
+        level(p.level);
+        break;
+      case "encounter_won": {
+        const l = level(p.level);
+        if (l && !ENCOUNTER_KINDS.has(l.kind))
+          pathErr(
+            at,
+            `level "${p.level}" is a ${l.kind} level, not an encounter (checkpoint, major or boss)`,
+          );
+        break;
+      }
+      case "complete_zone":
+        if (!zoneIds.has(p.zone)) pathErr(at, `unknown zone "${p.zone}"`);
+        break;
+      default:
+        break;
+    }
   };
-  meta.quests.forEach((q) =>
-    q.objectives.forEach((o) => checkPredicate(o.predicate, `quests.${q.id}.${o.id}`)),
-  );
-  meta.achievements.forEach((a) => checkPredicate(a.predicate, `achievements.${a.id}`));
+  const checkReward = (reward: { xp: number }, at: string) => {
+    if (reward.xp > 0 && !opts.rewardXpAllowed)
+      pathErr(
+        `${at}.reward.xp`,
+        "quest and achievement XP is disabled; XP comes only from the progression policy (DEC-002, DEC-005)",
+      );
+  };
+  for (const q of meta.quests) {
+    const at = `quests.${q.id}`;
+    const published = q.status === "published";
+    if (q.activation) checkPredicate(q.activation, `${at}.activation`, published);
+    const objectiveIds = new Set<string>();
+    for (const o of q.objectives) {
+      if (objectiveIds.has(o.id)) pathErr(`${at}.${o.id}`, `duplicate objective id "${o.id}"`);
+      objectiveIds.add(o.id);
+      checkPredicate(o.predicate, `${at}.${o.id}`, published);
+    }
+    if (!q.objectives.some((o) => !o.optional))
+      pathErr(`${at}.objectives`, "a quest needs at least one required objective");
+    checkReward(q.reward, at);
+  }
+  for (const a of meta.achievements) {
+    checkPredicate(a.predicate, `achievements.${a.id}`, a.status === "published");
+    checkReward(a.reward, `achievements.${a.id}`);
+  }
 
   return issues;
 }

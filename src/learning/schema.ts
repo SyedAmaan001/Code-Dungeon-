@@ -295,7 +295,13 @@ export type Level = z.infer<typeof Level>;
 // Path, zones, quests, achievements
 // ---------------------------------------------------------------------------
 
-/** Closed vocabulary evaluated by the game engine. Content can never carry executable rules. */
+export const EncounterKind = z.enum(["checkpoint", "major", "boss"]);
+
+/**
+ * Closed vocabulary evaluated by the game engine (src/domain/game/predicates.ts).
+ * Content can never carry executable rules. Phase 3 added level_unlocked,
+ * master_level_count and the encounter predicates (additive: v2 files still parse).
+ */
 export const Predicate = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("complete_levels"), levels: z.array(Id).min(1) }),
   z.strictObject({ kind: z.literal("complete_level_count"), count: z.int().positive() }),
@@ -307,10 +313,30 @@ export const Predicate = z.discriminatedUnion("kind", [
   }),
   z.strictObject({ kind: z.literal("level_no_hints_first_try"), count: z.int().positive() }),
   z.strictObject({ kind: z.literal("earn_xp"), amount: z.int().positive() }),
+  z.strictObject({ kind: z.literal("level_unlocked"), level: Id }),
+  z.strictObject({ kind: z.literal("master_level_count"), count: z.int().positive() }),
+  /** Win the encounter on one checkpoint, major or boss level. */
+  z.strictObject({ kind: z.literal("encounter_won"), level: Id }),
+  /** Win `count` encounters, optionally of one kind. */
+  z.strictObject({
+    kind: z.literal("encounters_won"),
+    encounterKind: EncounterKind.optional(),
+    count: z.int().positive(),
+  }),
+  /** Win `count` encounters without losing a life or revealing a hint during the winning run. */
+  z.strictObject({
+    kind: z.literal("flawless_encounters"),
+    encounterKind: EncounterKind.optional(),
+    count: z.int().positive(),
+  }),
 ]);
 export type Predicate = z.infer<typeof Predicate>;
 
 const Reward = z.strictObject({
+  /**
+   * Must be 0: quest/achievement XP is not part of the approved XP policy (DEC-002, DEC-005).
+   * validatePack rejects other values unless rewardXpAllowed is enabled.
+   */
   xp: z.int().min(0).default(0),
   /** Cosmetic reward icon key (VISUAL_DIRECTION.md); not an inventory economy. */
   item: Id.optional(),
@@ -321,7 +347,19 @@ export const Quest = z.strictObject({
   title: Text,
   description: Text,
   status: PublicationStatus,
-  objectives: z.array(z.strictObject({ id: Id, title: Text, predicate: Predicate })).min(1),
+  /** When the quest becomes active. Omitted = active from the start. */
+  activation: Predicate.optional(),
+  objectives: z
+    .array(
+      z.strictObject({
+        id: Id,
+        title: Text,
+        predicate: Predicate,
+        /** Optional objectives are shown and tracked but not needed to complete the quest. */
+        optional: z.boolean().default(false),
+      }),
+    )
+    .min(1),
   reward: Reward.default({ xp: 0 }),
 });
 
