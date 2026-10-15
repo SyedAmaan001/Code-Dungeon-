@@ -323,6 +323,10 @@ function checkHints(c: Challenge, at: string, err: Report) {
   });
 }
 
+/** Reviewer names that identify an AI system rather than a person. */
+const AI_REVIEWER =
+  /\b(claude|gpt|chatgpt|copilot|gemini|llm|ai agent|agent|bot|automated|assistant)\b/i;
+
 function checkPublishable(level: Level, options: ValidateOptions, err: Report) {
   const missing = (at: string, what: string) => err(at, `published level is missing ${what}`);
   if (!level.description) missing("description", "a description");
@@ -339,6 +343,12 @@ function checkPublishable(level: Level, options: ValidateOptions, err: Report) {
   if (!level.challenges.some((c) => c.required)) missing("challenges", "a required challenge");
   if (level.sources.length === 0) missing("sources", "at least one source reference");
   if (!level.review) missing("review", "review metadata (reviewer, date, pythonVersion)");
+  // DEC-011: AI review must never be recorded as human approval.
+  if (level.review?.kind === "human" && AI_REVIEWER.test(level.review.reviewer))
+    err(
+      "review.reviewer",
+      `"${level.review.reviewer}" looks like an AI agent; human review needs a person's name (use kind: agent for AI review)`,
+    );
   if (level.estimatedMinutes === undefined) missing("estimatedMinutes", "estimatedMinutes");
 
   level.challenges.forEach((c, i) => {

@@ -45,6 +45,23 @@ describe("review status (DEC-011)", () => {
   });
 });
 
+describe("human review cannot be claimed by an AI reviewer", () => {
+  it("rejects kind: human with an AI agent as reviewer, accepts a person", async () => {
+    const { validatePack } = await import("@/learning/validate");
+    const pack = clonePack(loadOrThrow(VALID_SMALL));
+    pack.levels[0]!.review = {
+      reviewer: "Claude Code (AI agent) with automated content checks",
+      date: "2026-10-15",
+      pythonVersion: "3.13",
+      kind: "human",
+    };
+    const errors = validatePack(pack).filter((i) => i.severity === "error");
+    expect(errors.map((e) => e.at)).toContain("review.reviewer");
+    pack.levels[0]!.review.reviewer = "Ada Lovelace";
+    expect(validatePack(pack).filter((i) => i.at === "review.reviewer")).toEqual([]);
+  });
+});
+
 describe("content release policy", () => {
   it("defaults to development and rejects unknown modes", () => {
     expect(parseContentRelease(undefined)).toBe("development");
