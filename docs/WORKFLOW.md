@@ -195,3 +195,16 @@ npm audit --omit=dev --audit-level=high                  # CI gate for runtime d
 ```
 
 Actual layout: `content/` (YAML content packs) · `src/learning/` (schemas, evaluators, validation, Python verification) · `src/domain/` (progression and `game/`: encounters, quests, achievements, leaderboard) · `src/services/` (server-only learning and game services, in-memory stores) · `src/app/` (status page) · `src/runner/` (disabled) · `tests/`. Work happens on the review branch `claude/tender-cerf-ooekni`; CI runs on every push; nothing is merged to `main` without owner review.
+
+## 15. Database workflow (as of Phase 4)
+
+```bash
+npm run db:local -- start      # throwaway local PostgreSQL in .local/postgres (prints DATABASE_URL / TEST_DATABASE_URL)
+export DATABASE_URL=...        # or put it in .env.local (git-ignored); never commit real values
+npm run db:migrate             # apply pending migrations (safe to re-run)
+npm run db:status              # list applied / pending / changed migrations
+TEST_DATABASE_URL=... npm test # database suites create and drop their own throwaway databases
+npm run db:local -- stop       # or: reset (deletes local data)
+```
+
+Rules: never edit a migration that has been applied anywhere shared — add a new numbered file. Every new player-owned table needs row-level security, a policy and an isolation test. Never connect the app or tests to production data. CI runs the migrations twice and all database tests against a PostgreSQL 16 service container.

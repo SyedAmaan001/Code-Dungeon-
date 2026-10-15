@@ -148,3 +148,25 @@
 - Decision: metric = lifetime XP from the verified XP ledger (R-005). Order: XP descending → time the current XP total was reached, earliest first → handle (case-insensitive, then exact) → internal player id (never displayed). Rank = competition ranking (1, 2, 2, 4) on equal XP *and* equal reached-at time; the later rules only fix display order within a shared rank. Only visible players with at least 1 XP are ranked; output shows rank, handle and XP only, plus the viewer's own rank or the reason they are unranked (hidden, no XP, unknown). Default top 10, maximum 100. Handles: 3–20 characters, starting with a letter, letters/digits/`_`/`-`, reserved words refused, unique case-insensitively. No offensive-word filter yet (R-08).
 - Consequences: with in-memory adapters the leaderboard only compares players held in one server process and is flagged `persistent: false`. It is not a persistent or cross-session leaderboard.
 - Revisit trigger: persistence/authentication phase; weekly boards; moderation needs.
+
+### DEC-007 — Local-first PostgreSQL persistence
+- Status: DEFAULT (implemented in Phase 4; no hosted database chosen — P-002/P-003 remain open)
+- Date: 2026-10-15
+- Context/problem: Phase 4 requires durable player profiles, learning progress, XP records, encounters, quests and achievements; learning and game state saved in one transaction; per-user isolation; no external services.
+- Decision:
+  - **PostgreSQL** (tested on 16) with plain SQL migrations in `db/migrations/`, applied by a small in-repo runner (ordered files, SHA-256 checksums, advisory lock, one transaction per file). `supabase/migrations/` from the proposal was not used because no provider is approved; the SQL is provider-neutral.
+  - **Driver:** `postgres` 3.4.9 (zero dependencies, Unlicense) — the only new dependency. No ORM.
+  - **Isolation:** row-level security on every player table. Each transaction switches to the non-owner role `code_dungeon_app` and sets `app.player_id` from the server's verified identity; with no identity set, nothing is visible. Cross-player reads happen only through `leaderboard_records()` (public fields) and `player_id_for_identity()` (id only), both `SECURITY DEFINER`.
+  - **Atomicity:** `PostgresPlayerStore.transaction` locks the player's `player_paths` row and writes learning progress and game state together; any failure rolls back both. `GameService` uses this when given a transactional store; the previous two-store path still exists for the in-memory adapters.
+  - **Integrity in the database:** award-once XP (primary key on source key), append-only ledger (no UPDATE/DELETE grants), idempotent submissions (primary key on submission id), state CHECK constraints, handle format and case-insensitive uniqueness.
+  - **Content stays in Git;** the database stores content ids without foreign keys to a content registry (validated against the loaded pack by the services).
+  - **Account deletion** cascades to all of the player's data.
+  - **Local development:** `scripts/db/local-postgres.sh` (throwaway cluster, loopback-only trust authentication); any PostgreSQL 15+ reachable through `DATABASE_URL` also works.
+- Consequences: the leaderboard and progress are persistent *when* a PostgreSQL store is wired in; nothing is exposed over HTTP until authentication exists (DEC-008). Learning and game services are unchanged in behaviour (all earlier tests still pass).
+- Revisit trigger: hosting/database provider approval; content registry need; scale (index or partition the ledger).
+
+### DEC-008 — Authentication integration design (provider pending approval)
+- Status: PROPOSED — design in `docs/auth-design.md`; **no provider configured**
+- Date: 2026-10-15
+- Decision so far: player ids come only from a server-verified session; `players.auth_provider/auth_subject` link one provider identity to one player; `player_id_for_identity()` resolves it under RLS. Recommended provider: Supabase Auth with GitHub/Google OAuth plus email magic link, no passwords at launch.
+- Needs owner approval: the provider, sign-in methods (O-5), minimum learner age and consent (O-8), an email sender if email sign-in is chosen, and hosting (P-002).

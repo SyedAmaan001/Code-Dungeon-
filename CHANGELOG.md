@@ -1,5 +1,15 @@
 # Changelog
 
+## Phase 4 — Saved progress and accounts, local first (2026-10-15)
+
+- PostgreSQL schema (`db/migrations/0001_initial.sql`): players, learning progress, append-only XP ledger with database-enforced award-once, idempotent submissions, encounters, checkpoints, quests, achievements, reward items; row-level security on every player table through the non-owner role `code_dungeon_app`; narrow `SECURITY DEFINER` functions for the leaderboard and identity lookup.
+- Migration runner (`npm run db:migrate`, `db:status`) with checksums and locking; local throwaway PostgreSQL (`npm run db:local`); CI runs PostgreSQL 16, applies migrations twice and requires the database tests.
+- `PostgresPlayerStore` saves learning progress and game state in one transaction with rollback; `PostgresPlayerAccounts` (handles, visibility, identity link, cascade delete); `PostgresLeaderboardSource` (public fields only).
+- Services refactored non-breakingly into pure plan steps plus persistence; `GameService` accepts a transactional store and a leaderboard source; in-memory transactional adapter.
+- Authentication integration designed (`docs/auth-design.md`); no provider configured.
+- New dependency: `postgres` 3.4.9 (zero dependencies). Tests: 207 with a database (178 without; database suites skip).
+- Curriculum, evaluation, XP policy, game engine, quests, achievements and leaderboard rules unchanged.
+
 ## Phase 3 — Game engine (2026-10-15)
 
 - Pure game engine (`src/domain/game/`): encounter runs for checkpoint, major and boss levels (checkpoints cannot be lost; 3 lives for major/boss; flawless victories), checkpoint records, quests with activation and optional objectives, achievements, cosmetic item rewards, and a read model for journals.

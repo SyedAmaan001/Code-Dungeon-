@@ -23,6 +23,19 @@ npm run check                   # all of the above
 
 Layout: `content/` curriculum data (25 Python levels) · `src/learning/` learning engine (schemas, evaluators, feedback, validation, Python verification) · `src/domain/` progression rules (unlocks, completion, mastery, XP policy) and `src/domain/game/` game engine (encounters, checkpoints, quests, achievements, leaderboard ranking) · `src/services/` server-side learning and game services with non-durable in-memory stores · `src/app/` status page · `src/runner/` disabled code runner · `tests/` unit, content, service and synthetic 100-level tests. See `docs/PHASE_2_REPORT.md` and `docs/PHASE_3_REPORT.md`. Nothing is saved permanently yet and there is no playable interface. No environment variables are needed yet; `.env.example` lists future names only.
 
+### Database (Phase 4, local only)
+
+Saved progress uses PostgreSQL. Nothing is hosted; no external service is required.
+
+```bash
+npm run db:local -- start       # local PostgreSQL 15+ in .local/postgres; prints the URLs to use
+export DATABASE_URL=postgresql://postgres@127.0.0.1:54329/code_dungeon_dev
+npm run db:migrate              # create/upgrade the schema (safe to re-run)
+TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:54329/postgres npm test   # include database tests
+```
+
+Without `TEST_DATABASE_URL` the database test suites are skipped (CI runs them against PostgreSQL 16). Data isolation, transactions and the schema are described in `docs/PHASE_4_REPORT.md`; sign-in is designed in `docs/auth-design.md` but not configured, so nothing is exposed over HTTP yet.
+
 ## Add it to GitHub
 
 1. Download and extract `Code_Dungeon_GitHub_Pack.zip`.

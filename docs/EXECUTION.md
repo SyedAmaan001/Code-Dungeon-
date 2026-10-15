@@ -12,10 +12,10 @@ The delivery phases in the reports are numbered by session and do not map one-to
 | 1 — Architecture and local foundation | Done | `docs/phase-1-report.md` (DEC-001) |
 | 2 — Curriculum and content validation | Done; 25 levels agent-reviewed, **human review pending** (DEC-004) | `docs/PHASE_2_REPORT.md` |
 | 3 — Domain/game engine | Done as pure domain + services on non-durable in-memory stores: progression (Phase 2), encounters, checkpoints, quests, achievements, leaderboard ranking (Phase 3) | `docs/PHASE_2_REPORT.md`, `docs/PHASE_3_REPORT.md` |
-| 4 — Account, persistence and permissions | Not started | — |
+| 4 — Account, persistence and permissions | Persistence and permissions done locally (PostgreSQL, migrations, row-level security, single-transaction saves, isolation tests); **authentication designed but not configured** (provider needs owner approval) | `docs/PHASE_4_REPORT.md`, `docs/auth-design.md` |
 | 5 — First playable vertical slice | Not started | — |
 | 6 — Full 25-level path, zones and quests | Content and rules done; UI not started | Phase 2/3 reports |
-| 7 — XP, achievements, profile and leaderboard | Rules done; persistence, profile and UI not started | Phase 3 report |
+| 7 — XP, achievements, profile and leaderboard | Rules and persistence done (profiles, ledger, leaderboard function); UI not started | Phase 3 and 4 reports |
 | 8–12 | Not started | — |
 
 Nothing is deployed. No external service or cloud resource has been created.
