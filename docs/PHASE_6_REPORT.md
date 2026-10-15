@@ -1,6 +1,6 @@
 # Phase 6 report — Security, account lifecycle, polish and QA
 
-- **Status:** PASS locally and in CI. Every check passed on a clean install: 270 Vitest tests with a database (224 without), 26 Playwright tests, build, lint, format, typecheck, content validation, Python verification, runtime audit. CI runs #9 and #10 passed both jobs; the final documentation commit is reported in the hand-off.
+- **Status:** PASS locally and in CI. Every check passed on a clean install: 270 Vitest tests with a database (224 without), 26 Playwright tests, build, lint, format, typecheck, content validation, Python verification, runtime audit. CI runs #9 and #10 passed both jobs. Run #11 (`7d5adab`) failed one e2e test through a race in a test helper (I-18); the fix `1f9c02f` passed both jobs in run #12.
 - **Not verified:** real Google OAuth, real Supabase email and real Supabase admin deletion. No Supabase project exists, because creating one needs approval. Those code paths ran against a **local mock** of Supabase Auth (DEC-017), which proves Code Dungeon's code, not Google's or Supabase's behaviour.
 - **Date:** 15 October 2026
 - **Branch:** `claude/tender-cerf-ooekni` (not merged, nothing deployed). Baseline `e8c6498` (CI run #7 green).
@@ -14,7 +14,8 @@
 | `725b8db` | Map and room polish, progress strip, offline and retry states |
 | `2219738` | QA journeys and the console/network guard |
 | `10d26b9` | Curriculum review checklist and the AI-reviewer guard |
-| final | Documentation |
+| `7d5adab` | Documentation |
+| `1f9c02f` | E2E helper waits for the onboarding outcome (CI #11 failure, I-18) |
 
 ## 1. Audit and baseline (Workstream 1)
 
@@ -159,7 +160,7 @@ The existing identity is kept: no redesign, no new dependencies.
 | `npm audit --omit=dev` | **0 vulnerabilities** |
 | Full `npm audit` | 5 high in lint tooling only, unchanged since Phase 1 (R-31) |
 | Browser bundle scan (`.next/static`) | No `DATABASE_URL`, `DEV_AUTH_SECRET`, `SUPABASE_SECRET_KEY`, `sb_secret_`, `service_role`, role, function or table names, `admin/users`, answer-key fields, `createHmac` or connection strings |
-| CI | Runs #9 (`b5931e1`) and #10 (`2219738`) passed, including the new supabase-mock job. Run #8 was superseded by #9 |
+| CI | Runs #9 (`b5931e1`), #10 (`2219738`) and #12 (`1f9c02f`) passed, including the new supabase-mock job. Run #8 was superseded by #9; run #11 failed on a test-helper race, fixed in #12 |
 | Preserved | `git diff e8c6498` is empty for `src/domain`, `src/learning/evaluation`, `src/learning/projection.ts` and `content/` |
 
 ## 7. Unresolved issues and decisions needing approval
