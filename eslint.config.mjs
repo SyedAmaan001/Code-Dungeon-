@@ -15,7 +15,15 @@ const frameworkImports = [
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
-  globalIgnores([".next/**", ".next-e2e/**", "test-results/**", "playwright-report/**", "node_modules/**", "coverage/**", "next-env.d.ts"]),
+  globalIgnores([
+    ".next/**",
+    ".next-e2e/**",
+    "test-results/**",
+    "playwright-report/**",
+    "node_modules/**",
+    "coverage/**",
+    "next-env.d.ts",
+  ]),
   {
     files: ["src/domain/**/*.ts"],
     rules: {
