@@ -17,6 +17,7 @@ import {
   DEFAULT_POLICY,
   emptyProgress,
   levelView,
+  maxPathXp,
   totalXp,
   type DomainError,
   type LearnerProgress,
@@ -128,6 +129,8 @@ export type LevelResult =
       status: "ok";
       level: PublicLevel;
       view: LevelView;
+      /** XP this learner has earned in this level, and the most the level can award (policy). */
+      xp: { earned: number; available: number };
       challenges: Record<
         string,
         {
@@ -277,10 +280,15 @@ export class LearningService {
     const view = levelView(this.rules, progress, levelId, this.policy);
     if (view.status === "locked") return reject("level_locked");
     const lp = progress.levels[levelId];
+    const rule = this.rules.levels.find((l) => l.id === levelId)!;
     return {
       status: "ok",
       level: toPublicLevel(level),
       view,
+      xp: {
+        earned: progress.xp.filter((e) => e.levelId === levelId).reduce((n, e) => n + e.amount, 0),
+        available: maxPathXp({ ...this.rules, levels: [rule] }, this.policy),
+      },
       challenges: Object.fromEntries(
         level.challenges.map((c) => {
           const cp = lp?.challenges[c.id];

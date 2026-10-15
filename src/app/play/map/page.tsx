@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requirePlayer } from "@/auth/server";
-import { DungeonMap } from "@/ui/dungeon-map";
+import { DungeonMap, MapLegend } from "@/ui/dungeon-map";
 import { Icon } from "@/ui/art/icons";
 import { loadPlayerView } from "../data";
 
@@ -20,6 +20,7 @@ export default async function MapPage() {
           are played in runs; a lost run never removes progress.
         </p>
       </header>
+      {view.levels.length > 0 && <MapLegend />}
       {view.levels.length === 0 ? (
         <div className="frame empty">
           <Icon name="lock" size={32} />

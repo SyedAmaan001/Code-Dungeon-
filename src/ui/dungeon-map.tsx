@@ -18,12 +18,14 @@ const KIND_ICON: Partial<Record<Level["kind"], IconName>> = {
   boss: "crown",
 };
 
+/** One short status line; the encounter kind is shown separately as a tag. */
 function statusText(level: Level, encounterWon: boolean) {
-  const base = LEVEL_STATUS_LABEL[level.status] ?? level.status;
-  const parts = [base];
-  if (level.mastered) parts.push("mastered");
-  if (encounterWon) parts.push(level.kind === "checkpoint" ? "checkpoint cleared" : "victory");
-  return parts.join(" · ");
+  if (level.status === "completed") {
+    if (level.mastered) return "Mastered";
+    if (encounterWon) return level.kind === "checkpoint" ? "Checkpoint cleared" : "Victory";
+    return "Complete";
+  }
+  return LEVEL_STATUS_LABEL[level.status] ?? level.status;
 }
 
 function Room({
@@ -61,26 +63,37 @@ function Room({
           </span>
         )}
       </span>
+      {level.kind !== "standard" && (
+        <span className="room__tag">
+          {LEVEL_KIND_LABEL[level.kind]}
+          {encounterWon && <span className="sr-only"> (won)</span>}
+        </span>
+      )}
       <span className="room__title">
         <span className="sr-only">Level {level.number}: </span>
         {level.title}
       </span>
       <span className="room__status">
-        {level.kind !== "standard" && `${LEVEL_KIND_LABEL[level.kind]} · `}
         {statusText(level, encounterWon)}
-        {current && " · continue here"}
+        {current && <span className="room__here"> · continue here</span>}
       </span>
     </>
   );
+  const data = {
+    "data-status": level.status,
+    "data-kind": level.kind,
+    "data-mastered": level.mastered || undefined,
+    "data-won": encounterWon || undefined,
+  };
   const className = current ? "room room--current" : "room";
   return level.status === "locked" ? (
-    <div className={className} data-status={level.status}>
+    <div className={className} {...data}>
       {inner}
     </div>
   ) : (
     <Link
       className={className}
-      data-status={level.status}
+      {...data}
       href={`/play/level/${encodeURIComponent(level.levelId)}`}
       aria-current={current ? "step" : undefined}
     >
@@ -123,15 +136,32 @@ export function DungeonMap({ view }: { view: PlayerGameView }) {
                     {zone.title}
                   </h2>
                 </div>
-                <p className="zone__count">
+                <div className="zone__count">
                   {locked ? (
-                    <>
+                    <span className="row" style={{ gap: "0.35rem" }}>
                       <Icon name="lock" size={16} /> Sealed
-                    </>
+                    </span>
                   ) : (
-                    `${done} of ${levels.length} complete`
+                    <>
+                      <span>
+                        {done} of {levels.length} complete
+                      </span>
+                      <span
+                        className="meter meter--zone"
+                        role="progressbar"
+                        aria-label={`${zone.title} progress`}
+                        aria-valuemin={0}
+                        aria-valuemax={levels.length}
+                        aria-valuenow={done}
+                      >
+                        <span
+                          className="meter__fill"
+                          style={{ width: `${(done / levels.length) * 100}%` }}
+                        />
+                      </span>
+                    </>
                   )}
-                </p>
+                </div>
               </div>
             </div>
             <ol className="path" style={{ "--count": levels.length } as React.CSSProperties}>
@@ -149,5 +179,32 @@ export function DungeonMap({ view }: { view: PlayerGameView }) {
         );
       })}
     </div>
+  );
+}
+
+/** Explains every room state on the map (icons, shapes and words, not colour alone). */
+export function MapLegend() {
+  const item = (icon: IconName, label: string, className = "") => (
+    <li className={`legend__item ${className}`}>
+      <span className="legend__swatch" aria-hidden="true">
+        <Icon name={icon} size={14} />
+      </span>
+      {label}
+    </li>
+  );
+  return (
+    <details className="legend frame">
+      <summary>How to read the map</summary>
+      <ul className="legend__list">
+        {item("arrow-right", "Open: ready to enter", "legend--open")}
+        {item("spark", "In progress", "legend--open")}
+        {item("check", "Complete", "legend--done")}
+        {item("star", "Mastered: every knowledge check shown without hints", "legend--done")}
+        {item("lock", "Locked: finish the room before it", "legend--locked")}
+        {item("flag", "Checkpoint: cannot be lost; records your progress", "legend--checkpoint")}
+        {item("swords", "Major encounter: 3 lives per run", "legend--major")}
+        {item("crown", "Boss: the final challenge, 3 lives per run", "legend--boss")}
+      </ul>
+    </details>
   );
 }

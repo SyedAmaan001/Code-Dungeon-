@@ -612,6 +612,7 @@ ol {
 
 /* ---------------------------------------------------------------- progress meter */
 .meter {
+  display: block;
   position: relative;
   height: 10px;
   border-radius: 999px;
@@ -620,6 +621,7 @@ ol {
   overflow: hidden;
 }
 .meter__fill {
+  display: block;
   height: 100%;
   background: linear-gradient(90deg, var(--gold-deep), var(--gold-bright));
   border-radius: inherit;
@@ -893,6 +895,145 @@ a.room:hover .room__seal {
 .room--current .room__title {
   color: var(--teal);
 }
+.room__here {
+  color: var(--teal);
+}
+.room__tag {
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+/* Encounter rooms: an outer ring whose colour and weight name the kind. */
+.room[data-kind="checkpoint"],
+.room[data-kind="major"],
+.room[data-kind="boss"] {
+  --encounter: var(--moss);
+}
+.room[data-kind="major"],
+.room[data-kind="boss"] {
+  --encounter: var(--ember);
+}
+.room[data-kind="checkpoint"] .room__tag {
+  color: var(--moss);
+}
+.room[data-kind="major"] .room__tag,
+.room[data-kind="boss"] .room__tag {
+  color: #f6a46d;
+}
+.room[data-kind="checkpoint"] .room__seal::after,
+.room[data-kind="major"] .room__seal::after,
+.room[data-kind="boss"] .room__seal::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 2px solid var(--encounter);
+  pointer-events: none;
+}
+.room[data-kind="checkpoint"] .room__seal::after {
+  border-style: double;
+  border-width: 4px;
+  inset: -9px;
+}
+.room[data-kind="boss"] .room__seal {
+  --node: 78px;
+  font-size: 1.6rem;
+}
+.room[data-kind="boss"] .room__seal::after {
+  inset: -10px;
+  border-width: 3px;
+  box-shadow:
+    0 0 0 3px var(--night-1),
+    0 0 0 4.5px var(--gold-deep);
+}
+.room[data-status="locked"] .room__seal::after {
+  opacity: 0.4;
+}
+.room[data-won] .room__kind {
+  background: var(--gold);
+  border-color: var(--gold-bright);
+  color: #2a1d09;
+}
+
+/* Mastered: a bright gold halo around the completed seal. */
+.room[data-mastered] .room__seal {
+  border-color: var(--gold-bright);
+  box-shadow:
+    0 0 0 3px var(--night-1),
+    0 0 0 5px rgb(236 208 143 / 0.55);
+}
+.room[data-mastered] .room__state {
+  background: var(--gold);
+  border-color: var(--gold-bright);
+  color: #2a1d09;
+}
+
+.zone__count {
+  display: grid;
+  justify-items: end;
+  gap: var(--s-1);
+  min-width: 9rem;
+}
+.zone__count .meter {
+  width: 9rem;
+  height: 6px;
+}
+
+.legend > summary {
+  cursor: pointer;
+  font-weight: 700;
+  list-style-position: inside;
+}
+.legend {
+  padding: var(--s-3) var(--s-5);
+}
+.legend__list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--s-2) var(--s-5);
+  margin-top: var(--s-3);
+  font-size: var(--text-s);
+}
+.legend__item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.legend__swatch {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  border: 1.5px solid var(--line-strong);
+}
+.legend--open .legend__swatch {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+.legend--done .legend__swatch {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+.legend--locked .legend__swatch {
+  border-style: dashed;
+  color: var(--parchment-dim);
+}
+.legend--checkpoint .legend__swatch {
+  border: 4px double var(--moss);
+  color: var(--moss);
+}
+.legend--major .legend__swatch,
+.legend--boss .legend__swatch {
+  border-color: var(--ember);
+  color: #f6a46d;
+}
 
 @keyframes beckon {
   0%,
@@ -905,6 +1046,9 @@ a.room:hover .room__seal {
 }
 
 @media (max-width: 720px) {
+  .zone__count {
+    justify-items: start;
+  }
   .path {
     grid-template-columns: 1fr;
     gap: var(--s-2);
@@ -997,19 +1141,29 @@ a.room:hover .room__seal {
 .jump-link {
   display: none;
 }
-@media (max-width: 1039px) {
+/* Keep the challenge beside the lesson while reading, only where it fits on screen. */
+@media (min-width: 900px) and (min-height: 820px) {
+  .room-layout__work {
+    position: sticky;
+    top: 76px;
+    /* Never taller than the viewport, so submit, feedback and hints stay reachable. */
+    max-height: calc(100dvh - 92px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    border-radius: var(--radius-l);
+  }
+}
+
+@media (max-width: 899px) {
   .jump-link {
     display: inline-flex;
   }
 }
-@media (min-width: 1040px) {
+@media (min-width: 900px) {
   .room-layout {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
     align-items: start;
-  }
-  .room-layout__work {
-    position: sticky;
-    top: 76px;
   }
 }
 
@@ -1027,6 +1181,37 @@ a.room:hover .room__seal {
 }
 .lesson p + p {
   margin-top: var(--s-3);
+}
+/* Keep lesson prose at a comfortable reading measure when the column is wide. */
+.lesson p,
+.lesson li {
+  max-width: 72ch;
+}
+
+/* Level progress: required challenges, XP here, mastery. */
+.room-progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--s-3) var(--s-5);
+  margin-top: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: rgb(14 13 17 / 0.72);
+}
+.room-progress__label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+}
+.room-progress__value {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.room-progress .meter {
+  margin-top: var(--s-1);
+  height: 6px;
 }
 .objectives {
   list-style: none;
@@ -1468,6 +1653,21 @@ a.room:hover .room__seal {
   font-family: var(--font-display);
   font-size: var(--text-l);
   color: var(--gold-bright);
+}
+.offline-notice {
+  position: sticky;
+  top: 68px;
+  z-index: 20;
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+  margin-bottom: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--radius-m);
+  border: 1px solid rgb(240 138 70 / 0.5);
+  background: #2a1d14;
+  color: #f8d2b4;
+  font-weight: 600;
 }
 .notice-box {
   display: flex;

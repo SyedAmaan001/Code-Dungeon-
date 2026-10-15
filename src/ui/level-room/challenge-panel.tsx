@@ -67,7 +67,7 @@ function Notices({ notices }: { notices: Notice[] }) {
   );
 }
 
-function Feedback({ result }: { result: SubmitView }) {
+function Feedback({ result, onRetry }: { result: SubmitView; onRetry?: () => void }) {
   switch (result.status) {
     case "evaluated": {
       const fb = result.feedback;
@@ -142,7 +142,17 @@ function Feedback({ result }: { result: SubmitView }) {
           <p className="feedback__head">
             <Icon name="alert" size={20} /> Something went wrong
           </p>
-          <p>Your answer could not be checked. Try again; it will not be counted twice.</p>
+          <p>
+            Your answer could not be checked (the connection may have dropped). Retrying is safe: it
+            will not be counted twice.
+          </p>
+          {onRetry && (
+            <div>
+              <button type="button" className="btn" onClick={onRetry}>
+                Retry
+              </button>
+            </div>
+          )}
         </div>
       );
   }
@@ -408,7 +418,7 @@ export function ChallengePanel({
 
         <div role="status" aria-live="polite">
           {result ? (
-            <Feedback result={result} />
+            <Feedback result={result} onRetry={pending ? undefined : submit} />
           ) : (
             progress[challenge.id]?.explanation && (
               <div className="feedback feedback--correct">

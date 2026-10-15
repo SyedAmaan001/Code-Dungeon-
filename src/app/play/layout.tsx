@@ -5,6 +5,7 @@ import { Icon } from "@/ui/art/icons";
 import { BrandMark } from "@/ui/art/zone-scene";
 import { formatXp } from "@/ui/labels";
 import { GameNav } from "@/ui/nav";
+import { OfflineNotice } from "@/ui/offline-notice";
 import { loadPlayerView } from "./data";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +50,7 @@ export default async function PlayLayout({ children }: { children: ReactNode }) 
         </div>
       </header>
       <main id="main" className="page">
+        <OfflineNotice />
         {children}
       </main>
       <GameNav variant="bottom" />

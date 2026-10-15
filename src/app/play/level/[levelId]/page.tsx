@@ -8,7 +8,7 @@ import { zoneTheme } from "@/world/catalog";
 import { Icon } from "@/ui/art/icons";
 import { ZoneScene } from "@/ui/art/zone-scene";
 import { CodeBlock } from "@/ui/code";
-import { LEVEL_KIND_LABEL, LEVEL_STATUS_LABEL, REVIEW_LABEL, plural } from "@/ui/labels";
+import { formatXp, LEVEL_KIND_LABEL, LEVEL_STATUS_LABEL, REVIEW_LABEL, plural } from "@/ui/labels";
 import { ChallengePanel } from "@/ui/level-room/challenge-panel";
 import { InlineText, RichText } from "@/ui/rich-text";
 import { loadPlayerView } from "../../data";
@@ -89,6 +89,69 @@ function EncounterPanel({ encounter, required }: { encounter: EncounterRoom; req
         )}
       </div>
       <p className="muted">{text}</p>
+    </section>
+  );
+}
+
+function Meter({ value, max, label }: { value: number; max: number; label: string }) {
+  return (
+    <span
+      className="meter"
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={max}
+      aria-valuenow={value}
+    >
+      <span className="meter__fill" style={{ width: `${max ? (value / max) * 100 : 0}%` }} />
+    </span>
+  );
+}
+
+/** Where the learner stands in this room: required challenges, XP here, mastery. */
+function RoomProgress({
+  solved,
+  required,
+  xp,
+  mastered,
+  hasChecks,
+}: {
+  solved: number;
+  required: number;
+  xp: { earned: number; available: number };
+  mastered: boolean;
+  hasChecks: boolean;
+}) {
+  return (
+    <section className="room-progress" aria-label="Your progress in this level">
+      <div>
+        <div className="room-progress__label">Required challenges</div>
+        <div className="room-progress__value">
+          {solved} of {required} solved
+        </div>
+        <Meter value={solved} max={required} label="Required challenges solved" />
+      </div>
+      <div>
+        <div className="room-progress__label">XP in this level</div>
+        <div className="room-progress__value">
+          {formatXp(xp.earned)} of {formatXp(xp.available)}
+        </div>
+        <Meter value={xp.earned} max={xp.available} label="XP earned in this level" />
+      </div>
+      <div>
+        <div className="room-progress__label">Mastery</div>
+        <div className="room-progress__value">
+          {mastered ? (
+            <>
+              <Icon name="star" size={16} /> Mastered
+            </>
+          ) : hasChecks ? (
+            "Not yet: each knowledge check right without a hint"
+          ) : (
+            "Not yet: each required challenge right without a hint"
+          )}
+        </div>
+      </div>
     </section>
   );
 }
@@ -197,6 +260,14 @@ export default async function LevelPage({ params }: { params: Params }) {
           </div>
         </div>
       </header>
+
+      <RoomProgress
+        solved={level.challenges.filter((c) => c.required && room.challenges[c.id]?.correct).length}
+        required={required}
+        xp={room.xp}
+        mastered={summary?.mastered ?? false}
+        hasChecks={level.challenges.some((c) => c.role === "check")}
+      />
 
       {status === "completed" && (
         <div className="banner" style={{ marginTop: "1.5rem" }} role="status">

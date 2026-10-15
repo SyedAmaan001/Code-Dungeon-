@@ -125,6 +125,23 @@ describe("level room read model", () => {
     expect(await game.levelRoom("p", "py.L012")).toMatchObject({ code: "level_locked" });
   });
 
+  it("reports XP earned and available per level, summing to the path maximum", async () => {
+    const { game } = services();
+    let available = 0;
+    for (const l of python.levels.slice(0, 1)) {
+      const room = await game.levelRoom("p", l.id);
+      if (room.status !== "ok") throw new Error();
+      expect(room.xp.earned).toBe(0);
+      available += room.xp.available;
+    }
+    for (let ci = 0; ci < python.levels[0]!.challenges.length; ci++)
+      await game.submit("p", sub(0, ci));
+    const done = await game.levelRoom("p", "py.L001");
+    if (done.status !== "ok") throw new Error();
+    expect(done.xp.earned).toBe(done.xp.available); // all first try, no hints
+    expect(done.xp.available).toBe(available);
+  });
+
   it("reports the path maximum XP and zones in the player view", async () => {
     const view = await services().game.getView("p");
     expect(view.maxXp).toBe(2455);
