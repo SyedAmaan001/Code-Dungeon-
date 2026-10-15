@@ -27,3 +27,4 @@ Baseline before any change: lint, format, typecheck, build, 245 Vitest tests (wi
 | I-15 | Security | No script Content-Security-Policy | Code review | OPEN | R-52; needs a nonce-based CSP |
 | I-16 | Content | 25 of 25 levels AI-reviewed only | Release gate | NEEDS APPROVAL | Human review using `docs/CURRICULUM_REVIEW_CHECKLIST.md` |
 | I-17 | Ops | Real Supabase project, Google OAuth client and email sender not created | DEC-013 | NEEDS APPROVAL | Owner approval of the project and cost plan |
+| I-18 | Tests | CI run #11 (`7d5adab`) failed one e2e test: the `onboard()` helper returned before the onboarding server action finished, so the deletion test navigated to the profile before the account existed | CI | FIXED (next commit) | `onboard()` now waits for the game shell, the refusal page or a form error; 26/26 locally |

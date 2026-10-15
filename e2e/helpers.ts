@@ -55,6 +55,14 @@ export async function onboard(
   await page.getByLabel("Birth year").fill(String(options.birthYear ?? 2000));
   if (options.visible) await page.getByLabel(/Show my handle and XP/).check();
   await page.getByRole("button", { name: "Begin the expedition" }).click();
+  // Wait for the server action's outcome (game shell, refusal or form error) so callers that
+  // navigate next cannot race ahead of account creation.
+  await expect(
+    page
+      .locator(".xp-chip")
+      .or(page.getByRole("heading", { name: "We can't create an account" }))
+      .or(page.locator(".form-error")),
+  ).toBeVisible();
 }
 
 export const xpChip = (page: Page) => page.locator(".xp-chip");
