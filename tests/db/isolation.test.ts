@@ -12,6 +12,7 @@ import {
   PostgresPlayerStore,
   scoped,
 } from "@/services/postgres-player-store";
+import { PostgresRateLimiter } from "@/services/postgres-rate-limit";
 import { createTestDatabase, describeDb, type TestDatabase } from "../support/db";
 import { loadOrThrow, VALID_SMALL } from "../support/packs";
 
@@ -26,6 +27,7 @@ const TABLES = [
   "quest_progress",
   "player_achievements",
   "reward_items",
+  "action_rate_limits",
 ];
 
 describeDb("cross-account isolation", () => {
@@ -73,6 +75,7 @@ describeDb("cross-account isolation", () => {
         challengeId,
         answer,
       });
+    await new PostgresRateLimiter(db.sql, 40).allow(b);
   });
   afterAll(() => db.drop());
 

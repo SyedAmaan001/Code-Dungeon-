@@ -90,6 +90,27 @@ describe("game server actions", () => {
     expect((await runtime.learning.getPath("player-a")).totalXp).toBe(0);
   });
 
+  it("count a resent submission once and return the original result", async () => {
+    session.player = { playerId: "player-a", handle: "Alice", visible: true };
+    const first = await submitAnswer(body("sub-dup-0001"));
+    const again = await submitAnswer(body("sub-dup-0001"));
+    expect(first).toMatchObject({ status: "evaluated", correct: true, duplicate: false });
+    expect(again).toMatchObject({ status: "evaluated", correct: true, duplicate: true });
+    if (first.status !== "evaluated" || again.status !== "evaluated") throw new Error();
+    expect(again.totalXp).toBe(first.totalXp);
+    expect((await runtime.learning.getPath("player-a")).totalXp).toBe(first.totalXp);
+  });
+
+  it("do not let one player replay another player's submission id", async () => {
+    session.player = { playerId: "player-a", handle: "Alice", visible: true };
+    await submitAnswer(body("sub-shared-01"));
+    session.player = { playerId: "player-b", handle: "Bryn", visible: true };
+    const b = await submitAnswer(body("sub-shared-01"));
+    // Ids are scoped per player: Bryn's submission is judged on its own and earns Bryn's XP.
+    expect(b).toMatchObject({ status: "evaluated", duplicate: false });
+    expect((await runtime.learning.getPath("player-a")).totalXp).toBeGreaterThan(0);
+  });
+
   it("rate-limit each player", async () => {
     session.player = { playerId: "player-a", handle: "Alice", visible: true };
     const results = [];

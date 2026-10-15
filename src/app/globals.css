@@ -490,6 +490,22 @@ ol {
   color: var(--parchment);
   background: rgb(255 255 255 / 0.04);
 }
+.btn--danger {
+  --btn-bg: #3a1d1a;
+  --btn-fg: #ffd9cf;
+  --btn-border: #8a3b2e;
+}
+.btn--danger:hover {
+  border-color: var(--danger);
+}
+.danger-zone {
+  border-color: rgb(240 144 122 / 0.35);
+}
+.mono-inline {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--gold-bright);
+}
 .btn--lg {
   min-height: 52px;
   padding: 0 1.5rem;
@@ -1099,6 +1115,7 @@ a.room:hover .room__seal {
 /* encounter panel */
 .encounter {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-3);
   border-color: rgb(240 138 70 / 0.35);
   background: linear-gradient(180deg, rgb(240 138 70 / 0.06), transparent 60%), var(--surface-1);
@@ -1121,6 +1138,8 @@ a.room:hover .room__seal {
 
 /* challenges */
 .tabs {
+  /* Contain absolutely positioned screen-reader text so scrolled-off tabs can't widen the page. */
+  position: relative;
   display: flex;
   gap: var(--s-2);
   overflow-x: auto;
@@ -1164,6 +1183,8 @@ a.room:hover .room__seal {
 
 .challenge {
   display: grid;
+  /* minmax(0, …): long code lines scroll inside their block instead of widening the page */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-4);
 }
 .challenge__meta {
@@ -1344,6 +1365,7 @@ a.room:hover .room__seal {
 /* feedback */
 .feedback {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-2);
   padding: var(--s-4);
   border-radius: var(--radius-m);

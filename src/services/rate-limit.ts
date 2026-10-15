@@ -1,11 +1,28 @@
 /**
- * Per-key sliding-window rate limit for submissions and hints (R-36).
+ * Rate limits for answers and hints (R-36, R-48).
  *
- * Process-local: it protects one server process from runaway clients and scripted
- * floods. A hosted deployment with several instances needs a shared limiter
- * (database or provider feature) in addition; see docs/PHASE_5_REPORT.md.
+ * `ActionLimiter` is what server actions call. The runtime layers two limiters:
+ * a process-local `RateLimiter` (cheap; stops floods before they reach the database)
+ * and the shared `PostgresRateLimiter` (src/services/postgres-rate-limit.ts), which
+ * holds the limit across every server instance.
  */
-export class RateLimiter {
+export interface ActionLimiter {
+  /** Record one action for `key` and say whether it is within the limit. */
+  allow(key: string): Promise<boolean> | boolean;
+}
+
+/** Every limiter must allow the action; stops at the first refusal. */
+export function layeredLimiter(...limiters: ActionLimiter[]): ActionLimiter {
+  return {
+    async allow(key) {
+      for (const limiter of limiters) if (!(await limiter.allow(key))) return false;
+      return true;
+    },
+  };
+}
+
+/** Process-local sliding window (one server process only). */
+export class RateLimiter implements ActionLimiter {
   private readonly hits = new Map<string, number[]>();
 
   constructor(

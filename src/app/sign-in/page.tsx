@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { signInWithGoogle } from "@/app/actions/auth";
+import { signInWithGoogle, signOut } from "@/app/actions/auth";
 import { safeNext } from "@/auth/redirect";
 import { getSession } from "@/auth/server";
 import { Icon } from "@/ui/art/icons";
@@ -43,6 +43,13 @@ export default async function SignInPage({ searchParams }: { searchParams: Searc
             <p className="form-error" role="alert">
               <Icon name="alert" size={18} /> {error ?? ERRORS.unverified}
             </p>
+          )}
+          {session.state === "email_unverified" && (
+            <form action={signOut}>
+              <button type="submit" className="btn btn--block">
+                Sign out and use another account
+              </button>
+            </form>
           )}
 
           {config.mode === "supabase" && (

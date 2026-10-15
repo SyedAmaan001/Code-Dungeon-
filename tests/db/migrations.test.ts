@@ -6,6 +6,7 @@ import { migrate, migrationStatus, readMigrations } from "@/db/migrate";
 import { createTestDatabase, describeDb, MIGRATIONS_DIR, type TestDatabase } from "../support/db";
 
 const PLAYER_TABLES = [
+  "action_rate_limits",
   "challenge_progress",
   "checkpoints",
   "encounters",
@@ -28,13 +29,13 @@ describeDb("migrations", () => {
 
   it("apply to an empty database, then re-run as a no-op", async () => {
     const first = await migrate(db.sql, MIGRATIONS_DIR);
-    expect(first).toEqual({ applied: ["0001_initial", "0002_age_check"], alreadyApplied: [] });
+    const all = ["0001_initial", "0002_age_check", "0003_action_rate_limits"];
+    expect(first).toEqual({ applied: all, alreadyApplied: [] });
     const second = await migrate(db.sql, MIGRATIONS_DIR);
-    expect(second).toEqual({ applied: [], alreadyApplied: ["0001_initial", "0002_age_check"] });
-    expect(await migrationStatus(db.sql, MIGRATIONS_DIR)).toEqual([
-      { migration: "0001_initial", state: "applied" },
-      { migration: "0002_age_check", state: "applied" },
-    ]);
+    expect(second).toEqual({ applied: [], alreadyApplied: all });
+    expect(await migrationStatus(db.sql, MIGRATIONS_DIR)).toEqual(
+      all.map((migration) => ({ migration, state: "applied" })),
+    );
   });
 
   it("refuses an edited, already-applied migration", async () => {

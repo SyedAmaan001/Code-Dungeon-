@@ -38,7 +38,25 @@ function origin(raw: string | undefined): string | undefined {
   }
 }
 
+/** Names that must never be exposed to the browser through the NEXT_PUBLIC_ prefix. */
+function exposedSecretName(env: Env): string | undefined {
+  return Object.keys(env).find(
+    (k) => k.startsWith("NEXT_PUBLIC_") && /SECRET|SERVICE_ROLE|PRIVATE|PASSWORD/i.test(k),
+  );
+}
+
+const isLoopback = (origin: string) => {
+  const host = new URL(origin).hostname;
+  return host === "localhost" || host === "127.0.0.1" || host === "[::1]";
+};
+
 export function readAuthConfig(env: Env): AuthConfig {
+  const exposed = exposedSecretName(env);
+  if (exposed)
+    return {
+      mode: "disabled",
+      reason: `${exposed} would be sent to browsers. Secrets must never use the NEXT_PUBLIC_ prefix.`,
+    };
   const mode = (env.AUTH_MODE ?? "").trim();
   if (mode === "") return { mode: "disabled", reason: DISABLED_HELP };
 
@@ -72,7 +90,7 @@ export function readAuthConfig(env: Env): AuthConfig {
         mode: "disabled",
         reason: "A secret key was given as the publishable key. Use the publishable key only.",
       };
-    if (env.NODE_ENV === "production" && !appUrl.startsWith("https:"))
+    if (env.NODE_ENV === "production" && !appUrl.startsWith("https:") && !isLoopback(appUrl))
       return { mode: "disabled", reason: "APP_URL must use https in production." };
     return { mode: "supabase", supabaseUrl, publishableKey, appUrl };
   }
@@ -82,4 +100,20 @@ export function readAuthConfig(env: Env): AuthConfig {
 
 export function authConfig(): AuthConfig {
   return readAuthConfig(process.env);
+}
+
+/**
+ * Server-only Supabase admin access, used for one thing: deleting a player's sign-in
+ * identity when they delete their account. The key is read from SUPABASE_SECRET_KEY
+ * (never NEXT_PUBLIC_*), is not configured until the owner approves it, and is only
+ * imported by server code (src/auth/supabase-admin.ts imports "server-only").
+ */
+export type AdminConfig = { url: string; secretKey: string } | null;
+
+export function readAdminConfig(env: Env): AdminConfig {
+  const config = readAuthConfig(env);
+  const secretKey = (env.SUPABASE_SECRET_KEY ?? "").trim();
+  if (config.mode !== "supabase" || !secretKey) return null;
+  if (secretKey.startsWith("sb_publishable_") || secretKey === config.publishableKey) return null;
+  return { url: config.supabaseUrl, secretKey };
 }

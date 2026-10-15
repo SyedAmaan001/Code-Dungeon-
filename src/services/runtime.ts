@@ -26,7 +26,8 @@ import {
   PostgresPlayerStore,
 } from "./postgres-player-store";
 import { Presenter } from "./presenter";
-import { RateLimiter } from "./rate-limit";
+import { PostgresRateLimiter } from "./postgres-rate-limit";
+import { layeredLimiter, RateLimiter, type ActionLimiter } from "./rate-limit";
 
 export interface Runtime {
   /** The pack as released (CONTENT_RELEASE); levels without human review are withheld in `public`. */
@@ -37,8 +38,8 @@ export interface Runtime {
   game: GameService;
   accounts: PostgresPlayerAccounts;
   presenter: Presenter;
-  /** Submissions and hints per player: 40 per minute (process-local; R-36). */
-  actionLimiter: RateLimiter;
+  /** Answers and hints per player: 40 per minute, shared across instances (R-36, R-48). */
+  actionLimiter: ActionLimiter;
 }
 
 export class RuntimeConfigError extends Error {}
@@ -82,7 +83,8 @@ function build(sql: Sql): Runtime {
     game,
     accounts: new PostgresPlayerAccounts(sql),
     presenter: new Presenter(pack),
-    actionLimiter: new RateLimiter(40, 60_000),
+    // Local first line (cheap flood guard), then the shared database limit.
+    actionLimiter: layeredLimiter(new RateLimiter(60, 60_000), new PostgresRateLimiter(sql, 40)),
   };
 }
 

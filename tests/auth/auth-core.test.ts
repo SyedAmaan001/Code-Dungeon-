@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { checkAge } from "@/auth/age";
-import { readAuthConfig } from "@/auth/config";
+import { readAdminConfig, readAuthConfig } from "@/auth/config";
 import { normaliseDevName, signDevSession, verifyDevSession } from "@/auth/dev-session";
 import { resolveDevIdentity, resolveSupabaseIdentity } from "@/auth/identity";
 import { isProtectedPath, safeNext } from "@/auth/redirect";
@@ -48,6 +48,41 @@ describe("auth configuration", () => {
       readAuthConfig({ ...supabaseEnv, APP_URL: "http://insecure.example", NODE_ENV: "production" })
         .mode,
     ).toBe("disabled");
+  });
+});
+
+describe("secret handling", () => {
+  it("refuses to run when a secret is exposed through a NEXT_PUBLIC_ variable", () => {
+    for (const name of [
+      "NEXT_PUBLIC_SUPABASE_SECRET_KEY",
+      "NEXT_PUBLIC_SERVICE_ROLE_KEY",
+      "NEXT_PUBLIC_DB_PASSWORD",
+    ])
+      expect(readAuthConfig({ ...supabaseEnv, [name]: "x" })).toMatchObject({
+        mode: "disabled",
+        reason: expect.stringContaining(name),
+      });
+  });
+
+  it("allows plain http only for loopback hosts in production builds", () => {
+    const prod = { ...supabaseEnv, NODE_ENV: "production" };
+    expect(readAuthConfig({ ...prod, APP_URL: "http://localhost:3101" }).mode).toBe("supabase");
+    expect(readAuthConfig({ ...prod, APP_URL: "http://127.0.0.1:3101" }).mode).toBe("supabase");
+    expect(readAuthConfig({ ...prod, APP_URL: "http://game.example" }).mode).toBe("disabled");
+  });
+
+  it("reads the server-side admin key only in Supabase mode and never accepts a publishable key", () => {
+    expect(readAdminConfig(supabaseEnv)).toBeNull();
+    expect(readAdminConfig({ ...supabaseEnv, SUPABASE_SECRET_KEY: "sb_secret_abc" })).toEqual({
+      url: "https://abc.supabase.co",
+      secretKey: "sb_secret_abc",
+    });
+    expect(
+      readAdminConfig({ ...supabaseEnv, SUPABASE_SECRET_KEY: "sb_publishable_test" }),
+    ).toBeNull();
+    expect(
+      readAdminConfig({ AUTH_MODE: "dev", DEV_AUTH_SECRET: SECRET, SUPABASE_SECRET_KEY: "s" }),
+    ).toBeNull();
   });
 });
 

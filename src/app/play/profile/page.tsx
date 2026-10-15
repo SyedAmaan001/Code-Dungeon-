@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { signOut } from "@/app/actions/auth";
 import { getSession, requirePlayer } from "@/auth/server";
-import { Icon } from "@/ui/art/icons";
+import { DeleteAccountForm } from "@/ui/forms/delete-account-form";
 import { ProfileForm } from "@/ui/forms/profile-form";
 
 export const metadata: Metadata = { title: "Profile" };
@@ -37,15 +37,16 @@ export default async function ProfilePage() {
           were not stored.
         </p>
         <p className="muted">Signed in with: {signInLabel}.</p>
-        <p className="notice-box">
-          <Icon name="info" size={18} />
-          Self-service account deletion is not available in this development build yet.
-        </p>
         <form action={signOut}>
           <button type="submit" className="btn">
             Sign out
           </button>
         </form>
+      </section>
+
+      <section className="frame stack danger-zone" aria-labelledby="delete-title">
+        <h2 id="delete-title">Delete account</h2>
+        <DeleteAccountForm handle={player.handle} />
       </section>
     </div>
   );

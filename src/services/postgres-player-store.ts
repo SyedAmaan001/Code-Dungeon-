@@ -545,6 +545,29 @@ export class PostgresPlayerAccounts {
     return result.count === 1;
   }
 
+  /**
+   * Delete a player's account: the player row and, by cascade, every piece of their
+   * learning and game data, in one transaction. `beforeCommit` runs inside it with the
+   * linked identity (e.g. to delete the sign-in at the identity provider); if it throws,
+   * the transaction rolls back and nothing is deleted.
+   */
+  async deleteAccount(
+    playerId: string,
+    beforeCommit?: (identity: { provider: string; subject: string } | null) => Promise<void>,
+  ): Promise<boolean> {
+    return scoped(this.sql, playerId, async (tx) => {
+      const [row] = await tx<{ auth_provider: string | null; auth_subject: string | null }[]>`
+        DELETE FROM players WHERE id = ${playerId} RETURNING auth_provider, auth_subject`;
+      if (!row) return false;
+      await beforeCommit?.(
+        row.auth_provider && row.auth_subject
+          ? { provider: row.auth_provider, subject: row.auth_subject }
+          : null,
+      );
+      return true;
+    });
+  }
+
   /** Resolve a provider-verified identity to a player id (docs/auth-design.md). */
   async playerIdForIdentity(provider: string, subject: string): Promise<string | undefined> {
     const [row] = await this.sql.begin(async (tx) => {
