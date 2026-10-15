@@ -2,7 +2,7 @@
   "name": "code-dungeon",
   "version": "0.1.0",
   "private": true,
-  "description": "Code Dungeon — a learning platform experienced as an illustrated fantasy game world.",
+  "description": "Code Dungeon \u2014 a learning platform experienced as an illustrated fantasy game world.",
   "type": "module",
   "engines": {
     "node": ">=22.12.0"
@@ -19,10 +19,14 @@
     "test:watch": "vitest",
     "content:validate": "tsx scripts/validate-content.ts",
     "content:verify-python": "tsx scripts/verify-python-examples.ts",
-    "check": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run content:validate && npm run content:verify-python && npm run build"
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run content:validate && npm run content:verify-python && npm run build",
+    "db:local": "bash scripts/db/local-postgres.sh",
+    "db:migrate": "tsx scripts/db/migrate.ts",
+    "db:status": "tsx scripts/db/migrate.ts --status"
   },
   "dependencies": {
     "next": "16.4.1",
+    "postgres": "3.4.9",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "server-only": "0.0.1",

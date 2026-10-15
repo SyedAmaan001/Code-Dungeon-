@@ -17,8 +17,22 @@ jobs:
     name: Lint, typecheck, test, content, build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Throwaway PostgreSQL for migration and database tests (no credentials: trust auth inside the job).
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
     env:
       NEXT_TELEMETRY_DISABLED: "1"
+      TEST_DATABASE_URL: postgresql://postgres@localhost:5432/postgres
+      REQUIRE_DB_TESTS: "1"
     steps:
       - uses: actions/checkout@v5
 
@@ -33,6 +47,10 @@ jobs:
           python-version: "3.13"
 
       - run: npm ci
+      - name: Apply migrations to a clean database (twice, to prove re-runs are no-ops)
+        env:
+          DATABASE_URL: postgresql://postgres@localhost:5432/postgres
+        run: npm run db:migrate && npm run db:migrate && npm run db:status
       - run: npm run lint
       - run: npm run format:check
       - run: npm run typecheck

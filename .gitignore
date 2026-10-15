@@ -12,3 +12,4 @@ Thumbs.db
 /Reference images/
 next-env.d.ts
 *.tsbuildinfo
+.local/
