@@ -13,3 +13,7 @@ Thumbs.db
 next-env.d.ts
 *.tsbuildinfo
 .local/
+
+# Playwright
+/test-results/
+/playwright-report/

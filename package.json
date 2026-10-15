@@ -23,7 +23,8 @@
     "db:local": "bash scripts/db/local-postgres.sh",
     "db:migrate": "tsx scripts/db/migrate.ts",
     "db:status": "tsx scripts/db/migrate.ts --status",
-    "content:release-check": "tsx scripts/content-release-check.ts"
+    "content:release-check": "tsx scripts/content-release-check.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@fontsource-variable/cinzel": "5.3.0",
@@ -47,6 +48,7 @@
     "@types/react-dom": "19.3.0",
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.1",
+    "playwright-core": "1.56.1",
     "prettier": "3.9.10",
     "tsx": "4.23.15",
     "typescript": "6.0.3",
