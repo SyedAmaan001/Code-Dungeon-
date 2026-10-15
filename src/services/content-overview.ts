@@ -9,6 +9,10 @@ export interface PathOverview {
   zones: number;
   levels: number;
   published: number;
+  quests: number;
+  achievements: number;
+  /** Distinct challenge formats used by published levels. */
+  challengeFormats: number;
   /** Published levels whose review metadata says only an AI agent reviewed them. */
   awaitingHumanReview: number;
   valid: boolean;
@@ -27,6 +31,13 @@ export function getPathOverviews(root = join(process.cwd(), "content")): PathOve
         zones: pack.meta.zones.length,
         levels: pack.levels.length,
         published: pack.levels.filter((l) => l.status === "published").length,
+        quests: pack.meta.quests.filter((q) => q.status === "published").length,
+        achievements: pack.meta.achievements.filter((a) => a.status === "published").length,
+        challengeFormats: new Set(
+          pack.levels
+            .filter((l) => l.status === "published")
+            .flatMap((l) => l.challenges.map((c) => c.type)),
+        ).size,
         awaitingHumanReview: pack.levels.filter(
           (l) => l.status === "published" && l.review?.kind === "agent",
         ).length,

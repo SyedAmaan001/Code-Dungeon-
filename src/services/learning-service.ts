@@ -111,7 +111,7 @@ export interface PathView {
   /** False while only the in-memory store exists: progress is not saved permanently. */
   progressIsDurable: boolean;
   totalXp: number;
-  zones: { id: string; title: string; order: number; themeKey: string }[];
+  zones: { id: string; title: string; order: number; themeKey: string; artTitle?: string }[];
   levels: (LevelView & {
     number: number;
     title: string;
@@ -243,6 +243,7 @@ export class LearningService {
         title: z.title,
         order: z.order,
         themeKey: z.themeKey,
+        ...(z.artTitle !== undefined && { artTitle: z.artTitle }),
       })),
       levels: [...this.published.values()].map((l) => ({
         ...levelView(this.rules, progress, l.id, this.policy),

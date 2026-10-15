@@ -143,7 +143,11 @@ export interface PlayerGameView extends GameView {
   /** The level to continue with: the first unlocked, unfinished level. */
   resumeLevelId: string | null;
   levels: PathView["levels"];
-  quests: (GameView["quests"][number] & { title: string; description: string })[];
+  quests: (Omit<GameView["quests"][number], "objectives"> & {
+    title: string;
+    description: string;
+    objectives: (GameView["quests"][number]["objectives"][number] & { title: string })[];
+  })[];
   achievements: (GameView["achievements"][number] & { title: string; description: string })[];
 }
 
@@ -384,11 +388,16 @@ export class GameService {
       totalXp: path.totalXp,
       resumeLevelId: resume?.levelId ?? null,
       levels: path.levels,
-      quests: view.quests.map((q) => ({
-        ...q,
-        title: quests.get(q.id)!.title,
-        description: quests.get(q.id)!.description,
-      })),
+      quests: view.quests.map((q) => {
+        const content = quests.get(q.id)!;
+        const titles = new Map(content.objectives.map((o) => [o.id, o.title]));
+        return {
+          ...q,
+          title: content.title,
+          description: content.description,
+          objectives: q.objectives.map((o) => ({ ...o, title: titles.get(o.id) ?? o.id })),
+        };
+      }),
       achievements: view.achievements.map((a) => ({
         ...a,
         title: achievements.get(a.id)!.title,
