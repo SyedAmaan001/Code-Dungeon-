@@ -1,0 +1,196 @@
+id: py.L020
+version: 1
+number: 20
+zone: py.zone.archive
+title: Functions
+description: "Major encounter: package code into named functions you can call again and again."
+status: published
+kind: major
+prerequisites:
+  - py.L019
+skills:
+  - py.skill.functions
+estimatedMinutes: 18
+lesson:
+  objectives:
+    - Define a function with def and call it.
+    - Explain that a function's body runs only when the function is called.
+    - Reuse a function to avoid repeating code.
+  explanation: |-
+    A function is a named block of code. You define it once with `def`:
+
+    ```
+    def greet():
+        print("Welcome, traveller!")
+    ```
+
+    Defining a function does not run it. The body runs each time you call the function by writing its name with parentheses: `greet()`. A function must be defined before the line that calls it runs, so definitions usually sit near the top of a file.
+
+    Functions can take inputs called parameters, written inside the parentheses: `def banner(title):`. When you call `banner("Level 20")`, the parameter title refers to "Level 20" inside the body. The next level goes deeper into parameters and results.
+
+    Functions let you name an idea, reuse it without copying code, and fix a bug in one place. This is a major encounter: the challenges check definitions, calls and program order together.
+  examples:
+    - code: |-
+        def greet():
+            print("Welcome, traveller!")
+
+        greet()
+        greet()
+      expectedOutput: |-
+        Welcome, traveller!
+        Welcome, traveller!
+    - code: |-
+        def banner(title):
+            print("=" * len(title))
+            print(title)
+            print("=" * len(title))
+
+        banner("Level 20")
+      expectedOutput: |-
+        ========
+        Level 20
+        ========
+  misconceptions:
+    - Defining a function runs it. (Only calling it runs it.)
+    - You can call a function on a line before its def. (The def must have run first.)
+  practicalContext: "Every larger program is built from functions: one to load data, one to check it, one to display results."
+challenges:
+  - id: py.L020.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      def chant():
+          print("Ho")
+
+      print("Start")
+      chant()
+      chant()
+      print("End")
+    answer:
+      output: |-
+        Start
+        Ho
+        Ho
+        End
+    feedback:
+      correct: "Correct: the definition prints nothing; each call prints Ho."
+      incorrect: When does a function's body run?
+      byAnswer:
+        "Ho\nStart\nHo\nHo\nEnd": Defining chant does not run it, so nothing is printed at the def.
+        "Start\nHo\nEnd": chant() is called twice.
+    hints:
+      - The def lines do not print anything by themselves.
+      - Each chant() call runs the body once.
+      - Follow the unindented lines from top to bottom and expand each call.
+    explanation: Python records the function, prints Start, runs chant twice, then prints End.
+  - id: py.L020.c2
+    version: 1
+    difficulty: 1
+    prompt: Arrange the lines (indentation is shown) so the program defines warn() and then calls it, printing Danger ahead!
+    type: order_lines
+    lines:
+      - id: l1
+        text: warn()
+      - id: l2
+        text: print("Danger ahead!")
+        indent: 1
+      - id: l3
+        text: "def warn():"
+    answer:
+      orders:
+        - - l3
+          - l2
+          - l1
+    check:
+      expectedOutput: Danger ahead!
+    feedback:
+      correct: "Correct: define first, then call."
+      incorrect: The function must exist before it is called.
+    hints:
+      - Which line creates the function?
+      - The indented line is the function's body.
+      - Put the definition and its body first, and the call last.
+    explanation: The def creates warn with its indented body; the final line calls it.
+  - id: py.L020.c3
+    version: 1
+    difficulty: 2
+    prompt: This program should print You are here but crashes. Find the line and the fix.
+    type: find_fix_bug
+    code: |-
+      show_map()
+
+      def show_map():
+          print("You are here")
+    fixes:
+      - id: f1
+        text: Move the call show_map() below the function definition
+      - id: f2
+        text: Remove the parentheses from show_map() on line 1
+      - id: f3
+        text: Indent line 1
+    answer:
+      line: 1
+      fix: f1
+    buggyBehaviour:
+      expectedException: NameError
+    fixedCode: |-
+      def show_map():
+          print("You are here")
+
+      show_map()
+    check:
+      expectedOutput: You are here
+    feedback:
+      correct: "Correct: Python must run the def before the function can be called."
+      incorrect: In which order does Python run these lines?
+      byAnswer:
+        fix:f2: Without parentheses the function is not called at all, and the name still does not exist yet on line 1.
+        line:3: The definition itself is fine; the problem is when it runs.
+    hints:
+      - The error is a NameError on the first line.
+      - Python runs the file from top to bottom.
+      - When line 1 runs, has show_map been defined yet?
+    explanation: Line 1 calls show_map before the def has run, so the name does not exist yet.
+  - id: py.L020.c4
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: |-
+      If this is the whole program, what does it print?
+
+      def roar():
+          print("ROAR")
+    type: multiple_choice
+    options:
+      - id: a
+        text: Nothing
+      - id: b
+        text: ROAR
+      - id: c
+        text: roar
+      - id: d
+        text: An error
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: the function is defined but never called."
+      incorrect: Is roar() ever called?
+      byAnswer:
+        b: The body only runs when roar() is called, and it never is.
+    hints:
+      - Look for a line that calls the function.
+      - def only creates the function.
+      - Without a call, the body never runs.
+    explanation: Defining a function does not run it, so the program prints nothing.
+sources:
+  - source: py-tutorial-control
+    topic: Defining Functions
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

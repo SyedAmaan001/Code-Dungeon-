@@ -1,0 +1,150 @@
+id: py.L009
+version: 1
+number: 9
+zone: py.zone.caverns
+title: Comparisons
+description: Ask questions about values with ==, !=, <, >, <= and >=.
+status: published
+kind: standard
+prerequisites:
+  - py.L008
+skills:
+  - py.skill.comparisons
+estimatedMinutes: 10
+lesson:
+  objectives:
+    - Compare values with ==, !=, <, >, <= and >=.
+    - Tell assignment (=) apart from comparison (==).
+    - Predict comparisons between numbers, and between strings.
+  explanation: |-
+    A comparison asks a question and produces a Boolean:
+
+    - `==` equal, `!=` not equal
+    - `<` less than, `>` greater than, `<=` and `>=` with "or equal"
+
+    Remember the difference: `=` assigns a value to a name, `==` asks whether two values are equal.
+
+    Numbers compare by value, so `7 == 7.0` is True. A string and a number are never equal: `"7" == 7` is False. Ordering a string against a number with `<` is not allowed and raises a TypeError.
+
+    Strings compare character by character using each character's code. For lowercase words this is alphabetical order, but every uppercase letter comes before every lowercase letter, so `"Zebra" < "apple"` is True.
+  examples:
+    - code: |-
+        print(7 > 3)
+        print(7 == 7.0)
+        print("7" == 7)
+      expectedOutput: |-
+        True
+        True
+        False
+    - code: |-
+        print("apple" < "banana")
+        print("Zebra" < "apple")
+      caption: Uppercase letters sort before lowercase ones.
+      expectedOutput: |-
+        True
+        True
+    - code: print("10" < 9)
+      caption: Ordering text against a number is an error.
+      expectedException: TypeError
+  misconceptions:
+    - = and == mean the same thing. (= assigns; == compares.)
+    - '"7" == 7 is True. (A string is never equal to a number.)'
+  practicalContext: Checking a password, testing whether a player has enough gold, or sorting names all depend on comparisons.
+challenges:
+  - id: py.L009.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      hp = 0
+      print(hp <= 0)
+      print(hp != 0)
+    answer:
+      output: |-
+        True
+        False
+    feedback:
+      correct: "Correct: 0 is less than or equal to 0, and it is not different from 0."
+      incorrect: Read each operator aloud.
+      byAnswer:
+        "False\nFalse": <= includes equality, and hp is exactly 0.
+        "True\nTrue": "!= asks whether the values are different. Is 0 different from 0?"
+    hints:
+      - Read <= as "less than or equal to".
+      - Read != as "is not equal to".
+      - Substitute 0 for hp in both lines and answer each question.
+    explanation: 0 <= 0 is True because the values are equal; 0 != 0 is False.
+  - id: py.L009.c2
+    version: 1
+    difficulty: 2
+    prompt: This program should print whether gold is exactly 30, but it crashes. Find the line and the fix.
+    type: find_fix_bug
+    code: |-
+      gold = 30
+      print(gold = 30)
+    fixes:
+      - id: f1
+        text: Use == instead of = on line 2
+      - id: f2
+        text: Put quotes around 30 on line 2
+      - id: f3
+        text: Change line 1 to gold == 30
+    answer:
+      line: 2
+      fix: f1
+    buggyBehaviour:
+      expectedException: TypeError
+    fixedCode: |-
+      gold = 30
+      print(gold == 30)
+    check:
+      expectedOutput: "True"
+    feedback:
+      correct: "Correct: == compares, = assigns."
+      incorrect: Which symbol asks a question rather than storing a value?
+      byAnswer:
+        fix:f3: Line 1 should store the value; == there would compare with a name that does not exist yet.
+    hints:
+      - One line tries to store a value inside print().
+      - Assignment and comparison use different symbols.
+      - Use the comparison operator on line 2.
+    explanation: Inside print(), gold = 30 is read as an unknown option called gold, causing a TypeError. gold == 30 compares and gives True.
+  - id: py.L009.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: What does 3 == "3" evaluate to?
+    type: multiple_choice
+    options:
+      - id: a
+        text: "True"
+      - id: b
+        text: "False"
+      - id: c
+        text: It raises an error
+      - id: d
+        text: '"3"'
+    answer:
+      correct:
+        - b
+    feedback:
+      correct: "Correct: an int and a str are never equal."
+      incorrect: Compare the types of the two values.
+      byAnswer:
+        a: One side is the number 3 and the other is text, so they are not equal.
+        c: == between different types is allowed; it just gives False. Ordering with < would raise an error.
+    hints:
+      - What type is each side?
+      - Python does not convert text to numbers when comparing.
+      - Values of different types are not equal.
+    explanation: == compares the values without converting types, so the number 3 is not equal to the text "3".
+sources:
+  - source: py-stdtypes
+    topic: Comparisons
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

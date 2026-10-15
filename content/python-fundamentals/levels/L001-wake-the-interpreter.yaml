@@ -1,9 +1,0 @@
-id: py.L001
-version: 1
-number: 1
-zone: py.zone.camp
-title: "Wake the Interpreter"
-status: draft
-kind: standard
-outline: "What Python is; run a tiny program; distinguish code from output."
-prerequisites: []

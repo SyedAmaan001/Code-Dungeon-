@@ -1,0 +1,191 @@
+id: py.L015
+version: 1
+number: 15
+zone: py.zone.forge
+title: Lists
+description: "Checkpoint: keep many values in one list, change it, and loop over it."
+status: published
+kind: checkpoint
+prerequisites:
+  - py.L014
+skills:
+  - py.skill.lists
+estimatedMinutes: 16
+lesson:
+  objectives:
+    - Create a list and read items by index.
+    - Change a list with append(), insert(), remove() and item assignment.
+    - Loop over a list, and use len(), sum(), min() and max().
+  explanation: |-
+    A list holds several values in order: `inventory = ["torch", "rope", "map"]`. Each item has an index starting at 0, so `inventory[0]` is "torch" and `inventory[2]` is "map".
+
+    Lists can change after they are created:
+
+    - `inventory.append("key")` adds an item at the end
+    - `inventory.insert(0, "lamp")` inserts at a position
+    - `inventory.remove("rope")` removes the first matching item
+    - `inventory[1] = "ladder"` replaces an item
+
+    `len(inventory)` gives the number of items, and `for item in inventory:` visits each one. For lists of numbers, `sum()`, `min()` and `max()` save you writing the loop yourself.
+
+    This checkpoint combines loops, conditions and lists.
+  examples:
+    - code: |-
+        inventory = ["torch", "rope", "map"]
+        print(inventory[0])
+        print(len(inventory))
+        inventory.append("key")
+        print(inventory)
+      expectedOutput: |-
+        torch
+        3
+        ['torch', 'rope', 'map', 'key']
+    - code: |-
+        scores = [4, 9, 2]
+        total = 0
+        for s in scores:
+            total += s
+        print(total)
+        print(max(scores), min(scores), sum(scores))
+      expectedOutput: |-
+        15
+        9 2 15
+    - code: |-
+        party = ["Ari", "Bo"]
+        party[0] = "Cy"
+        party.insert(1, "Di")
+        print(party)
+      expectedOutput: "['Cy', 'Di', 'Bo']"
+  misconceptions:
+    - The first item is at index 1. (It is at index 0.)
+    - remove() deletes every matching item. (It deletes the first match only.)
+  practicalContext: Shopping carts, to-do lists, high-score tables and the lines of a file are naturally lists.
+challenges:
+  - id: py.L015.c1
+    version: 1
+    difficulty: 2
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      bag = ["coin", "gem"]
+      bag.append("coin")
+      bag.remove("coin")
+      print(bag)
+    answer:
+      output: "['gem', 'coin']"
+    feedback:
+      correct: "Correct: remove() deleted the first coin, leaving the one added later."
+      incorrect: Which coin does remove() delete?
+      byAnswer:
+        "['coin', 'gem']": remove() deletes the first matching item, which is the coin at the start.
+        "['gem']": remove() deletes only one matching item.
+    hints:
+      - Write down the list after each line.
+      - After append, the list has three items.
+      - remove() deletes only the first item that matches.
+    explanation: After append the list is ['coin', 'gem', 'coin']; remove('coin') deletes the first coin.
+  - id: py.L015.c2
+    version: 1
+    difficulty: 2
+    prompt: After this code runs, what are count, nums[0] and nums[3]?
+    type: trace
+    code: |-
+      nums = [3, 1, 4]
+      nums.append(1)
+      nums[0] = 9
+      count = len(nums)
+    fields:
+      - id: count
+        label: count
+      - id: first
+        label: nums[0]
+        expression: nums[0]
+      - id: last
+        label: nums[3]
+        expression: nums[3]
+    answer:
+      values:
+        count:
+          - "4"
+        first:
+          - "9"
+        last:
+          - "1"
+    feedback:
+      correct: "Correct: the list ends as [9, 1, 4, 1]."
+      incorrect: Track the whole list after each line.
+    hints:
+      - append adds one item at the end.
+      - nums[0] = 9 replaces the first item.
+      - Write out the final list and count from index 0.
+    explanation: "The list becomes [3, 1, 4, 1], then [9, 1, 4, 1]: four items, first 9, item 3 is 1."
+  - id: py.L015.c3
+    version: 1
+    difficulty: 1
+    prompt: Fill in the keyword so the loop prints each potion.
+    type: fill_blank
+    template: |-
+      potions = ["heal", "speed"]
+      for p {{blank:b1}} potions:
+          print(p)
+    blanks:
+      - id: b1
+        label: keyword
+    answer:
+      accepted:
+        b1:
+          - in
+    check:
+      expectedOutput: |-
+        heal
+        speed
+    feedback:
+      correct: "Correct: for item in sequence."
+      incorrect: A for loop names the item and the sequence it comes from.
+    hints:
+      - You have seen this pattern with range().
+      - The keyword joins the loop variable to the sequence.
+      - It is a two-letter keyword, also used to test membership.
+    explanation: "for p in potions: takes each item of the list in turn."
+  - id: py.L015.c4
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: |-
+      potions = ["heal", "speed", "luck"]
+      What is potions[1]?
+    type: multiple_choice
+    options:
+      - id: a
+        text: '"heal"'
+      - id: b
+        text: '"speed"'
+      - id: c
+        text: '"luck"'
+      - id: d
+        text: An IndexError
+    answer:
+      correct:
+        - b
+    feedback:
+      correct: "Correct: index 1 is the second item."
+      incorrect: Indexes start at 0.
+      byAnswer:
+        a: That is potions[0]. Indexes start at 0.
+        c: That is potions[2].
+    hints:
+      - What index does the first item have?
+      - Count positions starting from 0.
+      - Index 1 is the item after the first one.
+    explanation: Indexes start at 0, so potions[1] is the second item.
+sources:
+  - source: py-tutorial
+    topic: "Using Python as a Calculator: Lists"
+  - source: py-tutorial-ds
+    topic: More on Lists
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

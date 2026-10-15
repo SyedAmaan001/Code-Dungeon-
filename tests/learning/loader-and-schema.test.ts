@@ -14,7 +14,7 @@ function tempPack(files: Record<string, string>): string {
   return dir;
 }
 
-const minimalPath = `schemaVersion: 1
+const minimalPath = `schemaVersion: 2
 subject: { id: s, title: S, description: S }
 path: { id: p, title: P, description: P, version: 1, status: draft, audience: A, learningGoal: G }
 zones: [{ id: z1, title: Z, order: 1, themeKey: t }]

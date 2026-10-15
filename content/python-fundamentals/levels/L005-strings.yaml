@@ -1,0 +1,174 @@
+id: py.L005
+version: 1
+number: 5
+zone: py.zone.camp
+title: Strings
+description: "Checkpoint: build, measure and format text with strings and f-strings."
+status: published
+kind: checkpoint
+prerequisites:
+  - py.L004
+skills:
+  - py.skill.strings
+  - py.skill.f-strings
+estimatedMinutes: 15
+lesson:
+  objectives:
+    - Join and repeat strings with + and *.
+    - Use len(), upper() and lower() on strings.
+    - Build messages that include variables with f-strings.
+  explanation: |-
+    A string is a sequence of characters. You can write one with double quotes or single quotes: `"cave"` and `'cave'` are the same string. Pick the kind that lets you include the other inside, as in `"It's dark"`.
+
+    `+` joins strings and `*` repeats a string: `"ha" * 3` is `"hahaha"`. `len(text)` counts the characters, including spaces. Strings also have methods, which you call with a dot: `name.upper()` gives an uppercase copy and `name.lower()` a lowercase copy. The original string is not changed.
+
+    To mix variables into text, use an f-string: put an `f` before the opening quote and write variable names inside curly braces. `f"{name} has {gold} gold"` builds the text with the current values. Inside a string, `\n` means a new line.
+
+    This level is a checkpoint: it brings together printing, variables and types from the whole camp.
+  examples:
+    - code: |-
+        name = "Mira"
+        print("Hello, " + name + "!")
+        print("-" * 10)
+        print(len(name))
+      expectedOutput: |-
+        Hello, Mira!
+        ----------
+        4
+    - code: |-
+        name = "Mira"
+        level = 3
+        print(f"{name} reached level {level}")
+        print(name.upper())
+      expectedOutput: |-
+        Mira reached level 3
+        MIRA
+    - code: print("Line 1\nLine 2")
+      caption: \n inside a string starts a new line.
+      expectedOutput: |-
+        Line 1
+        Line 2
+  misconceptions:
+    - upper() changes the original string. (It returns a new string.)
+    - len() ignores spaces. (Spaces are characters too.)
+    - Without the f prefix, {name} is still replaced. (It is printed literally.)
+  practicalContext: Usernames, messages, file names and reports are all strings; f-strings are the everyday way to build readable output.
+challenges:
+  - id: py.L005.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      word = "Ha"
+      print(word * 3 + "!")
+    answer:
+      output: HaHaHa!
+    feedback:
+      correct: "Correct: * repeats the text, then + adds the exclamation mark."
+      incorrect: Apply * first, then +.
+      byAnswer:
+        Ha3!: "* with a string and a number repeats the string; it does not join the number."
+        HaHaHa: Don't forget the + at the end of the expression.
+    hints:
+      - Multiplication happens before addition, even with strings.
+      - A string times a number repeats the string that many times.
+      - Repeat the word three times, then attach the last piece of text.
+    explanation: '"Ha" * 3 is "HaHaHa", and adding "!" gives "HaHaHa!".'
+  - id: py.L005.c2
+    version: 1
+    difficulty: 1
+    prompt: "Fill in the blank so the program prints: Gold: 50"
+    type: fill_blank
+    template: |-
+      gold = 50
+      print({{blank:b1}}"Gold: {gold}")
+    blanks:
+      - id: b1
+        label: prefix
+    answer:
+      accepted:
+        b1:
+          - f
+          - F
+    check:
+      expectedOutput: "Gold: 50"
+    feedback:
+      correct: "Correct: the f prefix makes Python fill in {gold}."
+      incorrect: Without the right prefix, the braces are printed as they are.
+      byAnswer:
+        r: The r prefix makes a raw string; the braces would still be printed literally.
+    hints:
+      - Something must go directly before the opening quote.
+      - This kind of string replaces names in curly braces with their values.
+      - It is a single letter, the first letter of the word formatted.
+    explanation: An f-string (f"...") replaces {gold} with the value of gold.
+  - id: py.L005.c3
+    version: 1
+    difficulty: 2
+    prompt: After this code runs, what are the values of n and shout?
+    type: trace
+    code: |-
+      msg = "Run!"
+      n = len(msg)
+      shout = msg.upper()
+    fields:
+      - id: n
+        label: n
+      - id: shout
+        label: shout (as printed)
+    answer:
+      values:
+        n:
+          - "4"
+        shout:
+          - RUN!
+    feedback:
+      correct: "Correct: four characters, and upper() leaves the ! unchanged."
+      incorrect: Count every character, and remember what upper() does to symbols.
+    hints:
+      - len() counts every character, including punctuation.
+      - upper() changes letters only.
+      - Count R, u, n and the punctuation mark; then capitalise the letters.
+    explanation: len("Run!") is 4. upper() returns "RUN!"; the exclamation mark has no uppercase form.
+  - id: py.L005.c4
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: What does len("dungeon") return?
+    type: multiple_choice
+    options:
+      - id: a
+        text: "6"
+      - id: b
+        text: "7"
+      - id: c
+        text: "8"
+      - id: d
+        text: '"dungeon"'
+    answer:
+      correct:
+        - b
+    feedback:
+      correct: "Correct: d-u-n-g-e-o-n is seven characters."
+      incorrect: Count the characters one by one.
+      byAnswer:
+        d: "len() returns a number: the count of characters."
+    hints:
+      - len() counts characters.
+      - Point at each letter as you count.
+      - Count the letters d, u, n, g, e, o, n.
+    explanation: '"dungeon" has seven characters, so len() returns 7.'
+sources:
+  - source: py-tutorial
+    topic: "Using Python as a Calculator: Text"
+  - source: py-tutorial-io
+    topic: Formatted String Literals
+  - source: py-stdtypes
+    topic: String Methods
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

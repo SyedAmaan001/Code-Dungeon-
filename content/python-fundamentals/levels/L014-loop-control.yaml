@@ -1,0 +1,160 @@
+id: py.L014
+version: 1
+number: 14
+zone: py.zone.forge
+title: Loop Control
+description: Leave a loop early with break, or skip ahead with continue.
+status: published
+kind: standard
+prerequisites:
+  - py.L013
+skills:
+  - py.skill.break-continue
+estimatedMinutes: 12
+lesson:
+  objectives:
+    - Stop a loop early with break.
+    - Skip the rest of one pass with continue.
+    - Combine loops and if statements to search for something.
+  explanation: |-
+    Two keywords change how a loop runs:
+
+    - `break` leaves the loop immediately. The program continues after the loop.
+    - `continue` skips the rest of the current pass and goes straight to the next one.
+
+    Both are normally inside an if, so they only happen in certain situations.
+
+    A common pattern is a loop that searches: go through the items, and break as soon as you find what you want. Another is `while True:` with a break inside, for loops where the stopping point is easiest to check in the middle.
+  examples:
+    - code: |-
+        for n in range(1, 10):
+            if n == 4:
+                break
+            print(n)
+      expectedOutput: |-
+        1
+        2
+        3
+    - code: |-
+        for n in range(1, 6):
+            if n % 2 == 0:
+                continue
+            print(n)
+      caption: Even numbers are skipped.
+      expectedOutput: |-
+        1
+        3
+        5
+    - code: |-
+        attempts = 0
+        while True:
+            attempts += 1
+            if attempts == 3:
+                break
+        print("Stopped after", attempts)
+      expectedOutput: Stopped after 3
+  misconceptions:
+    - break only skips the current pass. (It ends the whole loop.)
+    - continue restarts the loop from the beginning. (It moves on to the next item.)
+  practicalContext: Stopping a search when a match is found, or skipping blank lines while reading a file, are everyday uses of break and continue.
+challenges:
+  - id: py.L014.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      for ch in "ab#cd":
+          if ch == "#":
+              break
+          print(ch)
+    answer:
+      output: |-
+        a
+        b
+    feedback:
+      correct: "Correct: the loop ends as soon as it reaches #."
+      incorrect: What happens to the rest of the loop after break?
+      byAnswer:
+        "a\nb\nc\nd": That is what continue would do. break ends the loop completely.
+        "a\nb\n#": "break runs before the print on that pass, so # is not printed."
+    hints:
+      - Go through the string one character at a time.
+      - "When the character is #, break runs before print()."
+      - After break, no more characters are processed.
+    explanation: "a and b are printed; at # the loop breaks, so c and d are never reached."
+  - id: py.L014.c2
+    version: 1
+    difficulty: 2
+    prompt: Arrange the lines (indentation is shown) so the program prints only the odd numbers from 1 to 7.
+    type: order_lines
+    lines:
+      - id: l1
+        text: "for n in range(1, 8):"
+      - id: l2
+        text: "if n % 2 == 0:"
+        indent: 1
+      - id: l3
+        text: continue
+        indent: 2
+      - id: l4
+        text: print(n)
+        indent: 1
+    answer:
+      orders:
+        - - l1
+          - l2
+          - l3
+          - l4
+    check:
+      expectedOutput: |-
+        1
+        3
+        5
+        7
+    feedback:
+      correct: "Correct: even numbers skip the print."
+      incorrect: The skip must happen before the print in each pass.
+    hints:
+      - The loop header comes first.
+      - Inside the loop, test for an even number before printing.
+      - The most-indented line belongs under the if.
+    explanation: For even n, continue skips the print; odd numbers reach print(n).
+  - id: py.L014.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: What is the difference between break and continue?
+    type: multiple_choice
+    options:
+      - id: a
+        text: break leaves the loop; continue skips to the next pass
+      - id: b
+        text: continue leaves the loop; break skips to the next pass
+      - id: c
+        text: Both stop the whole program
+      - id: d
+        text: continue restarts the loop from its first item
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: Correct.
+      incorrect: Think about what happens right after each keyword.
+      byAnswer:
+        b: That is the other way round.
+        d: continue moves on to the next item, not back to the first one.
+    hints:
+      - One keyword ends the loop.
+      - The other keyword ends only the current pass.
+      - Think of breaking out of a room versus continuing to the next door.
+    explanation: break exits the loop entirely; continue ends the current pass and moves on to the next item.
+sources:
+  - source: py-tutorial-control
+    topic: break and continue Statements
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

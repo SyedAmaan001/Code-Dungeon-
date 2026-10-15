@@ -1,0 +1,161 @@
+id: py.L003
+version: 1
+number: 3
+zone: py.zone.camp
+title: Variables and Assignment
+description: Give values names, update them, and keep track of what each name refers to.
+status: published
+kind: standard
+prerequisites:
+  - py.L002
+skills:
+  - py.skill.variables
+  - py.skill.naming
+estimatedMinutes: 10
+lesson:
+  objectives:
+    - Store a value in a variable using =.
+    - Predict a variable's value after it has been reassigned.
+    - Choose valid and descriptive variable names.
+  explanation: |-
+    A variable is a name that refers to a value. The line `gold = 50` creates the name gold and makes it refer to 50. Afterwards, writing `gold` anywhere in an expression uses that value.
+
+    The `=` sign means assign, not "is equal to". Python first evaluates the right-hand side, then makes the name on the left refer to the result. That is why `gold = gold + 10` works: Python reads the current value of gold, adds 10, and stores the new value under the same name.
+
+    When you write `b = a`, b gets a's current value. Giving a a new value later does not change b.
+
+    Names may contain letters, digits and underscores, but cannot start with a digit or contain spaces or hyphens. They are case-sensitive, so `Gold` and `gold` are different names. By convention Python programmers write names in lowercase_with_underscores, and choose names that describe the value.
+  examples:
+    - code: |-
+        gold = 50
+        print(gold)
+        gold = gold + 10
+        print(gold)
+      expectedOutput: |-
+        50
+        60
+    - code: |-
+        a = 3
+        b = a
+        a = 10
+        print(b)
+      caption: b received the value 3; changing a afterwards does not change b.
+      expectedOutput: "3"
+  misconceptions:
+    - = means the two sides are equal. (It assigns the right-hand value to the left-hand name.)
+    - After b = a, changing a also changes b. (b keeps the value it was given.)
+    - Variable names can contain spaces. (Use underscores instead.)
+  practicalContext: "Programs keep track of everything with variables: a player's name, a running total, a setting chosen by the user."
+challenges:
+  - id: py.L003.c1
+    version: 1
+    difficulty: 1
+    prompt: Trace the program. What are the values of health and potion at the end?
+    type: trace
+    code: |-
+      health = 10
+      health = health - 3
+      potion = 5
+      health = health + potion
+    fields:
+      - id: health
+        label: health
+      - id: potion
+        label: potion
+    answer:
+      values:
+        health:
+          - "12"
+        potion:
+          - "5"
+    feedback:
+      correct: "Correct: 10 - 3 is 7, then 7 + 5 is 12."
+      incorrect: Follow the program one line at a time and update health each time it is assigned.
+      byAnswer:
+        health=15;potion=5: Line 2 changed health to 7 before the potion was added.
+    hints:
+      - Write down the value of health after each line.
+      - Line 2 uses the old value of health to calculate a new one.
+      - After line 2 health is 7; now apply the last line.
+    explanation: health starts at 10, becomes 7 on line 2, and becomes 7 + 5 = 12 on line 4. potion is 5.
+  - id: py.L003.c2
+    version: 1
+    difficulty: 2
+    prompt: This program should print 15 but stops with an error. Which line is wrong, and which fix works?
+    type: find_fix_bug
+    code: |-
+      score = 10
+      bonus = 5
+      total = score + Bonus
+      print(total)
+    fixes:
+      - id: f1
+        text: Change Bonus to bonus
+      - id: f2
+        text: Put quotes around Bonus
+      - id: f3
+        text: Change + to =
+    answer:
+      line: 3
+      fix: f1
+    buggyBehaviour:
+      expectedException: NameError
+    fixedCode: |-
+      score = 10
+      bonus = 5
+      total = score + bonus
+      print(total)
+    check:
+      expectedOutput: "15"
+    feedback:
+      correct: "Correct: Python names are case-sensitive, so Bonus and bonus are different names."
+      incorrect: Read the names on each line carefully.
+      byAnswer:
+        fix:f2: Quotes would make "Bonus" text, and adding a number to text causes a different error.
+        fix:f3: = is assignment and cannot appear in the middle of an expression like that.
+    hints:
+      - "The error is a NameError: Python met a name it does not know."
+      - Compare the spelling of every name with where it was created.
+      - Check upper and lower case letters on line 3.
+    explanation: The variable was created as bonus but used as Bonus. Python treats those as different names, so it raises NameError.
+  - id: py.L003.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: Which of these is a valid Python variable name?
+    type: multiple_choice
+    options:
+      - id: a
+        text: 2nd_place
+      - id: b
+        text: player-score
+      - id: c
+        text: player_score
+      - id: d
+        text: player score
+    answer:
+      correct:
+        - c
+    feedback:
+      correct: "Correct: letters and underscores, starting with a letter."
+      incorrect: "Check the rules: no leading digit, no hyphens, no spaces."
+      byAnswer:
+        a: Names cannot start with a digit.
+        b: A hyphen would be read as subtraction.
+        d: Names cannot contain spaces.
+    hints:
+      - Check the first character of each name.
+      - Hyphens and spaces have other meanings in Python code.
+      - Underscores are the usual way to join words in a name.
+    explanation: Valid names use letters, digits and underscores and do not start with a digit.
+sources:
+  - source: py-tutorial
+    topic: "Using Python as a Calculator: Numbers (variables)"
+  - source: pep8
+    topic: Naming Conventions
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

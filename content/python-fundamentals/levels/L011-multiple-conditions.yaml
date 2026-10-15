@@ -1,0 +1,162 @@
+id: py.L011
+version: 1
+number: 11
+zone: py.zone.forge
+title: Multiple Conditions
+description: Combine conditions with and, or and not, and avoid the classic or trap.
+status: published
+kind: standard
+prerequisites:
+  - py.L010
+skills:
+  - py.skill.boolean-logic
+estimatedMinutes: 12
+lesson:
+  objectives:
+    - Combine conditions with and, or and not.
+    - Predict the result of combined conditions.
+    - Write range checks such as 13 <= age <= 19.
+  explanation: |-
+    You can combine Boolean values with three keywords:
+
+    - `a and b` is True only when both are True
+    - `a or b` is True when at least one is True
+    - `not a` flips True to False and False to True
+
+    `not` is applied first, then `and`, then `or`. Use parentheses when a condition gets long.
+
+    Python also lets you chain comparisons: `13 <= age <= 19` means "age is between 13 and 19 inclusive".
+
+    A classic bug is writing `if colour == "red" or "blue":`. Python reads this as `(colour == "red") or ("blue")`, and the non-empty string "blue" is always truthy, so the condition is always True. Write the full comparison on both sides: `colour == "red" or colour == "blue"`.
+  examples:
+    - code: |-
+        has_key = True
+        is_night = False
+        print(has_key and is_night)
+        print(has_key or is_night)
+        print(not is_night)
+      expectedOutput: |-
+        False
+        True
+        True
+    - code: |-
+        age = 14
+        print(13 <= age <= 19)
+      expectedOutput: "True"
+    - code: |-
+        colour = "green"
+        if colour == "red" or "blue":
+            print("warm door")
+        else:
+            print("other door")
+      caption: 'The bug in action: "blue" on its own is truthy, so the condition is always True.'
+      expectedOutput: warm door
+  misconceptions:
+    - x == "a" or "b" checks x against both values. (The right-hand side is just "b", which is always truthy.)
+    - and means "either". (Both sides must be True.)
+  practicalContext: Access rules ("logged in and is an admin"), validation ("empty or too long") and game rules combine conditions this way.
+challenges:
+  - id: py.L011.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      a = True
+      b = False
+      print(a and not b)
+      print(not a or b)
+    answer:
+      output: |-
+        True
+        False
+    feedback:
+      correct: "Correct: not is applied first on both lines."
+      incorrect: Apply not first, then and/or.
+      byAnswer:
+        "False\nTrue": "Apply not before and/or: not b is True, and not a is False."
+    hints:
+      - Work out the not parts first.
+      - On line 3, not b is True; on line 4, not a is False.
+      - "Now combine: True and True, then False or False."
+    explanation: a and not b is True and True, which is True. not a or b is False or False, which is False.
+  - id: py.L011.c2
+    version: 1
+    difficulty: 2
+    prompt: A player holding an axe should see Something else, but the program prints Blade or bow. Find the line and the fix.
+    type: find_fix_bug
+    code: |-
+      weapon = "axe"
+      if weapon == "sword" or "bow":
+          print("Blade or bow")
+      else:
+          print("Something else")
+    fixes:
+      - id: f1
+        text: 'Change line 2 to: if weapon == "sword" or weapon == "bow":'
+      - id: f2
+        text: Change or to and on line 2
+      - id: f3
+        text: Indent line 3 by four more spaces
+    answer:
+      line: 2
+      fix: f1
+    buggyBehaviour:
+      expectedOutput: Blade or bow
+    fixedCode: |-
+      weapon = "axe"
+      if weapon == "sword" or weapon == "bow":
+          print("Blade or bow")
+      else:
+          print("Something else")
+    check:
+      expectedOutput: Something else
+    feedback:
+      correct: "Correct: each side of or needs its own comparison."
+      incorrect: What does or "bow" mean on its own?
+      byAnswer:
+        fix:f2: weapon == "sword" and "bow" would be False here, but it would also be False for a bow. It hides the real problem.
+    hints:
+      - Look at what is on each side of the or.
+      - A non-empty string on its own counts as True.
+      - Each side of or needs to compare weapon with something.
+    explanation: The condition is (weapon == "sword") or "bow". "bow" is truthy, so it is always True. Comparing weapon on both sides fixes it.
+  - id: py.L011.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: x = 5. Which condition is True?
+    type: multiple_choice
+    options:
+      - id: a
+        text: x > 3 and x < 4
+      - id: b
+        text: x < 3 or x > 4
+      - id: c
+        text: not x > 3
+      - id: d
+        text: x > 3 and x > 10
+    answer:
+      correct:
+        - b
+    feedback:
+      correct: "Correct: x < 3 is False but x > 4 is True, and or needs just one."
+      incorrect: Evaluate each side separately, then combine.
+      byAnswer:
+        a: x < 4 is False, and and needs both sides to be True.
+        c: x > 3 is True, so not makes it False.
+        d: x > 10 is False, so the and is False.
+    hints:
+      - Substitute 5 for x in every comparison.
+      - and needs both sides True; or needs at least one.
+      - Find the option that has one True part joined by or.
+    explanation: "For x = 5: x < 3 is False, x > 4 is True, and False or True is True."
+sources:
+  - source: py-stdtypes
+    topic: Boolean Operations — and, or, not
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

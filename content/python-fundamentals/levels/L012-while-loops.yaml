@@ -1,0 +1,183 @@
+id: py.L012
+version: 1
+number: 12
+zone: py.zone.forge
+title: While Loops
+description: Repeat actions while a condition holds, and make sure the loop ends.
+status: published
+kind: standard
+prerequisites:
+  - py.L011
+skills:
+  - py.skill.while
+estimatedMinutes: 14
+lesson:
+  objectives:
+    - Repeat code with a while loop.
+    - Update the loop variable so that the loop ends.
+    - Trace a loop and count how many times it runs.
+  explanation: |-
+    A `while` loop repeats its indented block as long as its condition is True:
+
+    ```
+    count = 3
+    while count > 0:
+        print(count)
+        count = count - 1
+    ```
+
+    Before each repetition Python checks the condition again. When it becomes False, the loop ends and the program continues after the block.
+
+    Something inside the loop must eventually make the condition False. If nothing changes, the condition stays True forever and you have an infinite loop; in a terminal you can stop it with Ctrl+C.
+
+    `count += 1` is shorthand for `count = count + 1`. Similarly `-=`, `*=` and `/=` exist.
+  examples:
+    - code: |-
+        count = 3
+        while count > 0:
+            print(count)
+            count = count - 1
+        print("Liftoff!")
+      expectedOutput: |-
+        3
+        2
+        1
+        Liftoff!
+    - code: |-
+        total = 0
+        n = 1
+        while n <= 4:
+            total += n
+            n += 1
+        print(total)
+      caption: Adds 1 + 2 + 3 + 4.
+      expectedOutput: "10"
+  misconceptions:
+    - The condition is checked only once. (It is checked before every repetition.)
+    - A loop stops by itself eventually. (Only if the condition becomes False.)
+  practicalContext: Retrying until a download succeeds, asking until the input is valid, or running a game loop until the player quits all use while.
+challenges:
+  - id: py.L012.c1
+    version: 1
+    difficulty: 2
+    prompt: Trace the loop. What are n and steps when it finishes?
+    type: trace
+    code: |-
+      n = 1
+      steps = 0
+      while n < 20:
+          n = n * 3
+          steps += 1
+    fields:
+      - id: n
+        label: n
+      - id: steps
+        label: steps
+    answer:
+      values:
+        n:
+          - "27"
+        steps:
+          - "3"
+    feedback:
+      correct: "Correct: n goes 1, 3, 9, 27 and the loop stops when 27 is no longer below 20."
+      incorrect: Write a row for each time round the loop.
+      byAnswer:
+        n=9;steps=2: "After n becomes 9 the condition is checked again: 9 < 20 is still True."
+    hints:
+      - Make a small table with n and steps for each pass.
+      - The condition is checked before each pass, using the newest n.
+      - The loop runs while n is below 20; find the first n that is not.
+    explanation: "Passes: n=3 (steps 1), n=9 (steps 2), n=27 (steps 3). Then 27 < 20 is False, so the loop ends."
+  - id: py.L012.c2
+    version: 1
+    difficulty: 2
+    prompt: This should light torches 1 to 5, but it stops at 4. Find the line and the fix.
+    type: find_fix_bug
+    code: |-
+      torches = 1
+      while torches < 5:
+          print("Torch", torches)
+          torches += 1
+    fixes:
+      - id: f1
+        text: "Change line 2 to: while torches <= 5:"
+      - id: f2
+        text: "Change line 1 to: torches = 0"
+      - id: f3
+        text: "Change line 4 to: torches += 2"
+    answer:
+      line: 2
+      fix: f1
+    buggyBehaviour:
+      expectedOutput: |-
+        Torch 1
+        Torch 2
+        Torch 3
+        Torch 4
+    fixedCode: |-
+      torches = 1
+      while torches <= 5:
+          print("Torch", torches)
+          torches += 1
+    check:
+      expectedOutput: |-
+        Torch 1
+        Torch 2
+        Torch 3
+        Torch 4
+        Torch 5
+    feedback:
+      correct: "Correct: <= includes 5 in the loop."
+      incorrect: When torches is 5, is the condition True or False?
+      byAnswer:
+        fix:f2: Starting at 0 would print Torch 0 to Torch 4.
+        fix:f3: Counting by two would skip torches.
+    hints:
+      - Check the condition when torches reaches 5.
+      - 5 < 5 is False, so the loop ends before printing 5.
+      - The comparison needs to include the value 5 itself.
+    explanation: The loop stopped one step early. while torches <= 5 also runs when torches is 5.
+  - id: py.L012.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: |-
+      What happens when this program runs?
+
+      x = 5
+      while x > 0:
+          print(x)
+    type: multiple_choice
+    options:
+      - id: a
+        text: It prints 5 forever
+      - id: b
+        text: It prints 5, 4, 3, 2, 1
+      - id: c
+        text: It prints 5 once
+      - id: d
+        text: It raises an error
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: nothing changes x, so the condition never becomes False."
+      incorrect: Look for the line that would make the loop end.
+      byAnswer:
+        b: Nothing in the loop decreases x.
+        c: The condition is checked again after each pass, and it is still True.
+    hints:
+      - Is x ever changed inside the loop?
+      - The condition is re-checked before every pass.
+      - If x stays the same, the condition gives the same answer every time.
+    explanation: "x stays 5, so x > 0 is always True: an infinite loop that keeps printing 5."
+sources:
+  - source: py-reference-compound
+    topic: The while statement
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

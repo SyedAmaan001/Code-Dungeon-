@@ -1,5 +1,5 @@
 # TEST FIXTURE — not curriculum. Exercises every challenge type and the publication gate.
-schemaVersion: 1
+schemaVersion: 2
 subject:
   id: fixture-python
   title: Fixture Python

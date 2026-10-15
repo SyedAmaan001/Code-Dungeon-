@@ -1,0 +1,150 @@
+id: py.L008
+version: 1
+number: 8
+zone: py.zone.caverns
+title: Boolean Values
+description: "True or False: the two values every decision in a program rests on."
+status: published
+kind: standard
+prerequisites:
+  - py.L007
+skills:
+  - py.skill.booleans
+estimatedMinutes: 10
+lesson:
+  objectives:
+    - Use the Boolean values True and False.
+    - Produce Booleans with the in operator.
+    - Predict which values count as false with bool().
+  explanation: |-
+    The `bool` type has exactly two values: `True` and `False`. They are written with a capital letter and no quotes; `true` is just an unknown name, and `"True"` is a string.
+
+    Booleans answer yes/no questions. One question you can already ask is whether some text appears inside other text: `"key" in "monkey"` is True. In the next level you will meet comparisons, which also produce Booleans.
+
+    `bool(value)` tells you whether Python treats a value as true or false. Zero, the empty string `""` and a few other "empty" values count as false; almost everything else counts as true. Careful: the string `"False"` is not empty, so it counts as true, and so does a string containing just a space.
+  examples:
+    - code: |-
+        has_key = True
+        print(has_key)
+        print(type(has_key))
+      expectedOutput: |-
+        True
+        <class 'bool'>
+    - code: |-
+        print("sword" in "swordfish")
+        print("Sword" in "swordfish")
+      caption: in is case-sensitive.
+      expectedOutput: |-
+        True
+        False
+    - code: |-
+        print(bool(0))
+        print(bool(42))
+        print(bool(""))
+        print(bool("False"))
+      expectedOutput: |-
+        False
+        True
+        False
+        True
+  misconceptions:
+    - '"True" in quotes is a Boolean. (It is a string.)'
+    - bool("False") is False. (Any non-empty string is true.)
+  practicalContext: Flags such as is_logged_in, has_key or game_over are Booleans; every if statement you write will test one.
+challenges:
+  - id: py.L008.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      print(bool(""))
+      print(bool(" "))
+    answer:
+      output: |-
+        False
+        True
+    feedback:
+      correct: "Correct: only the truly empty string counts as false."
+      incorrect: Is each string empty?
+      byAnswer:
+        "False\nFalse": A space is a character, so the second string is not empty.
+    hints:
+      - Which values does Python treat as false?
+      - Only an empty string counts as false.
+      - Check whether each string has zero characters or not.
+    explanation: '"" is empty, so it is falsy. " " contains one space, so it is truthy.'
+  - id: py.L008.c2
+    version: 1
+    difficulty: 1
+    prompt: This program should print True but crashes. Find the line and the fix.
+    type: find_fix_bug
+    code: |-
+      is_open = true
+      print(is_open)
+    fixes:
+      - id: f1
+        text: Change true to True
+      - id: f2
+        text: Change true to "true"
+      - id: f3
+        text: Change print to Print
+    answer:
+      line: 1
+      fix: f1
+    buggyBehaviour:
+      expectedException: NameError
+    fixedCode: |-
+      is_open = True
+      print(is_open)
+    check:
+      expectedOutput: "True"
+    feedback:
+      correct: "Correct: Boolean values start with a capital letter."
+      incorrect: How are Python's Boolean values spelled?
+      byAnswer:
+        fix:f2: That would print true, but as a string, not a Boolean.
+    hints:
+      - "The error is a NameError: Python does not recognise a name."
+      - Python's Boolean values are spelled in a particular way.
+      - Check the capitalisation of the value on line 1.
+    explanation: true is not a Python name. The Boolean value is True with a capital T.
+  - id: py.L008.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: Which of these is a Boolean value in Python?
+    type: multiple_choice
+    options:
+      - id: a
+        text: "True"
+      - id: b
+        text: '"True"'
+      - id: c
+        text: "true"
+      - id: d
+        text: "1"
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: True, capitalised, without quotes."
+      incorrect: Booleans have no quotes and a capital first letter.
+      byAnswer:
+        b: With quotes it is a string.
+        c: Lowercase true is not defined in Python.
+        d: 1 is an int; it counts as true, but it is not the Boolean value itself.
+    hints:
+      - Quotes make text.
+      - Python is case-sensitive.
+      - Look for the capitalised word with no quotes.
+    explanation: The two Boolean values are True and False, with no quotes.
+sources:
+  - source: py-stdtypes
+    topic: Truth Value Testing; Boolean Type
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

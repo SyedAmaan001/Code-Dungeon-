@@ -11,7 +11,10 @@ interface PublicChallengeBase {
   id: string;
   version: number;
   difficulty: number;
+  role: "exercise" | "check";
+  required: boolean;
   prompt: string;
+  /** Number of progressive hints available; the text is only served on request. */
   hintCount: number;
 }
 
@@ -46,14 +49,22 @@ export interface PublicLevel {
   number: number;
   zone: string;
   title: string;
+  description?: string;
   kind: Level["kind"];
   prerequisites: string[];
   estimatedMinutes?: number;
   lesson?: {
-    objective: string;
+    objectives: string[];
     explanation: string;
-    example?: { code: string; expectedOutput?: string };
+    examples: {
+      code: string;
+      caption?: string;
+      stdin?: string;
+      expectedOutput?: string;
+      expectedException?: string;
+    }[];
     misconceptions: string[];
+    practicalContext?: string;
   };
   challenges: PublicChallenge[];
 }
@@ -65,22 +76,25 @@ export function toPublicLevel(level: Level): PublicLevel {
     number: level.number,
     zone: level.zone,
     title: level.title,
+    ...(level.description !== undefined && { description: level.description }),
     kind: level.kind,
     prerequisites: [...level.prerequisites],
     ...(level.estimatedMinutes !== undefined && { estimatedMinutes: level.estimatedMinutes }),
     ...(level.lesson && {
       lesson: {
-        objective: level.lesson.objective,
+        objectives: [...level.lesson.objectives],
         explanation: level.lesson.explanation,
-        ...(level.lesson.example && {
-          example: {
-            code: level.lesson.example.code,
-            ...(level.lesson.example.expectedOutput !== undefined && {
-              expectedOutput: level.lesson.example.expectedOutput,
-            }),
-          },
-        }),
+        examples: level.lesson.examples.map((e) => ({
+          code: e.code,
+          ...(e.caption !== undefined && { caption: e.caption }),
+          ...(e.stdin !== undefined && { stdin: e.stdin }),
+          ...(e.expectedOutput !== undefined && { expectedOutput: e.expectedOutput }),
+          ...(e.expectedException !== undefined && { expectedException: e.expectedException }),
+        })),
         misconceptions: [...level.lesson.misconceptions],
+        ...(level.lesson.practicalContext !== undefined && {
+          practicalContext: level.lesson.practicalContext,
+        }),
       },
     }),
     challenges: level.challenges.map(toPublicChallenge),
@@ -92,6 +106,8 @@ export function toPublicChallenge(c: Challenge): PublicChallenge {
     id: c.id,
     version: c.version,
     difficulty: c.difficulty,
+    role: c.role,
+    required: c.required,
     prompt: c.prompt,
     hintCount: c.hints.length,
   };

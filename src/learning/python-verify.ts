@@ -13,7 +13,10 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { ContentPack } from "./schema";
+import { normalizeOutput } from "./evaluation/normalize";
+import type { Challenge, ContentPack, Expectation } from "./schema";
+
+export { normalizeOutput };
 
 export interface PythonSnippet {
   /** Human-readable location, e.g. `levels/L001.yaml › py.L001 lesson example`. */
@@ -51,30 +54,110 @@ export interface SnippetResult {
   reason?: string;
 }
 
+const INDENT = "    ";
+
+function withExpectation(label: string, code: string, e: Expectation): PythonSnippet {
+  return {
+    label,
+    code,
+    ...(e.stdin !== undefined && { stdin: e.stdin }),
+    ...(e.expectedOutput !== undefined && { expectedOutput: e.expectedOutput }),
+    ...(e.expectedException !== undefined && { expectedException: e.expectedException }),
+  };
+}
+
+/** Substitute one accepted value per blank into a fill_blank template. */
+export function fillTemplate(template: string, values: Record<string, string>): string {
+  return template.replace(/\{\{blank:([A-Za-z0-9._-]+)\}\}/g, (_, id: string) => values[id] ?? "");
+}
+
+/** Assemble an order_lines answer into a program (indent level × 4 spaces). */
+export function assembleOrder(
+  lines: { id: string; text: string; indent: number }[],
+  order: string[],
+): string {
+  const byId = new Map(lines.map((l) => [l.id, l]));
+  return order.map((id) => INDENT.repeat(byId.get(id)!.indent) + byId.get(id)!.text).join("\n");
+}
+
+/**
+ * Every runnable claim in a challenge, as programs to execute:
+ * - predict_output: the code must print the answer key.
+ * - fill_blank: every accepted value (one blank varied at a time) must satisfy `check`.
+ * - order_lines: every accepted order must satisfy `check`.
+ * - find_fix_bug: the buggy code must behave as `buggyBehaviour`; `fixedCode` must satisfy `check`.
+ * - trace: after the code runs, each field expression must print an accepted value.
+ */
+export function challengeSnippets(c: Challenge, where: string): PythonSnippet[] {
+  const label = `${where} › ${c.id}`;
+  switch (c.type) {
+    case "predict_output":
+      return [
+        {
+          label: `${label} (predict_output answer)`,
+          code: c.code,
+          ...(c.stdin !== undefined && { stdin: c.stdin }),
+          expectedOutput: c.answer.output,
+        },
+      ];
+    case "fill_blank": {
+      if (!c.check) return [];
+      const first = Object.fromEntries(c.blanks.map((b) => [b.id, c.answer.accepted[b.id]![0]!]));
+      const variants = [first];
+      for (const b of c.blanks)
+        for (const v of c.answer.accepted[b.id]!.slice(1)) variants.push({ ...first, [b.id]: v });
+      return variants.map((values, i) =>
+        withExpectation(
+          `${label} (fill_blank accepted answer #${i + 1})`,
+          fillTemplate(c.template, values),
+          c.check!,
+        ),
+      );
+    }
+    case "order_lines":
+      if (!c.check) return [];
+      return c.answer.orders.map((order, i) =>
+        withExpectation(
+          `${label} (order_lines accepted order #${i + 1})`,
+          assembleOrder(c.lines, order),
+          c.check!,
+        ),
+      );
+    case "find_fix_bug": {
+      const out: PythonSnippet[] = [];
+      if (c.buggyBehaviour)
+        out.push(withExpectation(`${label} (buggy program behaviour)`, c.code, c.buggyBehaviour));
+      if (c.fixedCode && c.check)
+        out.push(withExpectation(`${label} (fixed program)`, c.fixedCode, c.check));
+      return out;
+    }
+    case "trace": {
+      const probe = c.fields.map((f) => `print(${f.expression ?? f.id})`).join("\n");
+      return [
+        {
+          label: `${label} (trace values)`,
+          code: `${c.code}\n${probe}`,
+          // Trace answers may list several accepted spellings; the first must be what Python prints.
+          expectedOutput: c.fields.map((f) => c.answer.values[f.id]?.[0] ?? "").join("\n"),
+        },
+      ];
+    }
+    default:
+      return [];
+  }
+}
+
 export function collectSnippets(pack: ContentPack): PythonSnippet[] {
   const snippets: PythonSnippet[] = [];
   if (pack.meta.path.language && pack.meta.path.language !== "python") return snippets;
   for (const level of pack.levels) {
     const file = pack.levelFiles[level.id] ?? level.id;
-    const ex = level.lesson?.example;
-    if (ex) {
-      snippets.push({
-        label: `${file} › ${level.id} lesson example`,
-        code: ex.code,
-        ...(ex.stdin !== undefined && { stdin: ex.stdin }),
-        ...(ex.expectedOutput !== undefined && { expectedOutput: ex.expectedOutput }),
-        ...(ex.expectedException !== undefined && { expectedException: ex.expectedException }),
-      });
-    }
+    level.lesson?.examples.forEach((ex, i) =>
+      snippets.push(withExpectation(`${file} › ${level.id} lesson example #${i + 1}`, ex.code, ex)),
+    );
     for (const c of level.challenges) {
-      if (c.type === "predict_output" && c.language === "python") {
-        snippets.push({
-          label: `${file} › ${c.id} (predict_output answer)`,
-          code: c.code,
-          ...(c.stdin !== undefined && { stdin: c.stdin }),
-          expectedOutput: c.answer.output,
-        });
-      }
+      if ("language" in c && c.language !== "python") continue;
+      snippets.push(...challengeSnippets(c, file));
     }
   }
   return snippets;
@@ -117,16 +200,6 @@ export function runPython(
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
-}
-
-/** Ignore trailing whitespace on each line and trailing blank lines; everything else is exact. */
-export function normalizeOutput(text: string): string {
-  return text
-    .replace(/\r\n/g, "\n")
-    .split("\n")
-    .map((line) => line.trimEnd())
-    .join("\n")
-    .replace(/\n+$/, "");
 }
 
 export function verifySnippet(

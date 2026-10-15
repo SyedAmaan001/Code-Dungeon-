@@ -1,0 +1,270 @@
+id: py.L025
+version: 1
+number: 25
+zone: py.zone.citadel
+title: "Capstone: The Expedition Ledger"
+description: "Final boss: read, debug and assemble a small supply-tracking program that uses everything so far."
+status: published
+kind: boss
+prerequisites:
+  - py.L024
+skills:
+  - py.skill.problem-solving
+  - py.skill.integration
+estimatedMinutes: 30
+lesson:
+  objectives:
+    - "Plan a small program: inputs, outputs, data and helper functions."
+    - Read and predict a program that combines dictionaries, lists, loops, conditions and functions.
+    - Find and fix a bug defensively, and assemble a function from its parts.
+  explanation: |-
+    The expedition needs a ledger: a small program that tracks supplies, reports what is missing, and prices an order. Real programs are built this way, from small parts you already know.
+
+    A reliable way to start any problem:
+
+    1. Write down the inputs and the output you want, with one small worked example.
+    2. Choose the data: here, a dictionary from item name to count fits naturally.
+    3. Split the work into small functions, each doing one job and returning a result.
+    4. Check each function with examples, including awkward ones such as an empty list.
+
+    The worked example shows two helper functions for the ledger, and how `assert` can check a function: `assert total_items({"a": 1}) == 1` does nothing when the claim is true and raises AssertionError when it is false.
+
+    The boss challenges ask you to predict, debug and assemble pieces of this ledger.
+  examples:
+    - code: |-
+        supplies = {"rope": 2, "torch": 0, "ration": 5}
+
+        def missing_items(stock):
+            missing = []
+            for item, count in stock.items():
+                if count == 0:
+                    missing.append(item)
+            return missing
+
+        def total_items(stock):
+            return sum(stock.values())
+
+        print("Total:", total_items(supplies))
+        print("Missing:", missing_items(supplies))
+      expectedOutput: |-
+        Total: 7
+        Missing: ['torch']
+    - code: |-
+        def total_items(stock):
+            return sum(stock.values())
+
+        assert total_items({"a": 1, "b": 2}) == 3
+        assert total_items({}) == 0
+        print("All checks passed")
+      caption: assert statements check a function against known answers, including the empty case.
+      expectedOutput: All checks passed
+  misconceptions:
+    - Big programs need new, advanced features. (They are mostly familiar pieces combined carefully.)
+    - If it works for one example, it works. (Test edge cases such as empty inputs too.)
+  practicalContext: Inventory trackers, budget calculators and grade books follow exactly this pattern of data, small functions and tests.
+challenges:
+  - id: py.L025.c1
+    version: 1
+    difficulty: 3
+    prompt: The ledger prices an order. What does this program print?
+    type: predict_output
+    code: |-
+      prices = {"rope": 3, "torch": 2, "ration": 4}
+      order = ["rope", "ration", "lantern", "rope"]
+
+      total = 0
+      unknown = 0
+      for item in order:
+          if item in prices:
+              total += prices[item]
+          else:
+              unknown += 1
+      print(f"Total: {total} gold")
+      print(f"Unknown items: {unknown}")
+    answer:
+      output: |-
+        Total: 10 gold
+        Unknown items: 1
+    feedback:
+      correct: "Correct: rope + ration + rope is 3 + 4 + 3, and lantern is unknown."
+      incorrect: Process the order one item at a time.
+      byAnswer:
+        "Total: 7 gold\nUnknown items: 1": rope appears twice in the order, and both count.
+        "Total: 9 gold\nUnknown items: 1": Check the price of each item in the dictionary again.
+    hints:
+      - Go through the order list one item at a time.
+      - lantern is not a key in prices, so it is counted as unknown.
+      - Add the price of each known item, remembering repeated items count each time.
+    explanation: rope (3) + ration (4) + rope (3) = 10; lantern is not in prices, so unknown is 1.
+  - id: py.L025.c2
+    version: 1
+    difficulty: 3
+    prompt: The ledger's average function crashes when a day has no records. Find the line and the defensive fix.
+    type: find_fix_bug
+    code: |-
+      def average(scores):
+          total = 0
+          for s in scores:
+              total += s
+          return total / len(scores)
+
+      print(average([8, 6, 10]))
+      print(average([]))
+    fixes:
+      - id: f1
+        text: Before line 5, return 0 when the list is empty
+      - id: f2
+        text: Change len(scores) to len(scores) + 1 on line 5
+      - id: f3
+        text: Change / to // on line 5
+    answer:
+      line: 5
+      fix: f1
+    buggyBehaviour:
+      expectedException: ZeroDivisionError
+    fixedCode: |-
+      def average(scores):
+          if not scores:
+              return 0
+          total = 0
+          for s in scores:
+              total += s
+          return total / len(scores)
+
+      print(average([8, 6, 10]))
+      print(average([]))
+    check:
+      expectedOutput: |-
+        8.0
+        0
+    feedback:
+      correct: "Correct: guard the edge case before dividing."
+      incorrect: What is len([])?
+      byAnswer:
+        fix:f2: "That avoids the crash but makes every average wrong: [8, 6, 10] would give 6.0."
+        fix:f3: // also divides by zero, so it still crashes.
+    hints:
+      - The first call works; the second crashes.
+      - An empty list has length 0, and you cannot divide by zero.
+      - Handle the empty case before the division happens.
+    explanation: For an empty list, len(scores) is 0. Checking for an empty list first returns 0 safely and keeps other averages correct.
+  - id: py.L025.c3
+    version: 1
+    difficulty: 3
+    prompt: Assemble the ledger's count_heavy function (indentation is shown) so the program prints 2.
+    type: order_lines
+    lines:
+      - id: l1
+        text: return count
+        indent: 1
+      - id: l2
+        text: count += 1
+        indent: 3
+      - id: l3
+        text: "def count_heavy(weights, limit):"
+      - id: l4
+        text: "for w in weights:"
+        indent: 1
+      - id: l5
+        text: print(count_heavy([5, 12, 30, 8], 10))
+      - id: l6
+        text: "if w > limit:"
+        indent: 2
+      - id: l7
+        text: count = 0
+        indent: 1
+    answer:
+      orders:
+        - - l3
+          - l7
+          - l4
+          - l6
+          - l2
+          - l1
+          - l5
+    check:
+      expectedOutput: "2"
+    feedback:
+      correct: "Correct: set up the counter, loop, test, count, return, then call."
+      incorrect: Use the indentation to see which line belongs inside which block.
+    hints:
+      - Start with the def line and end with the call.
+      - The counter must be created before the loop starts.
+      - The return belongs at function level, after the loop has finished.
+    explanation: count starts at 0; the loop adds 1 for 12 and 30 (both over 10); the function returns 2, which is printed.
+  - id: py.L025.c4
+    version: 1
+    role: check
+    difficulty: 3
+    prompt: After this code runs, what are gems and kinds?
+    type: trace
+    code: |-
+      inventory = {"gem": 1}
+
+      def add(item, amount):
+          inventory[item] = inventory.get(item, 0) + amount
+
+      add("gem", 2)
+      add("coin", 5)
+      gems = inventory["gem"]
+      kinds = len(inventory)
+    fields:
+      - id: gems
+        label: gems
+      - id: kinds
+        label: kinds
+    answer:
+      values:
+        gems:
+          - "3"
+        kinds:
+          - "2"
+    feedback:
+      correct: "Correct: gem goes from 1 to 3, and coin is added as a new key."
+      incorrect: Follow each add() call and the dictionary it changes.
+      byAnswer:
+        gems=2;kinds=2: get("gem", 0) returns the current 1, so 1 + 2 = 3.
+    hints:
+      - get() returns the current count, or 0 if the item is missing.
+      - The first call updates an existing key; the second adds a new one.
+      - Work out the dictionary after both calls, then read the gem count and the number of keys.
+    explanation: add("gem", 2) makes gem 3; add("coin", 5) adds coin. The dictionary has 2 keys and gem is 3.
+  - id: py.L025.c5
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: Which is the best first step when you start a new programming problem?
+    type: multiple_choice
+    options:
+      - id: a
+        text: Write down the inputs, the expected output and one small example
+      - id: b
+        text: Start typing code immediately and fix it later
+      - id: c
+        text: Wrap everything in try/except so nothing can crash
+      - id: d
+        text: Put all the data in global variables
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: a clear example gives you something to build and test against."
+      incorrect: Which choice helps you know when your program is right?
+      byAnswer:
+        c: That hides bugs instead of preventing them.
+    hints:
+      - How will you know whether the program is correct?
+      - A worked example lets you check your code.
+      - Plan before you build.
+    explanation: Knowing the inputs, outputs and an example makes the problem concrete and testable.
+sources:
+  - source: py-tutorial-ds
+    topic: Dictionaries; Looping Techniques
+  - source: py-reference-simple
+    topic: The assert statement
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

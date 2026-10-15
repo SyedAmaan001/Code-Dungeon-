@@ -1,12 +1,10 @@
 /**
- * Game engine (Phase 2 — not implemented yet).
- *
- * Pure, deterministic functions: unlocks, attempt evaluation, XP events, quests,
- * achievements and leaderboard ranking. No I/O, no framework, no other layer
- * (enforced by eslint.config.mjs). Only the shared vocabulary exists so far.
+ * Game-engine domain (pure, deterministic). No I/O, no framework, no other layer
+ * (enforced by eslint.config.mjs). Phase 2 provides progression: unlocks, attempts,
+ * hints, completion, mastery and XP. Quests, achievements and leaderboard ranking
+ * come in a later phase.
  */
-
-/** Learner-facing level state. `available` is derived from prerequisites, not stored. */
-export type LevelProgressState = "locked" | "available" | "in_progress" | "completed";
+export * from "./policy";
+export * from "./progression";
 
 export type QuestState = "locked" | "active" | "completed";

@@ -1,0 +1,132 @@
+id: py.L002
+version: 1
+number: 2
+zone: py.zone.camp
+title: Values and Expressions
+description: Combine numbers with operators and let Python work out the result.
+status: published
+kind: standard
+prerequisites:
+  - py.L001
+skills:
+  - py.skill.expressions
+  - py.skill.operator-precedence
+estimatedMinutes: 10
+lesson:
+  objectives:
+    - Recognise values such as 7, 2.5 and "gold".
+    - Predict the result of expressions that use +, -, *, / and parentheses.
+    - Explain that print() shows the value an expression produces.
+  explanation: |-
+    A value is a single piece of data, such as the number 7, the number 2.5 or the text "gold". An expression combines values with operators, and Python evaluates it down to one value. When you write `print(2 + 3)`, Python first works out `2 + 3` and then prints the result, 5.
+
+    Python follows the usual order of operations: `*` and `/` are done before `+` and `-`, and anything in parentheses is done first. When in doubt, add parentheses; they make your intent clear.
+
+    Two details surprise beginners. First, `/` always produces a decimal number (a float), so `10 / 2` is `5.0`, not `5`. Second, quotation marks turn an expression into plain text: `print("2 + 3")` prints the characters 2 + 3, because Python does not calculate inside text.
+  examples:
+    - code: |-
+        print(2 + 3 * 4)
+        print((2 + 3) * 4)
+      caption: Multiplication happens first unless parentheses say otherwise.
+      expectedOutput: |-
+        14
+        20
+    - code: |-
+        print(10 / 2)
+        print("10 / 2")
+      caption: / always gives a float, and text in quotes is never calculated.
+      expectedOutput: |-
+        5.0
+        10 / 2
+  misconceptions:
+    - Python always works strictly left to right. (Multiplication and division come before addition and subtraction.)
+    - 10 / 2 gives 5. (It gives 5.0.)
+    - An expression inside quotes is calculated. (It is just text.)
+  practicalContext: Totals in a shopping basket, damage in a game and unit conversions are all expressions evaluated like these.
+challenges:
+  - id: py.L002.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: print(6 + 4 / 2)
+    answer:
+      output: "8.0"
+    feedback:
+      correct: "Correct: 4 / 2 is 2.0, and 6 + 2.0 is 8.0."
+      incorrect: Check which operator runs first and what kind of number / produces.
+      byAnswer:
+        "5": Division happens before addition, and / always produces a float.
+        "8": The arithmetic is right, but / always produces a float, so the result has a decimal point.
+        "5.0": That would be (6 + 4) / 2. Without parentheses, division happens before addition.
+    hints:
+      - Which operator does Python apply first here?
+      - Division happens before addition when there are no parentheses.
+      - Work out 4 / 2 first, then add 6, and remember what kind of number / always produces.
+    explanation: Division has higher precedence than addition, so Python computes 4 / 2 = 2.0, then 6 + 2.0 = 8.0.
+  - id: py.L002.c2
+    version: 1
+    difficulty: 2
+    prompt: Fill in the operator so the program prints 9.
+    type: fill_blank
+    template: print((1 + 2) {{blank:op}} 3)
+    blanks:
+      - id: op
+        label: operator
+    answer:
+      accepted:
+        op:
+          - "*"
+    check:
+      expectedOutput: "9"
+    feedback:
+      correct: "Yes: (1 + 2) is 3, and 3 * 3 is 9."
+      incorrect: Work out the parentheses first, then think about which operator turns 3 and 3 into 9.
+      byAnswer:
+        +: That gives 3 + 3, which is 6.
+        /: That gives 3 / 3, which is 1.0.
+        "-": That gives 3 - 3, which is 0.
+    hints:
+      - Start with the part in parentheses.
+      - The parentheses give 3, so you need an operator that turns 3 and 3 into 9.
+      - Think of the operator for repeated addition.
+    explanation: The parentheses are evaluated first (1 + 2 = 3), then 3 * 3 = 9.
+  - id: py.L002.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: Which expression evaluates to 20?
+    type: multiple_choice
+    options:
+      - id: a
+        text: 2 + 3 * 4
+      - id: b
+        text: (2 + 3) * 4
+      - id: c
+        text: 2 * 3 + 4
+      - id: d
+        text: '"2 + 3 * 4"'
+    answer:
+      correct:
+        - b
+    feedback:
+      correct: "Correct: the parentheses make Python add first, giving 5 * 4."
+      incorrect: Evaluate each option using the order of operations.
+      byAnswer:
+        a: "Multiplication happens first: 3 * 4 is 12, plus 2 is 14."
+        c: 2 * 3 is 6, plus 4 is 10.
+        d: That is text in quotes, so Python does not calculate it at all.
+    hints:
+      - Work out each option separately.
+      - Without parentheses, multiplication happens before addition.
+      - Find the option where the addition is forced to happen first.
+    explanation: "Parentheses override precedence: (2 + 3) is 5, and 5 * 4 is 20."
+sources:
+  - source: py-tutorial
+    topic: "Using Python as a Calculator: Numbers"
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

@@ -6,6 +6,7 @@
 - **After approval:** promote §3–§8 to `docs/architecture.md` and §6 to `docs/data-model.md` (or extend `DATA_MODEL.md`), and record the stack choice as a `DEC-` entry in `docs/decision.md`.
 
 - **Implementation status (2026-10-15):** the foundation (§2 core tooling, §3 layout and boundaries, §4 content model) is implemented — see `docs/phase-1-report.md` and DEC-001. Differences from this proposal: TypeScript pinned to 6.0.3 and ESLint to 9.x (newer majors not yet supported by `typescript-eslint`/Next lint plugins); Tailwind, Radix, Shiki, Supabase, Drizzle and Playwright deferred until needed; levels gained an optional draft-only `outline` field; predicates gained `complete_level_count`; `sources.yaml` lives inside each pack; Python examples may declare `expectedException`.
+- **Implementation status (Phase 2, 2026-10-15):** §4 learning engine (schema v2, six evaluators, feedback, hints, validation, real-Python verification), §5.1/§5.2 progression (unlocks, attempts, completion, mastery, XP ledger, replay) and the §6.3 submission flow are implemented against a non-durable in-memory store — see `docs/PHASE_2_REPORT.md`, DEC-002 and DEC-004. Mastery is defined more precisely than §5 (demonstrated knowledge checks). Quests, achievements, the leaderboard, the database and authentication are not implemented.
 
 ---
 

@@ -3,16 +3,19 @@ version: 1
 number: 2
 zone: fx.zone.one
 title: Fixture Structures
+description: Test fixture level covering every deterministic format.
 status: published
 kind: checkpoint
 prerequisites: [fx.L001]
 estimatedMinutes: 10
 lesson:
-  objective: Recognise that dividing by zero raises ZeroDivisionError.
+  objectives:
+    - Recognise that dividing by zero raises ZeroDivisionError.
   explanation: Python stops the program and reports an exception when an operation is impossible.
-  example:
-    code: print(10 / 0)
-    expectedException: ZeroDivisionError
+  examples:
+    - code: print(10 / 0)
+      expectedException: ZeroDivisionError
+  practicalContext: Reading error names quickly is the first step in debugging.
 challenges:
   - id: fx.L002.c1
     version: 1
@@ -25,7 +28,16 @@ challenges:
     answer:
       accepted:
         b1: [print]
-    feedback: { correct: Correct., incorrect: Which built-in function displays output? }
+    check: { expectedOutput: Hello }
+    feedback:
+      correct: Correct.
+      incorrect: Which built-in function displays output?
+      byAnswer:
+        Print: Python is case-sensitive; the built-in name is all lowercase.
+    hints:
+      - You used this function in the previous level.
+      - It is a built-in function that shows text in the console.
+      - Its name is a five-letter lowercase word.
     explanation: print() displays its argument.
   - id: fx.L002.c2
     version: 1
@@ -39,11 +51,17 @@ challenges:
       - { id: l4, text: "count = count - 1", indent: 1 }
     answer:
       orders: [[l1, l2, l3, l4]]
+    check: { expectedOutput: "3\n2\n1" }
     feedback: { correct: Correct., incorrect: The value must be printed before it is decreased. }
+    hints:
+      - A variable must exist before it is used.
+      - The loop header comes before its indented body.
+      - Inside the loop, think about which should happen first for the output to start at 3.
     explanation: The loop prints count, then decreases it, until the condition is false.
   - id: fx.L002.c3
     version: 1
     type: trace
+    role: check
     difficulty: 1
     prompt: What are the values of x and y after these lines run?
     code: |-
@@ -58,6 +76,10 @@ challenges:
         x: ["5"]
         y: ["10"]
     feedback: { correct: Correct., incorrect: x changes before y is computed. }
+    hints:
+      - Go one line at a time.
+      - The second line uses the old value of x to make a new one.
+      - Work out x after line 2 first, then use it on line 3.
     explanation: x becomes 5, so y is 5 * 2 = 10.
   - id: fx.L002.c4
     version: 1
@@ -73,7 +95,22 @@ challenges:
       - { id: f1, text: Indent line 3 so it is inside the loop. }
       - { id: f2, text: "Change [1, 2, 3] to (1, 2, 3)." }
     answer: { line: 3, fix: f1 }
-    feedback: { correct: Correct., incorrect: Python needs an indented block after a for line. }
+    buggyBehaviour: { expectedException: IndentationError }
+    fixedCode: |-
+      total = 0
+      for n in [1, 2, 3]:
+          total = total + n
+      print(total)
+    check: { expectedOutput: "6" }
+    feedback:
+      correct: Correct.
+      incorrect: Python needs an indented block after a for line.
+      byAnswer:
+        "fix:f2": A tuple loops the same way as a list, so that would not change anything.
+    hints:
+      - Run it in your head; does Python even get to the end?
+      - Lines that belong to a loop share the same indentation.
+      - Look at the line right after the for statement.
     explanation: Line 3 must be indented to form the loop body; otherwise Python raises IndentationError.
 sources:
   - source: python-tutorial-3.13

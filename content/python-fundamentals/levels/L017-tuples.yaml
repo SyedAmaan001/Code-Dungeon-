@@ -1,0 +1,141 @@
+id: py.L017
+version: 1
+number: 17
+zone: py.zone.archive
+title: Tuples
+description: Group fixed values together and unpack them into names.
+status: published
+kind: standard
+prerequisites:
+  - py.L016
+skills:
+  - py.skill.tuples
+  - py.skill.unpacking
+estimatedMinutes: 10
+lesson:
+  objectives:
+    - Create tuples and explain that they cannot be changed.
+    - Unpack a tuple into separate variables.
+    - Choose between a tuple and a list.
+  explanation: |-
+    A tuple is like a list that cannot be changed after it is made. You write it with parentheses: `position = (3, 7)`. You can index it, slice it and loop over it, but `position[0] = 5` raises a TypeError.
+
+    Unpacking gives each item its own name in one step: `x, y = position`. The number of names must match the number of items. Unpacking also gives Python's neat swap: `a, b = b, a`.
+
+    Use a tuple for a fixed group of related values, such as coordinates or an RGB colour, where changing one item by accident would be a bug. Use a list for a collection that grows and shrinks.
+
+    A one-item tuple needs a trailing comma: `(5,)`. Plain `(5)` is just the number 5 in parentheses.
+  examples:
+    - code: |-
+        position = (3, 7)
+        x, y = position
+        print(x, y)
+        print(len(position))
+      expectedOutput: |-
+        3 7
+        2
+    - code: |-
+        point = (1, 2)
+        point[0] = 5
+      caption: Tuples cannot be changed.
+      expectedException: TypeError
+    - code: |-
+        a, b = 1, 2
+        a, b = b, a
+        print(a, b)
+        print(type((5,)), type((5)))
+      expectedOutput: |-
+        2 1
+        <class 'tuple'> <class 'int'>
+  misconceptions:
+    - Tuples are just slower lists. (Their key property is that they cannot be changed.)
+    - "(5) is a one-item tuple. (The comma makes the tuple: (5,).)"
+  practicalContext: Coordinates, dates, and functions that return several results at once commonly use tuples.
+challenges:
+  - id: py.L017.c1
+    version: 1
+    difficulty: 1
+    prompt: After this code runs, what are defence and power?
+    type: trace
+    code: |-
+      stats = (12, 5, 8)
+      attack, defence, speed = stats
+      power = attack + speed
+    fields:
+      - id: defence
+        label: defence
+      - id: power
+        label: power
+    answer:
+      values:
+        defence:
+          - "5"
+        power:
+          - "20"
+    feedback:
+      correct: "Correct: unpacking assigns 12, 5 and 8 in order."
+      incorrect: Unpacking matches names to items by position.
+    hints:
+      - The first name gets the first item.
+      - attack is 12 and speed is the third item.
+      - Add the values of attack and speed.
+    explanation: attack = 12, defence = 5, speed = 8, so power = 12 + 8 = 20.
+  - id: py.L017.c2
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      dims = (4, 2)
+      w, h = dims
+      print(w * h, len(dims))
+    answer:
+      output: 8 2
+    feedback:
+      correct: "Correct: 4 * 2 is 8, and the tuple has 2 items."
+      incorrect: Unpack first, then evaluate each value print() receives.
+      byAnswer:
+        "8": print() receives two values here, separated by a comma.
+    hints:
+      - w and h are taken from the tuple in order.
+      - print() receives two values and separates them with a space.
+      - Multiply the two numbers, then count the items in the tuple.
+    explanation: w = 4 and h = 2, so w * h is 8, and len(dims) is 2.
+  - id: py.L017.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: Why might you store a map coordinate as a tuple rather than a list?
+    type: multiple_choice
+    options:
+      - id: a
+        text: A tuple cannot be changed, so the coordinate cannot be altered by accident
+      - id: b
+        text: A tuple can hold more items than a list
+      - id: c
+        text: Only tuples can store numbers
+      - id: d
+        text: You can only loop over tuples
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: immutability protects values that should stay fixed."
+      incorrect: What is the defining difference between tuples and lists?
+      byAnswer:
+        b: Lists and tuples can both hold any number of items.
+        c: Lists can store numbers too.
+    hints:
+      - Think about what you can do to a list but not to a tuple.
+      - Try to remember what happened with point[0] = 5.
+      - A coordinate is a fixed pair of values.
+    explanation: Tuples are immutable, which suits fixed groups of values like coordinates.
+sources:
+  - source: py-tutorial-ds
+    topic: Tuples and Sequences
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

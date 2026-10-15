@@ -1,0 +1,138 @@
+id: py.L001
+version: 1
+number: 1
+zone: py.zone.camp
+title: Your First Python Program
+description: "Wake the interpreter: write instructions, run them in order, and see their output."
+status: published
+kind: standard
+prerequisites: []
+skills:
+  - py.skill.program-flow
+  - py.skill.print
+estimatedMinutes: 8
+lesson:
+  objectives:
+    - Explain that Python runs a program's instructions from top to bottom.
+    - Use print() to display text in the console.
+    - Tell the difference between the code you write and the output it produces.
+  explanation: |-
+    A Python program is a plain text file full of instructions. The Python interpreter reads those instructions from top to bottom and carries out each one in turn.
+
+    The simplest useful instruction is a call to `print()`. Whatever you put between its parentheses is shown in the console, the area where a program's output appears. Text has to be wrapped in quotation marks, either "double" or 'single', so Python knows it is text and not an instruction.
+
+    Keep two things apart: the code and its output. The code `print("Hello")` contains the word print, parentheses and quotes. Its output is just the word Hello.
+  examples:
+    - code: print("Hello, adventurer!")
+      expectedOutput: Hello, adventurer!
+    - code: |-
+        print("Line one")
+        print("Line two")
+      caption: Each print() call writes a new line, in the order the code is written.
+      expectedOutput: |-
+        Line one
+        Line two
+  misconceptions:
+    - The quotation marks are part of the output. (They only mark where the text starts and ends.)
+    - Python can run the lines in any order. (It runs them top to bottom.)
+  practicalContext: Every program that reports something to a person, from a script that renames files to a game showing your score, starts with output like this.
+challenges:
+  - id: py.L001.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      print("Torch lit")
+      print("Door open")
+    answer:
+      output: |-
+        Torch lit
+        Door open
+    feedback:
+      correct: "Right: two print() calls, two lines, in order."
+      incorrect: Look at what each line prints and the order they run in.
+      byAnswer:
+        "\"Torch lit\"\n\"Door open\"": Close, but the quotation marks are not printed. They only mark where the text starts and ends.
+        "Door open\nTorch lit": Python runs the lines from top to bottom, so the first line's output comes first.
+        Torch lit Door open: Each print() call ends its output with a new line.
+    hints:
+      - Python runs the lines from top to bottom.
+      - The quotation marks tell Python where text starts and ends; they are not shown.
+      - Write the text inside each print(), one per line, in the order the lines appear.
+    explanation: The first print() shows its text and moves to a new line; then the second print() runs.
+  - id: py.L001.c2
+    version: 1
+    difficulty: 1
+    prompt: |-
+      Arrange the lines so the program's output is:
+      Welcome
+      Good luck
+      Goodbye
+    type: order_lines
+    lines:
+      - id: l1
+        text: print("Goodbye")
+      - id: l2
+        text: print("Welcome")
+      - id: l3
+        text: print("Good luck")
+    answer:
+      orders:
+        - - l2
+          - l3
+          - l1
+    check:
+      expectedOutput: |-
+        Welcome
+        Good luck
+        Goodbye
+    feedback:
+      correct: "Yes: the order of the lines is the order of the output."
+      incorrect: The output appears in the same order as the print() lines.
+    hints:
+      - Which message should appear first?
+      - Python runs from the top line down, so the top line's message is printed first.
+      - Put the line that prints the first message at the top, then follow the desired output line by line.
+    explanation: Because Python runs top to bottom, the line order matches the output order.
+  - id: py.L001.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: Which line of code displays the word Welcome?
+    type: multiple_choice
+    options:
+      - id: a
+        text: print("Welcome")
+      - id: b
+        text: print(Welcome)
+      - id: c
+        text: Print("Welcome")
+      - id: d
+        text: '"Welcome".print'
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: lowercase print, parentheses, and the text in quotes."
+      incorrect: Check the spelling of the function, the parentheses and the quotes.
+      byAnswer:
+        b: Without quotes, Python thinks Welcome is the name of a variable, which does not exist.
+        c: "Python is case-sensitive: the built-in function is print with a lowercase p."
+        d: Text does not have a print method; you pass the text to the print() function.
+    hints:
+      - Text you want to show must be marked as text.
+      - Python treats Print and print as different names.
+      - Look for the lowercase function name with the text in quotes inside the parentheses.
+    explanation: print("Welcome") calls the built-in print function with the text "Welcome".
+sources:
+  - source: py-tutorial
+    topic: An Informal Introduction to Python
+  - source: py-builtins
+    topic: print()
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

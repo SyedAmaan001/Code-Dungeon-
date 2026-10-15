@@ -94,3 +94,36 @@
 - **O-3 Python version:** content targets Python ≥ 3.10 (`minLanguageVersion` in `path.yaml`); CI verifies with CPython 3.13. Status: DEFAULT.
 - **O-7 Docs naming:** existing UPPER_SNAKE docs stay canonical; new docs use lower-kebab; `decision.md` remains the decision log. Status: DEFAULT.
 - **Content storage:** curriculum lives in Git as YAML content packs (`content/<pack>/`); the database will later hold only a registry of IDs/versions. Status: DEFAULT (architecture-proposal §6.2).
+
+### DEC-002 — Progression policy: XP, completion, mastery, unlocks and replay
+- Status: DEFAULT (applied in Phase 2; configurable; awaiting owner confirmation — open item O-2)
+- Date: 2026-10-15
+- Context/problem: The learning engine needs explicit, testable rules for attempts, completion, mastery, XP and replay (P-005). No owner-approved numbers existed.
+- Options considered: speed/time bonuses; XP penalties for wrong answers or hints; mastery from a single answer; repeat XP on replay.
+- Decision (all values live only in `src/domain/policy.ts`):
+  - **XP:** first correct answer to a challenge = 10 × difficulty (1–3); +5 if the first counted attempt is correct with no hint; level completion 25 / checkpoint 50 / major 75 / boss 150; mastery bonus 0. No negative XP, no time bonus.
+  - **Attempts:** only well-formed, judged answers count. Invalid submissions and engine errors are not attempts.
+  - **Completed:** every required challenge in the level answered correctly at least once.
+  - **Mastered:** completed, and every knowledge-check challenge demonstrated — correct without a hint either on its first counted attempt or in a replay after the level was completed.
+  - **Unlock:** a level unlocks when all its prerequisites are completed.
+  - **Replay:** allowed; earns no repeat XP (award keys are unique per learner), but can earn mastery.
+  - **Duplicates:** a resent submission id returns the original result; XP is awarded at most once per source key.
+- Why: correctness dominates (bonus ≤ a third of base), hints never block learning, mistakes never remove progress, and mastery is not claimed from an immediate retry after feedback.
+- Consequences: total available XP for the Python path is fixed by content difficulty and level kinds (see `docs/PHASE_2_REPORT.md`). Changing a number changes future awards only; existing ledger entries are kept.
+- Security/privacy/cost impact: XP is computed server-side from evaluator results; clients cannot submit XP, correctness or learner ids.
+- Revisit trigger: owner confirms or changes the numbers; leaderboard design (weekly boards) or spaced review.
+
+### DEC-003 — Python Fundamentals curriculum sequence and zone titles
+- Status: CONFIRMED (owner-provided topic sequence in the Phase 2 instruction, 2026-10-15)
+- Context/problem: The earlier outline (`00_TO_100.md` §6, blueprint §5) was explicitly a plan to be validated. The owner supplied a revised 25-topic sequence.
+- Decision: levels 1–25 follow the owner's sequence exactly (no reordering was needed for prerequisites). Zone IDs, theme keys and art titles are unchanged; curriculum zone 3 is retitled "Looping Forge" (was "Function Forge") because functions now fall in zones 4–5. Checkpoints/major/boss stay at 5, 10, 15, 20 and 25. Topics from the old outline that are not in the new sequence: reading error messages is covered in level 22, exceptions in level 24 and problem decomposition in the level 25 capstone; **file handling is not covered** and is deferred to levels 26+.
+- Consequences: `00_TO_100.md` §6 and the blueprint §5 outline are superseded for level content; those documents are kept unchanged as history.
+
+### DEC-004 — Content schema v2 and agent-reviewed publication
+- Status: DEFAULT (pending owner decision on human review — open item O-13)
+- Decision: content schema v2 adds lesson objectives/examples/practical context, level descriptions, challenge roles (exercise/check), exactly three progressive hints for published challenges, and runnable checks for fill-in, ordering, tracing and bug-fix challenges. The 25 Python levels are `published` with `review.kind: agent`; validation emits a warning while any published level lacks human review, and the home page states it.
+- Why: the levels pass every automated gate, but CONTENT_QUALITY_STANDARD asks for reviewer verification; an AI agent's self-review is recorded honestly rather than presented as human review.
+- Revisit trigger: a human reviewer signs off a level (set `review.kind: human`) or the owner decides that agent review is insufficient for publication (then set levels to `review`).
+
+### Note on report file naming
+`docs/PHASE_2_REPORT.md` uses the UPPER_SNAKE name the owner requested; this is an explicit exception to the O-7 lower-kebab default. `docs/phase-1-report.md` keeps its existing name.

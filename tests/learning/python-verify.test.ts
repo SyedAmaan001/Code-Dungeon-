@@ -25,9 +25,14 @@ describe("real Python interpreter", () => {
   it("verifies every snippet in the valid fixture", () => {
     const snippets = collectSnippets(loadOrThrow(VALID_SMALL));
     expect(snippets.map((s) => s.label)).toEqual([
-      "levels/L001-output.yaml › fx.L001 lesson example",
+      "levels/L001-output.yaml › fx.L001 lesson example #1",
       "levels/L001-output.yaml › fx.L001.c1 (predict_output answer)",
-      "levels/L002-structures.yaml › fx.L002 lesson example",
+      "levels/L002-structures.yaml › fx.L002 lesson example #1",
+      "levels/L002-structures.yaml › fx.L002.c1 (fill_blank accepted answer #1)",
+      "levels/L002-structures.yaml › fx.L002.c2 (order_lines accepted order #1)",
+      "levels/L002-structures.yaml › fx.L002.c3 (trace values)",
+      "levels/L002-structures.yaml › fx.L002.c4 (buggy program behaviour)",
+      "levels/L002-structures.yaml › fx.L002.c4 (fixed program)",
     ]);
     for (const s of snippets) expect(verifySnippet(s)).toEqual({ snippet: s, ok: true });
   });

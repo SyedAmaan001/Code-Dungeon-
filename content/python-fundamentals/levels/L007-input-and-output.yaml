@@ -1,0 +1,165 @@
+id: py.L007
+version: 1
+number: 7
+zone: py.zone.caverns
+title: Input and Output
+description: Ask the player for information and shape what your program prints back.
+status: published
+kind: standard
+prerequisites:
+  - py.L006
+skills:
+  - py.skill.input
+  - py.skill.print-formatting
+estimatedMinutes: 12
+lesson:
+  objectives:
+    - Read what the user types with input().
+    - Convert input to a number before doing arithmetic with it.
+    - Control output with print()'s sep and end options.
+  explanation: |-
+    `input()` pauses the program and waits for the user to type a line. It returns what they typed as a string. You can pass a prompt to show first, such as `input("Name: ")`.
+
+    input() always returns a string, even when the user types digits. To do arithmetic, convert it: `age = int(input())`. Forgetting this is one of the most common beginner bugs: "4" * 2 is "44", not 8.
+
+    `print()` has two useful options. `sep` sets what goes between several values (a space by default), and `end` sets what goes after the output (a new line by default). `print("a", "b", sep="-")` prints a-b; `print("Loading", end="")` stays on the same line.
+
+    In this level's examples the typed text is supplied for you, shown as the program's input.
+  examples:
+    - code: |-
+        name = input()
+        print("Welcome,", name)
+      stdin: |
+        Ari
+      caption: The user types Ari.
+      expectedOutput: Welcome, Ari
+    - code: |-
+        potions = int(input())
+        print(potions * 2)
+      stdin: |
+        4
+      caption: The user types 4; int() turns it into a number.
+      expectedOutput: "8"
+    - code: |-
+        potions = input()
+        print(potions * 2)
+      stdin: |
+        4
+      caption: Without int(), the input is the text "4", and * repeats it.
+      expectedOutput: "44"
+    - code: |-
+        print("N", "E", "S", "W", sep="-")
+        print("Loading", end="")
+        print("...")
+      expectedOutput: |-
+        N-E-S-W
+        Loading...
+  misconceptions:
+    - input() gives a number when the user types digits. (It always gives a string.)
+    - print() can only show one value. (Separate several values with commas.)
+  practicalContext: Command-line tools, quizzes and setup scripts all read input, convert it, and report results.
+challenges:
+  - id: py.L007.c1
+    version: 1
+    difficulty: 1
+    prompt: The user types 3. What does this program print?
+    type: predict_output
+    code: |-
+      arrows = input()
+      print(arrows + arrows)
+    stdin: |
+      3
+    answer:
+      output: "33"
+    feedback:
+      correct: 'Correct: input() gives text, so + joins "3" and "3".'
+      incorrect: Think about the type input() returns.
+      byAnswer:
+        "6": input() returns a string, so + joins the text instead of adding numbers.
+    hints:
+      - What type does input() return?
+      - The program never converts the input to a number.
+      - Treat the typed 3 as text and apply + to two copies of it.
+    explanation: input() returns "3"; "3" + "3" is "33". Use int(input()) to get a number.
+  - id: py.L007.c2
+    version: 1
+    difficulty: 2
+    prompt: The user types 15. The program should print 16 but crashes. Find the line and the fix.
+    type: find_fix_bug
+    code: |-
+      age = input()
+      next_year = age + 1
+      print(next_year)
+    fixes:
+      - id: f1
+        text: "Change line 2 to: next_year = int(age) + 1"
+      - id: f2
+        text: 'Change line 2 to: next_year = age + "1"'
+      - id: f3
+        text: "Change line 3 to: print(int(next_year))"
+    answer:
+      line: 2
+      fix: f1
+    buggyBehaviour:
+      stdin: |
+        15
+      expectedException: TypeError
+    fixedCode: |-
+      age = input()
+      next_year = int(age) + 1
+      print(next_year)
+    check:
+      stdin: |
+        15
+      expectedOutput: "16"
+    feedback:
+      correct: "Correct: convert the text to a number before adding."
+      incorrect: Which line mixes text and a number?
+      byAnswer:
+        fix:f2: "That runs, but joins text: it prints 151, not 16."
+        fix:f3: The crash happens on line 2, before line 3 ever runs.
+        line:1: Line 1 runs fine; the problem appears when its result is used.
+    hints:
+      - The error is a TypeError on the line that adds.
+      - age holds text, and Python will not add text and a number.
+      - Pick the fix that converts age to a whole number before the addition.
+    explanation: age is the string "15". Adding 1 to a string raises TypeError; int(age) + 1 gives 16.
+  - id: py.L007.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: What type of value does input() always return?
+    type: multiple_choice
+    options:
+      - id: a
+        text: int
+      - id: b
+        text: str
+      - id: c
+        text: float
+      - id: d
+        text: It depends on what the user types
+    answer:
+      correct:
+        - b
+    feedback:
+      correct: "Correct: input() always returns a string."
+      incorrect: Even digits come back as text.
+      byAnswer:
+        d: Even when the user types digits, input() returns them as text. You convert them yourself.
+    hints:
+      - Think about the earlier example where 4 * 2 printed 44.
+      - Python does not guess what the user meant.
+      - It returns the text type, whatever the user types.
+    explanation: input() returns a str. Convert it with int() or float() when you need a number.
+sources:
+  - source: py-builtins
+    topic: input(), print()
+  - source: py-tutorial-io
+    topic: Input and Output
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

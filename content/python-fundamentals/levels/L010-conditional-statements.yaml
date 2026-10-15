@@ -1,0 +1,201 @@
+id: py.L010
+version: 1
+number: 10
+zone: py.zone.caverns
+title: Conditional Statements
+description: "Major encounter: steer your program down different paths with if, elif and else."
+status: published
+kind: major
+prerequisites:
+  - py.L009
+skills:
+  - py.skill.if
+  - py.skill.indentation
+estimatedMinutes: 18
+lesson:
+  objectives:
+    - Write if, elif and else blocks.
+    - Explain that only the first branch whose condition is true runs.
+    - Use indentation to show which lines belong to a block.
+  explanation: |-
+    An `if` statement runs a block of code only when its condition is True:
+
+    ```
+    if temperature > 25:
+        print("Hot")
+    ```
+
+    The colon ends the condition, and the indented lines underneath (four spaces is the standard) form the block. Indentation is not decoration in Python; it is how Python knows which lines belong to the if.
+
+    Add `elif` (else if) for more conditions and `else` for "none of the above". Python checks the conditions from top to bottom and runs only the first block whose condition is True. The remaining branches are skipped, even if their conditions are also True. After the chain, the program carries on with the next unindented line.
+
+    This is a major encounter: the challenges combine conditions, indentation and program order.
+  examples:
+    - code: |-
+        temperature = 15
+        if temperature > 25:
+            print("Hot")
+        elif temperature > 10:
+            print("Mild")
+        else:
+            print("Cold")
+        print("Done")
+      expectedOutput: |-
+        Mild
+        Done
+    - code: |-
+        gold = 120
+        if gold >= 100:
+            print("You can buy the map")
+        if gold >= 50:
+            print("You can buy a torch")
+      caption: Two separate if statements are checked independently, unlike an elif chain.
+      expectedOutput: |-
+        You can buy the map
+        You can buy a torch
+  misconceptions:
+    - Every branch whose condition is true runs. (Only the first true branch in an if/elif/else chain runs.)
+    - Indentation is optional style. (It defines the blocks.)
+  practicalContext: Applying a discount, validating a form field or deciding which level to load are all conditional decisions.
+challenges:
+  - id: py.L010.c1
+    version: 1
+    difficulty: 2
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      score = 75
+      if score >= 90:
+          print("A")
+      elif score >= 70:
+          print("B")
+      elif score >= 50:
+          print("C")
+      else:
+          print("D")
+    answer:
+      output: B
+    feedback:
+      correct: "Correct: 75 >= 70 is the first true condition, so only that branch runs."
+      incorrect: Check the conditions from the top and stop at the first true one.
+      byAnswer:
+        "B\nC": 75 >= 50 is also true, but only the first true branch in the chain runs.
+        C: "Check the conditions in order: score >= 70 comes before score >= 50."
+    hints:
+      - Test each condition from the top with score = 75.
+      - As soon as one condition is True, Python runs that block and skips the rest.
+      - 75 >= 90 is False, so move on to the next condition and test it.
+    explanation: score >= 90 is False; score >= 70 is True, so B is printed and the rest of the chain is skipped.
+  - id: py.L010.c2
+    version: 1
+    difficulty: 2
+    prompt: Arrange the lines (indentation is shown) so the program prints Locked.
+    type: order_lines
+    lines:
+      - id: l1
+        text: has_key = False
+      - id: l2
+        text: "if has_key:"
+      - id: l3
+        text: print("Open")
+        indent: 1
+      - id: l4
+        text: "else:"
+      - id: l5
+        text: print("Locked")
+        indent: 1
+    answer:
+      orders:
+        - - l1
+          - l2
+          - l3
+          - l4
+          - l5
+    check:
+      expectedOutput: Locked
+    feedback:
+      correct: "Correct: the variable is set, the if is tested, and else catches the False case."
+      incorrect: Each indented line must sit directly under the header it belongs to.
+    hints:
+      - A variable has to exist before it is tested.
+      - Each indented print belongs under the line ending with a colon just above it.
+      - "The else: header comes after the if block has finished."
+    explanation: has_key is False, so the if block is skipped and the else block prints Locked.
+  - id: py.L010.c3
+    version: 1
+    difficulty: 1
+    prompt: This program should print Boss room unlocked. Find the line and the fix.
+    type: find_fix_bug
+    code: |-
+      level = 5
+      if level > 3:
+      print("Boss room unlocked")
+    fixes:
+      - id: f1
+        text: Indent line 3 by four spaces
+      - id: f2
+        text: Remove the colon on line 2
+      - id: f3
+        text: Change > to >= on line 2
+    answer:
+      line: 3
+      fix: f1
+    buggyBehaviour:
+      expectedException: IndentationError
+    fixedCode: |-
+      level = 5
+      if level > 3:
+          print("Boss room unlocked")
+    check:
+      expectedOutput: Boss room unlocked
+    feedback:
+      correct: "Correct: the block after if must be indented."
+      incorrect: Look at how blocks are marked in Python.
+      byAnswer:
+        fix:f2: The colon is required; removing it causes a different error.
+        fix:f3: The condition is already True; the problem is the shape of the code.
+    hints:
+      - Python reports an IndentationError.
+      - Lines that belong to an if must be shifted right.
+      - The line after the colon is not part of a block yet.
+    explanation: "After if level > 3: Python expects an indented block. Indenting line 3 makes it the body of the if."
+  - id: py.L010.c4
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: In a single if / elif / else chain, how many blocks can run at most?
+    type: multiple_choice
+    options:
+      - id: a
+        text: One
+      - id: b
+        text: Every block whose condition is True
+      - id: c
+        text: "Two: the if block and the else block"
+      - id: d
+        text: None; else always runs instead
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: Python stops at the first true condition."
+      incorrect: Think about what happens after a true condition is found.
+      byAnswer:
+        b: That describes separate if statements, not one chain.
+        c: else runs only when none of the conditions was true.
+    hints:
+      - Python checks conditions from top to bottom.
+      - What does Python do with the rest of the chain after a true condition?
+      - The chain is skipped after the first block runs, and else only runs when nothing matched.
+    explanation: "At most one block in an if/elif/else chain runs: the first one whose condition is True, or else if none is."
+sources:
+  - source: py-tutorial-control
+    topic: if Statements
+  - source: py-reference-compound
+    topic: The if statement
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

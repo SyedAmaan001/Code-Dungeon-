@@ -1,0 +1,150 @@
+id: py.L018
+version: 1
+number: 18
+zone: py.zone.archive
+title: Dictionaries
+description: Look things up by name with key–value pairs.
+status: published
+kind: standard
+prerequisites:
+  - py.L017
+skills:
+  - py.skill.dicts
+estimatedMinutes: 14
+lesson:
+  objectives:
+    - Store key–value pairs in a dictionary.
+    - Read, add and update values by key.
+    - Loop over pairs with items(), and use get() for keys that may be missing.
+  explanation: |-
+    A dictionary maps keys to values: `player = {"name": "Ari", "level": 3}`. Instead of a position, you look a value up by its key: `player["name"]` is "Ari".
+
+    Assigning to a key updates it if it exists and adds it if it does not: `player["level"] = 4` changes the level, `player["gold"] = 10` adds a new pair. Keys are unique; each key appears once.
+
+    Asking for a key that is not there, such as `player["mana"]`, raises KeyError. When a key might be missing, use `player.get("mana", 0)`, which returns the default (here 0) instead of failing. Check whether a key exists with `"mana" in player`.
+
+    `for key, value in player.items():` visits every pair. Dictionaries remember the order in which keys were added.
+  examples:
+    - code: |-
+        player = {"name": "Ari", "level": 3}
+        print(player["name"])
+        player["level"] = 4
+        player["gold"] = 10
+        print(player)
+      expectedOutput: |-
+        Ari
+        {'name': 'Ari', 'level': 4, 'gold': 10}
+    - code: |-
+        prices = {"potion": 5, "rope": 2}
+        for item, cost in prices.items():
+            print(item, cost)
+        print(prices.get("map", 0))
+        print("map" in prices)
+      expectedOutput: |-
+        potion 5
+        rope 2
+        0
+        False
+    - code: |-
+        prices = {"potion": 5}
+        print(prices["map"])
+      caption: A missing key raises KeyError.
+      expectedException: KeyError
+  misconceptions:
+    - Dictionaries are looked up by position like lists. (They are looked up by key.)
+    - A missing key returns None. (Square brackets raise KeyError; get() returns a default.)
+  practicalContext: Settings, word counts, phone books and JSON data from web APIs are all dictionaries.
+challenges:
+  - id: py.L018.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      stock = {"arrow": 20, "bow": 1}
+      stock["arrow"] = stock["arrow"] - 5
+      print(stock["arrow"])
+      print(len(stock))
+    answer:
+      output: |-
+        15
+        2
+    feedback:
+      correct: "Correct: the arrow count is updated, and the dictionary still has two keys."
+      incorrect: Updating a key does not add a new one.
+      byAnswer:
+        "15\n3": Assigning to an existing key replaces its value; it does not add a new pair.
+    hints:
+      - Read the right-hand side of line 2 first.
+      - The key "arrow" already exists, so its value is replaced.
+      - len() of a dictionary counts its keys.
+    explanation: stock["arrow"] becomes 20 - 5 = 15. The dictionary still has 2 keys.
+  - id: py.L018.c2
+    version: 1
+    difficulty: 1
+    prompt: Fill in the method so a missing item gives 0 instead of an error.
+    type: fill_blank
+    template: |-
+      bag = {"gem": 2}
+      print(bag.{{blank:m}}("key", 0))
+    blanks:
+      - id: m
+        label: method
+    answer:
+      accepted:
+        m:
+          - get
+    check:
+      expectedOutput: "0"
+    feedback:
+      correct: "Correct: get() returns the default when the key is missing."
+      incorrect: Which dictionary method takes a key and a default?
+      byAnswer:
+        items: items() returns all pairs and takes no arguments.
+    hints:
+      - Square brackets would raise KeyError for "key".
+      - There is a method that takes a key and a fallback value.
+      - Its name is a three-letter verb meaning fetch.
+    explanation: bag.get("key", 0) returns 0 because "key" is not in the dictionary.
+  - id: py.L018.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: |-
+      d = {"a": 1, "b": 2}
+      What does d["c"] do?
+    type: multiple_choice
+    options:
+      - id: a
+        text: Raises a KeyError
+      - id: b
+        text: Returns None
+      - id: c
+        text: Returns 0
+      - id: d
+        text: Adds the key "c"
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: square brackets need the key to exist."
+      incorrect: Reading and writing behave differently.
+      byAnswer:
+        b: That is what d.get("c") returns, not d["c"].
+        d: Only assignment, like d["c"] = 3, adds a key.
+    hints:
+      - Is "c" a key in d?
+      - Reading a missing key with [] is an error.
+      - The error's name contains the word Key.
+    explanation: Reading a missing key with square brackets raises KeyError.
+sources:
+  - source: py-tutorial-ds
+    topic: Dictionaries
+  - source: py-stdtypes
+    topic: Mapping Types — dict
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

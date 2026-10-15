@@ -67,7 +67,12 @@ export function loadPack(dir: string): LoadResult {
       if (raw === undefined) continue;
       const parsed = Level.safeParse(raw);
       if (!parsed.success) {
-        issues.push(...zodIssues(rel, parsed.error));
+        const id = (raw as { id?: unknown } | null)?.id;
+        issues.push(
+          ...zodIssues(rel, parsed.error).map((i) =>
+            typeof id === "string" ? { ...i, level: id } : i,
+          ),
+        );
         continue;
       }
       levels.push(parsed.data);

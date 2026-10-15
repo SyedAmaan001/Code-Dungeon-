@@ -1,0 +1,138 @@
+# References consulted for the Python Fundamentals path. All explanations are original.
+sources:
+  - id: py-tutorial
+    title: The Python Tutorial — An Informal Introduction to Python
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/tutorial/introduction.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for numbers, text, variables and lists. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-tutorial-control
+    title: The Python Tutorial — More Control Flow Tools
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/tutorial/controlflow.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for if, for, range(), break/continue and defining functions. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-tutorial-ds
+    title: The Python Tutorial — Data Structures
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/tutorial/datastructures.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for lists, tuples, sets and dictionaries. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-tutorial-modules
+    title: The Python Tutorial — Modules
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/tutorial/modules.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for import and modules. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-tutorial-io
+    title: The Python Tutorial — Input and Output
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/tutorial/inputoutput.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for output formatting and f-strings. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-tutorial-errors
+    title: The Python Tutorial — Errors and Exceptions
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/tutorial/errors.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for try/except/finally. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-tutorial-fp
+    title: "The Python Tutorial — Floating-Point Arithmetic: Issues and Limitations"
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/tutorial/floatingpoint.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for float precision. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-builtins
+    title: The Python Standard Library — Built-in Functions
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/library/functions.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for print(), input(), int(), float(), str(), type(), len() and round(). The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-stdtypes
+    title: The Python Standard Library — Built-in Types
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/library/stdtypes.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for truth values, comparisons, numeric, sequence, set and mapping types. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-exceptions
+    title: The Python Standard Library — Built-in Exceptions
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/library/exceptions.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for exception types. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-math
+    title: The Python Standard Library — math
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/library/math.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for math functions. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-random
+    title: The Python Standard Library — random
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/library/random.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for random numbers. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-reference-compound
+    title: The Python Language Reference — Compound statements
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/reference/compound_stmts.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for if and while statements. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-reference-simple
+    title: The Python Language Reference — Simple statements
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/reference/simple_stmts.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for the assert statement. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-reference-execution
+    title: The Python Language Reference — Execution model
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/reference/executionmodel.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for naming, binding and scope. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: py-faq-programming
+    title: Python Programming FAQ
+    author: Python Software Foundation
+    edition: Python 3.13 documentation
+    url: https://docs.python.org/3.13/faq/programming.html
+    licence: PSF documentation licence; code samples in the documentation are Zero-Clause BSD. Consulted as a factual reference only; no text copied.
+    reviewed: 2026-10-15
+    notes: Authoritative reference for UnboundLocalError. The agent did not re-read this page during authoring; every runnable claim in the levels was instead verified by executing it with CPython 3.13.16.
+  - id: pep8
+    title: PEP 8 – Style Guide for Python Code
+    author: Guido van Rossum, Barry Warsaw, Alyssa Coghlan
+    edition: PEP 8 (living document)
+    url: https://peps.python.org/pep-0008/
+    licence: Placed in the public domain (as stated in the PEP). Consulted for naming conventions only.
+    reviewed: 2026-10-15
+    notes: Naming-convention reference (lowercase_with_underscores). Not re-read during authoring.

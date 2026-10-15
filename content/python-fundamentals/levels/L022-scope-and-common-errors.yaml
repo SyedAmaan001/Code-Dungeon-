@@ -1,0 +1,217 @@
+id: py.L022
+version: 1
+number: 22
+zone: py.zone.citadel
+title: Scope and Common Errors
+description: Learn where variables live, and read the errors Python gives you.
+status: published
+kind: standard
+prerequisites:
+  - py.L021
+skills:
+  - py.skill.scope
+  - py.skill.reading-errors
+estimatedMinutes: 15
+lesson:
+  objectives:
+    - Explain that variables assigned inside a function are local to it.
+    - Pass values in through parameters and out through return instead of relying on globals.
+    - Name the common error types and what usually causes them.
+  explanation: |-
+    A variable assigned inside a function is local: it exists only while the function runs and cannot be seen outside it. A variable assigned at the top level of a file is global and can be read inside functions.
+
+    If a function assigns to a name, Python treats that name as local throughout the function. So `counter = counter + 1` inside a function fails with UnboundLocalError: the local counter is being read before it has a value. The clean fix is to pass the value in as a parameter and return the new value.
+
+    When something goes wrong, the last line of the error message names the error type and gives a short reason. Common ones:
+
+    - `NameError`: a name is not defined (often a typo or a call before the def)
+    - `TypeError`: an operation got the wrong type, such as "a" + 1
+    - `ValueError`: the type is right but the value is not, such as int("seven")
+    - `IndexError` / `KeyError`: a list index or dictionary key does not exist
+    - `SyntaxError` / `IndentationError`: the code is not valid Python
+
+    Read the last line first, then the line number above it.
+  examples:
+    - code: |-
+        x = 5
+
+        def change():
+            x = 99
+            return x
+
+        print(change())
+        print(x)
+      caption: The x inside change() is a separate, local variable.
+      expectedOutput: |-
+        99
+        5
+    - code: |-
+        def make_gold():
+            gold = 100
+            return gold
+
+        print(make_gold())
+        print(gold)
+      caption: gold only exists inside the function, so the last line fails.
+      expectedException: NameError
+    - code: |-
+        counter = 0
+
+        def add():
+            counter = counter + 1
+
+        add()
+      caption: Assigning to counter makes it local, so it is read before it has a value.
+      expectedException: UnboundLocalError
+  misconceptions:
+    - Assigning to a variable inside a function changes the global one. (It creates a local one.)
+    - Error messages are only for experts. (The last line usually says exactly what went wrong.)
+  practicalContext: Keeping data inside functions avoids bugs where distant code changes a value unexpectedly; reading error messages is the core debugging skill.
+challenges:
+  - id: py.L022.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      level = 1
+
+      def level_up(level):
+          level = level + 1
+          return level
+
+      new = level_up(level)
+      print(level, new)
+    answer:
+      output: 1 2
+    feedback:
+      correct: "Correct: the parameter is a separate local name; the global level is unchanged."
+      incorrect: Which level does the function change?
+      byAnswer:
+        2 2: The function changes its own local level, not the global one.
+    hints:
+      - The parameter level is local to the function.
+      - Changing a local variable does not change the global one with the same name.
+      - The function returns 2, but what happened to the global level?
+    explanation: Inside level_up, level is a local parameter. The global level stays 1; the returned value 2 is stored in new.
+  - id: py.L022.c2
+    version: 1
+    difficulty: 3
+    prompt: This program should add 5 points and print 5, but it crashes. Find the line and the fix.
+    type: find_fix_bug
+    code: |-
+      score = 0
+
+      def add_points(points):
+          score = score + points
+
+      add_points(5)
+      print(score)
+    fixes:
+      - id: f1
+        text: "Return the new score instead: change line 4 to return score + points, and line 6 to score = add_points(5)"
+      - id: f2
+        text: Rename score to points on line 4
+      - id: f3
+        text: Delete line 1
+    answer:
+      line: 4
+      fix: f1
+    buggyBehaviour:
+      expectedException: UnboundLocalError
+    fixedCode: |-
+      score = 0
+
+      def add_points(points):
+          return score + points
+
+      score = add_points(5)
+      print(score)
+    check:
+      expectedOutput: "5"
+    feedback:
+      correct: "Correct: compute the value inside, hand it back, and assign it outside."
+      incorrect: Why does Python think score is local inside the function?
+      byAnswer:
+        fix:f3: Without line 1 there is no score at all, so the program still fails.
+        line:6: The call is fine; the error is raised inside the function.
+    hints:
+      - The error is an UnboundLocalError.
+      - Assigning to score inside the function makes score local there.
+      - Avoid assigning to the global name inside the function; give the value back instead.
+    explanation: Because line 4 assigns to score, Python treats score as local and reads it before it has a value. Returning the result and assigning it outside fixes this.
+  - id: py.L022.c3
+    version: 1
+    difficulty: 1
+    prompt: |-
+      A program stops with:
+
+      TypeError: can only concatenate str (not "int") to str
+
+      What went wrong?
+    type: multiple_choice
+    options:
+      - id: a
+        text: Text and a number were joined with +
+      - id: b
+        text: A variable name was misspelled
+      - id: c
+        text: A list index was too large
+      - id: d
+        text: A colon is missing after an if
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: + was used between a str and an int."
+      incorrect: "Read the message word by word: concatenate means join."
+      byAnswer:
+        b: That would be a NameError.
+        c: That would be an IndexError.
+        d: That would be a SyntaxError.
+    hints:
+      - Read the error type first.
+      - '"Concatenate" means joining strings together.'
+      - The message says an int was found where a str was expected.
+    explanation: Joining text and a number, as in "Level " + 3, raises this TypeError. Use str(3) or an f-string.
+  - id: py.L022.c4
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: Which error does int("seven") raise?
+    type: multiple_choice
+    options:
+      - id: a
+        text: ValueError
+      - id: b
+        text: TypeError
+      - id: c
+        text: NameError
+      - id: d
+        text: SyntaxError
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: int() accepts strings, but this string's value is not a number."
+      incorrect: The type (str) is acceptable to int(); the content is the problem.
+      byAnswer:
+        b: int() does accept strings, so the type is fine. The value is the problem.
+    hints:
+      - Does int() accept strings at all?
+      - The type is fine; the contents are not digits.
+      - The error type is named after the word value.
+    explanation: int() accepts strings, but "seven" is not a valid number, so it raises ValueError.
+sources:
+  - source: py-reference-execution
+    topic: Naming and binding
+  - source: py-faq-programming
+    topic: Why am I getting an UnboundLocalError
+  - source: py-exceptions
+    topic: Concrete exceptions
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

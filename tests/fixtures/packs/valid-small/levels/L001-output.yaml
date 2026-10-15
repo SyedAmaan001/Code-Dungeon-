@@ -3,16 +3,19 @@ version: 1
 number: 1
 zone: fx.zone.one
 title: Fixture Output
+description: Test fixture level about print().
 status: published
 estimatedMinutes: 5
 lesson:
-  objective: Predict what print() displays for a string.
+  objectives:
+    - Predict what print() displays for a string.
   explanation: print() writes its argument to the console, followed by a newline.
-  example:
-    code: print("Hello, dungeon!")
-    expectedOutput: Hello, dungeon!
+  examples:
+    - code: print("Hello, dungeon!")
+      expectedOutput: Hello, dungeon!
   misconceptions:
     - The quotation marks are printed too.
+  practicalContext: Programs report results to people by printing them.
 challenges:
   - id: fx.L001.c1
     version: 1
@@ -29,10 +32,13 @@ challenges:
         "5": That would be true for the numbers 2 and 3, but these are strings.
     hints:
       - Look at the quotation marks.
+      - Quoted values are strings, not numbers.
+      - With strings, + puts the second piece of text right after the first.
     explanation: '"2" and "3" are strings; + concatenates strings, giving "23".'
   - id: fx.L001.c2
     version: 1
     type: multiple_choice
+    role: check
     difficulty: 1
     prompt: Which line prints the text Ready?
     options:
@@ -44,6 +50,12 @@ challenges:
     feedback:
       correct: Strings need quotes, and Python names are case-sensitive.
       incorrect: Check the quotes and the capital letter.
+      byAnswer:
+        b: Without quotes, Ready is treated as a variable name.
+    hints:
+      - Text that should appear exactly needs something around it.
+      - Python cares about upper and lower case.
+      - The built-in function is spelled in lowercase and text goes in quotes.
     explanation: Without quotes Ready is a variable name; Print is not the built-in print.
 sources:
   - source: python-tutorial-3.13

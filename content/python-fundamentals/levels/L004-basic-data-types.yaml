@@ -1,0 +1,140 @@
+id: py.L004
+version: 1
+number: 4
+zone: py.zone.camp
+title: Basic Data Types
+description: Meet int, float, str and bool, and convert values from one type to another.
+status: published
+kind: standard
+prerequisites:
+  - py.L003
+skills:
+  - py.skill.types
+  - py.skill.conversion
+estimatedMinutes: 12
+lesson:
+  objectives:
+    - Identify int, float, str and bool values.
+    - Use type() to check a value's type.
+    - Convert values with int(), float() and str().
+  explanation: |-
+    Every value has a type, and the type decides what you can do with it:
+
+    - `int`: whole numbers such as 7 or -3
+    - `float`: numbers with a decimal point such as 2.5 or 7.0
+    - `str` (string): text such as "7" or "gold"
+    - `bool`: the two truth values True and False
+
+    `type(value)` tells you a value's type. Types matter: `"5" + 5` is an error, because Python will not guess whether you meant text or arithmetic.
+
+    You can convert between types. `int("42")` turns text into the number 42, `str(42)` turns a number into the text "42", and `float("2.5")` gives 2.5. `int()` on a float does not round; it drops everything after the decimal point, so `int(3.9)` is 3. Converting text that is not a whole number, such as `int("3.5")`, raises a ValueError.
+  examples:
+    - code: |-
+        print(type(7))
+        print(type(7.0))
+        print(type("7"))
+        print(type(True))
+      expectedOutput: |-
+        <class 'int'>
+        <class 'float'>
+        <class 'str'>
+        <class 'bool'>
+    - code: |-
+        print(int("42") + 1)
+        print(str(42) + "1")
+        print(int(3.9))
+      caption: Converting changes what + means; int() drops the decimal part.
+      expectedOutput: |-
+        43
+        421
+        3
+    - code: print("5" + 5)
+      caption: Mixing text and numbers with + raises a TypeError.
+      expectedException: TypeError
+  misconceptions:
+    - The text "7" and the number 7 are the same thing. (One is a str, the other an int.)
+    - int(3.9) rounds to 4. (It drops the decimal part and gives 3.)
+  practicalContext: Data read from files, forms and keyboards arrives as text; converting it to the right type is one of the most common tasks in real programs.
+challenges:
+  - id: py.L004.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: print(str(7) + "7")
+    answer:
+      output: "77"
+    feedback:
+      correct: "Correct: str(7) is text, so + joins the two pieces of text."
+      incorrect: Think about the type of each side of the +.
+      byAnswer:
+        "14": str(7) turns the number into text, so + joins text rather than adding numbers.
+        '"77"': The value is the text 77, but print() does not show the quotation marks.
+    hints:
+      - What type does str() produce?
+      - When both sides of + are text, + joins them.
+      - Write the first piece of text, then the second piece directly after it.
+    explanation: str(7) is the text "7"; "7" + "7" joins them into "77".
+  - id: py.L004.c2
+    version: 1
+    difficulty: 2
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      print(int("8") * 2)
+      print(int(7.9))
+    answer:
+      output: |-
+        16
+        7
+    feedback:
+      correct: 'Correct: "8" becomes the number 8, and int() cuts 7.9 down to 7.'
+      incorrect: Check what each conversion produces before the rest of the line runs.
+      byAnswer:
+        "16\n8": int() does not round. It drops the decimal part, so 7.9 becomes 7.
+        "88\n7": int("8") is the number 8, so * multiplies instead of repeating text.
+    hints:
+      - Work out each conversion first.
+      - int() turns text digits into a number, and turns a float into a whole number.
+      - "int() never rounds up: think about what happens to the .9."
+    explanation: int("8") is 8 and 8 * 2 is 16. int(7.9) truncates toward zero, giving 7.
+  - id: py.L004.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: What is the type of the value 3.0?
+    type: multiple_choice
+    options:
+      - id: a
+        text: int
+      - id: b
+        text: float
+      - id: c
+        text: str
+      - id: d
+        text: bool
+    answer:
+      correct:
+        - b
+    feedback:
+      correct: "Correct: a decimal point makes it a float, even when the fractional part is zero."
+      incorrect: Look for the decimal point.
+      byAnswer:
+        a: 3.0 has a decimal point, so it is a float, even though it equals the whole number 3.
+        c: It has no quotation marks, so it is not text.
+    hints:
+      - Is there a decimal point?
+      - Whole numbers without a decimal point are ints.
+      - A number written with a decimal point belongs to the decimal-number type.
+    explanation: Any number literal with a decimal point is a float.
+sources:
+  - source: py-builtins
+    topic: int(), float(), str(), type()
+  - source: py-stdtypes
+    topic: Numeric Types; Text Sequence Type
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

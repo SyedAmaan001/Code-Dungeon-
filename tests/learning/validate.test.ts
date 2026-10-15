@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { ContentPack, Level } from "@/learning/schema";
+import { formatIssue } from "@/learning/issues";
 import { findCycles, prerequisiteOrder, validatePack } from "@/learning/validate";
 import { clonePack, loadOrThrow, VALID_SMALL } from "../support/packs";
 
@@ -100,17 +101,25 @@ describe("validatePack — rejects invalid content", () => {
   it("publishing code_write while live execution is disabled", () => {
     const p = clonePack(base);
     const l = level(p, "fx.L003");
+    const donor = level(p, "fx.L001");
     l.status = "published";
+    l.description = "Publishable apart from the code_write challenge.";
     l.estimatedMinutes = 5;
-    l.lesson = structuredClone(level(p, "fx.L001").lesson);
+    l.lesson = structuredClone(donor.lesson);
     l.sources = [{ source: "python-tutorial-3.13" }];
-    l.review = { reviewer: "test", date: "2026-10-15", pythonVersion: "3.13" };
-    l.challenges[0]!.feedback = { correct: "Yes.", incorrect: "No." };
-    l.challenges[0]!.explanation = "Because.";
-    expect(errorsOf(p)).toContainEqual(
-      expect.stringContaining("cannot be published while live code execution is disabled"),
-    );
-    expect(errorsOf(p, true)).toEqual([]);
+    l.review = { reviewer: "test", date: "2026-10-15", pythonVersion: "3.13", kind: "human" };
+    const cw = l.challenges[0]!;
+    cw.feedback = { correct: "Yes.", incorrect: "No." };
+    cw.explanation = "Because.";
+    cw.hints = ["One.", "Two.", "Three."];
+    l.challenges.push(structuredClone(donor.challenges[1]!));
+    l.challenges[1]!.id = "fx.L003.c2";
+    const blocked = "cannot be published while live code execution is disabled";
+    expect(errorsOf(p)).toEqual([expect.stringContaining(blocked)]);
+    // With a runner enabled the block lifts, but an evaluator must still be registered.
+    expect(errorsOf(p, true)).toEqual([
+      expect.stringContaining('no evaluator is registered for "code_write"'),
+    ]);
   });
 
   it("multiple choice answer inconsistencies", () => {
@@ -153,5 +162,104 @@ describe("validatePack — rejects invalid content", () => {
     const errors = errorsOf(p);
     expect(errors).toContainEqual(expect.stringContaining('unknown level "fx.L404"'));
     expect(errors).toContainEqual(expect.stringContaining('unknown zone "fx.zone.void"'));
+  });
+});
+
+describe("validatePack — Phase 2 learning-engine rules", () => {
+  const issuesOf = (pack: ContentPack) => validatePack(pack).filter((i) => i.severity === "error");
+
+  it("locates errors by file, level and field", () => {
+    const p = clonePack(base);
+    level(p, "fx.L001").challenges[0]!.hints = ["Only one."];
+    const issue = issuesOf(p).find((i) => i.message.includes("progressive hints"));
+    expect(issue).toMatchObject({
+      file: "levels/L001-output.yaml",
+      level: "fx.L001",
+      at: "challenges[0] (fx.L001.c1).hints",
+    });
+    expect(formatIssue(issue!)).toBe(
+      "ERROR levels/L001-output.yaml › fx.L001 › challenges[0] (fx.L001.c1).hints: published challenge needs exactly 3 progressive hints (has 1)",
+    );
+  });
+
+  it("rejects hints that repeat or reveal the answer", () => {
+    const p = clonePack(base);
+    const mc = level(p, "fx.L001").challenges[1]!;
+    mc.hints = ["Same.", "same.", 'Try print("Ready")'];
+    const errors = errorsOf(p);
+    expect(errors).toContainEqual(expect.stringContaining("hints must be distinct"));
+    expect(errors).toContainEqual(
+      expect.stringContaining('hint 3 reveals the answer ("print("Ready")")'),
+    );
+  });
+
+  it("requires description, practical context, an exercise and a knowledge check", () => {
+    const p = clonePack(base);
+    const l = level(p, "fx.L001");
+    delete l.description;
+    delete l.lesson!.practicalContext;
+    l.challenges.forEach((c) => (c.role = "exercise"));
+    const errors = errorsOf(p);
+    expect(errors).toContainEqual(expect.stringContaining("missing a description"));
+    expect(errors).toContainEqual(expect.stringContaining("missing a practical context"));
+    expect(errors).toContainEqual(
+      expect.stringContaining('missing a knowledge check (role: "check")'),
+    );
+  });
+
+  it("requires runnable checks for fill_blank, order_lines and find_fix_bug", () => {
+    const p = clonePack(base);
+    const [fill, order, , fix] = level(p, "fx.L002").challenges;
+    if (
+      fill?.type !== "fill_blank" ||
+      order?.type !== "order_lines" ||
+      fix?.type !== "find_fix_bug"
+    )
+      throw new Error("fixture changed");
+    delete fill.check;
+    delete order.check;
+    delete fix.fixedCode;
+    const errors = errorsOf(p);
+    expect(errors).toContainEqual(expect.stringContaining("published fill_blank needs a check"));
+    expect(errors).toContainEqual(expect.stringContaining("published order_lines needs a check"));
+    expect(errors).toContainEqual(
+      expect.stringContaining("needs buggyBehaviour, fixedCode and check"),
+    );
+  });
+
+  it("rejects misconception keys that are actually correct or impossible", () => {
+    const p = clonePack(base);
+    const [po, mc] = level(p, "fx.L001").challenges;
+    po!.feedback!.byAnswer = { "23": "x" };
+    mc!.feedback!.byAnswer = { a: "x", z: "y" };
+    const errors = errorsOf(p);
+    expect(errors).toContainEqual(
+      expect.stringContaining('misconception key "23" is an accepted answer'),
+    );
+    expect(errors).toContainEqual(
+      expect.stringContaining('misconception key "a" is the correct answer'),
+    );
+    expect(errors).toContainEqual(
+      expect.stringContaining('misconception key "z" names an unknown option'),
+    );
+  });
+
+  it("requires a starting level when anything is published", () => {
+    const p = clonePack(base);
+    level(p, "fx.L001").prerequisites = ["fx.L002"];
+    expect(errorsOf(p)).toContainEqual(
+      expect.stringContaining("no published level is unlockable at the start"),
+    );
+  });
+
+  it("warns once when published content has only agent review", () => {
+    const p = clonePack(base);
+    p.levels.forEach((l) => l.review && (l.review.kind = "agent"));
+    const warnings = validatePack(p).filter((i) => i.severity === "warning");
+    expect(warnings).toEqual([
+      expect.objectContaining({
+        message: expect.stringContaining("2 published level(s) were reviewed only by an AI agent"),
+      }),
+    ]);
   });
 });

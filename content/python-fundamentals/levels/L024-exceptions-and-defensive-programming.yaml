@@ -1,0 +1,172 @@
+id: py.L024
+version: 1
+number: 24
+zone: py.zone.citadel
+title: Exceptions and Defensive Programming
+description: Catch errors you expect, and check input before trusting it.
+status: published
+kind: standard
+prerequisites:
+  - py.L023
+skills:
+  - py.skill.exceptions
+  - py.skill.validation
+estimatedMinutes: 15
+lesson:
+  objectives:
+    - Handle an expected error with try and except.
+    - Catch specific exception types rather than every error.
+    - Validate input before using it.
+  explanation: |-
+    Some errors are expected: a user types "ten" when you asked for a number, or a file is missing. A `try` block lets you attempt something, and an `except` block says what to do if a particular error happens:
+
+    ```
+    try:
+        amount = int(text)
+    except ValueError:
+        amount = 0
+    ```
+
+    If the try block succeeds, the except block is skipped. If a ValueError happens, Python jumps to the except block instead of crashing. An optional `finally` block runs either way.
+
+    Catch the specific error you expect. A bare `except:` also hides typos and real bugs, which makes them much harder to find.
+
+    Defensive programming also means checking before acting: `text.isdigit()` tests whether a string contains only digits, and an if can test whether a list is empty before dividing by its length.
+  examples:
+    - code: |-
+        try:
+            amount = int("12a")
+        except ValueError:
+            amount = 0
+        print(amount)
+      expectedOutput: "0"
+    - code: |-
+        text = input()
+        if text.isdigit():
+            print(int(text) * 2)
+        else:
+            print("Please enter a whole number")
+      stdin: |
+        abc
+      caption: The user types abc.
+      expectedOutput: Please enter a whole number
+    - code: |-
+        try:
+            print(10 / 0)
+        except ZeroDivisionError:
+            print("Cannot divide by zero")
+        finally:
+            print("Done")
+      expectedOutput: |-
+        Cannot divide by zero
+        Done
+  misconceptions:
+    - Wrapping everything in try/except makes a program correct. (It can hide real bugs.)
+    - except catches errors that happen after the try block. (Only errors raised inside the try block.)
+  practicalContext: Forms, file loaders and network code must expect bad input and failures and respond helpfully instead of crashing.
+challenges:
+  - id: py.L024.c1
+    version: 1
+    difficulty: 2
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      def safe_div(a, b):
+          try:
+              return a / b
+          except ZeroDivisionError:
+              return None
+
+      print(safe_div(9, 3))
+      print(safe_div(1, 0))
+    answer:
+      output: |-
+        3.0
+        None
+    feedback:
+      correct: "Correct: the first call divides normally; the second is caught."
+      incorrect: Follow each call separately.
+      byAnswer:
+        "3\nNone": / always produces a float.
+        "3.0": The second call does not crash; the except block returns None, which is printed.
+    hints:
+      - The first call does not raise an error.
+      - Dividing by zero raises the error the except block names.
+      - Print the value each call returns, one per line.
+    explanation: 9 / 3 is 3.0. 1 / 0 raises ZeroDivisionError, so the function returns None.
+  - id: py.L024.c2
+    version: 1
+    difficulty: 2
+    prompt: Arrange the lines (indentation is shown) so the program prints Invalid number when converting "ten".
+    type: order_lines
+    lines:
+      - id: l1
+        text: print("Invalid number")
+        indent: 1
+      - id: l2
+        text: "try:"
+      - id: l3
+        text: "except ValueError:"
+      - id: l4
+        text: value = int("ten")
+        indent: 1
+      - id: l5
+        text: print(value)
+        indent: 1
+    answer:
+      orders:
+        - - l2
+          - l4
+          - l5
+          - l3
+          - l1
+    check:
+      expectedOutput: Invalid number
+    feedback:
+      correct: "Correct: the risky conversion sits inside try, and except handles the failure."
+      incorrect: The code that might fail goes in the try block.
+    hints:
+      - "The try: header comes first."
+      - The conversion and the code that uses its result belong inside try.
+      - The except header and its message come after the try block.
+    explanation: int("ten") raises ValueError inside try, so print(value) is skipped and the except block runs.
+  - id: py.L024.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: "Why is except ValueError: usually better than a bare except: when converting user input?"
+    type: multiple_choice
+    options:
+      - id: a
+        text: It handles the expected problem while unexpected bugs still show up
+      - id: b
+        text: It makes the program run faster
+      - id: c
+        text: "A bare except: is not valid Python"
+      - id: d
+        text: It also catches every other kind of error
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: specific handlers do not hide unrelated mistakes."
+      incorrect: "What would a bare except: hide?"
+      byAnswer:
+        c: "A bare except: is valid, but it hides every error, including real bugs."
+        d: That is what a bare except does, and it is the problem.
+    hints:
+      - Think about a typo inside the try block.
+      - A bare except catches every error, including ones you did not expect.
+      - Which choice lets surprising errors still be noticed?
+    explanation: Catching only ValueError handles bad input while letting genuine bugs (such as NameError) surface.
+sources:
+  - source: py-tutorial-errors
+    topic: Handling Exceptions; Defining Clean-up Actions
+  - source: py-stdtypes
+    topic: str.isdigit
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

@@ -12,7 +12,12 @@
  */
 import { z } from "zod";
 
-export const SCHEMA_VERSION = 1;
+/**
+ * Content format version. v2 (Phase 2): lesson objectives[]/examples[]/practicalContext,
+ * level description, challenge role/required, ≤3 progressive hints, and verifiable
+ * checks for fill_blank, order_lines, trace and find_fix_bug.
+ */
+export const SCHEMA_VERSION = 2;
 
 /** Stable identifier: never reused, never derived from a display title. e.g. `py.L003`, `py.L003.c1`. */
 export const Id = z
@@ -52,19 +57,35 @@ export const SourcesFile = z.strictObject({
 
 export const CodeLanguage = z.enum(["python"]);
 
-/** A program whose real output is verified by `npm run content:verify-python`. */
+const expectationFields = {
+  stdin: z.string().optional(),
+  /** Exact stdout (trailing whitespace per line and trailing blank lines are ignored). */
+  expectedOutput: z.string().optional(),
+  /** For programs that deliberately fail: the exception class name on the final traceback line. */
+  expectedException: Id.optional(),
+};
+
+const exactlyOneExpectation = (e: { expectedOutput?: string; expectedException?: string }) =>
+  (e.expectedOutput === undefined) !== (e.expectedException === undefined);
+const exactlyOneMessage = {
+  message: "declare exactly one of expectedOutput or expectedException",
+};
+
+/** What running a program must produce; verified by `npm run content:verify-python`. */
+export const Expectation = z
+  .strictObject(expectationFields)
+  .refine(exactlyOneExpectation, exactlyOneMessage);
+export type Expectation = z.infer<typeof Expectation>;
+
+/** A worked example whose real output is verified by `npm run content:verify-python`. */
 export const VerifiedExample = z
   .strictObject({
     code: Text,
-    stdin: z.string().optional(),
-    /** Exact stdout (trailing whitespace per line and trailing blank lines are ignored). */
-    expectedOutput: z.string().optional(),
-    /** For examples that deliberately fail: the exception class name on the final traceback line. */
-    expectedException: Id.optional(),
+    /** Optional one-line note shown with the example. */
+    caption: Text.optional(),
+    ...expectationFields,
   })
-  .refine((e) => (e.expectedOutput === undefined) !== (e.expectedException === undefined), {
-    message: "an example declares exactly one of expectedOutput or expectedException",
-  });
+  .refine(exactlyOneExpectation, exactlyOneMessage);
 export type VerifiedExample = z.infer<typeof VerifiedExample>;
 
 // ---------------------------------------------------------------------------
@@ -83,13 +104,24 @@ const Feedback = z.strictObject({
   byAnswer: z.record(z.string(), Text).optional(),
 });
 
+export const ChallengeRole = z.enum(["exercise", "check"]);
+
 const ChallengeBase = {
   id: Id,
   version: z.int().positive(),
   difficulty: z.int().min(1).max(3),
+  /** `exercise` = practice; `check` = short knowledge check used for mastery. */
+  role: ChallengeRole.default("exercise"),
+  /** Required challenges must be answered correctly to complete the level. */
+  required: z.boolean().default(true),
   prompt: Text,
   feedback: Feedback.optional(),
-  hints: z.array(Text).default([]),
+  /**
+   * Progressive hints, revealed one at a time and in order:
+   * 1 = gentle nudge, 2 = specific conceptual clue, 3 = strong hint that still
+   * leaves the final step to the learner. Published challenges need all three.
+   */
+  hints: z.array(Text).max(3).default([]),
   /** Why the correct answer is correct; shown after submission. */
   explanation: Text.optional(),
 };
@@ -125,6 +157,8 @@ export const FillBlankChallenge = z.strictObject({
   template: Text,
   blanks: z.array(z.strictObject({ id: Id, label: Text.optional() })).min(1),
   answer: z.strictObject({ accepted: z.record(Id, z.array(Text).min(1)) }),
+  /** Every accepted answer, substituted into the template, must produce this. */
+  check: Expectation.optional(),
 });
 
 export const OrderLinesChallenge = z.strictObject({
@@ -135,6 +169,8 @@ export const OrderLinesChallenge = z.strictObject({
     .array(z.strictObject({ id: Id, text: Text, indent: z.int().min(0).max(8).default(0) }))
     .min(2),
   answer: z.strictObject({ orders: z.array(z.array(Id).min(2)).min(1) }),
+  /** Every accepted order, assembled with 4-space indents, must produce this. */
+  check: Expectation.optional(),
 });
 
 export const TraceChallenge = z.strictObject({
@@ -142,7 +178,16 @@ export const TraceChallenge = z.strictObject({
   type: z.literal("trace"),
   language: CodeLanguage.default("python"),
   code: Text,
-  fields: z.array(z.strictObject({ id: Id, label: Text })).min(1),
+  fields: z
+    .array(
+      z.strictObject({
+        id: Id,
+        label: Text,
+        /** Python expression whose str() is the expected value (defaults to the field id). */
+        expression: Text.optional(),
+      }),
+    )
+    .min(1),
   answer: z.strictObject({ values: z.record(Id, z.array(Text).min(1)) }),
 });
 
@@ -153,6 +198,11 @@ export const FindFixBugChallenge = z.strictObject({
   code: Text,
   fixes: z.array(Option).min(2),
   answer: z.strictObject({ line: z.int().positive(), fix: Id }),
+  /** What the buggy program actually does (proves the bug is real). */
+  buggyBehaviour: Expectation.optional(),
+  /** The program with the correct fix applied, and what it must produce. */
+  fixedCode: Text.optional(),
+  check: Expectation.optional(),
 });
 
 /** Requires a sandboxed CodeRunner. Cannot be published while live execution is disabled. */
@@ -194,11 +244,15 @@ export const CHALLENGE_TYPES = [
 // ---------------------------------------------------------------------------
 
 export const Lesson = z.strictObject({
-  /** Observable ability, e.g. "Predict what print() shows for a string literal." */
-  objective: Text,
+  /** Observable abilities, e.g. "Predict what print() shows for a string literal." */
+  objectives: z.array(Text).min(1),
+  /** Original beginner-friendly explanation (Markdown-light: paragraphs and `code`). */
   explanation: Text,
-  example: VerifiedExample.optional(),
+  /** Worked examples, each verified against real Python. */
+  examples: z.array(VerifiedExample).default([]),
   misconceptions: z.array(Text).default([]),
+  /** Where this is useful outside the game. */
+  practicalContext: Text.optional(),
 });
 
 export const LevelKind = z.enum(["standard", "checkpoint", "major", "boss"]);
@@ -210,6 +264,8 @@ export const Level = z.strictObject({
   number: z.int().positive(),
   zone: Id,
   title: Text,
+  /** One or two sentences shown on the map/room card. */
+  description: Text.optional(),
   status: PublicationStatus,
   kind: LevelKind.default("standard"),
   /** Planning note for drafts (topics to cover). Never shown to learners. */
@@ -227,6 +283,8 @@ export const Level = z.strictObject({
       date: IsoDate,
       /** Python version the examples and answer keys were verified with. */
       pythonVersion: z.string().regex(/^3\.\d+$/),
+      /** `agent` = written/checked by an AI agent and automated tests; `human` = a person reviewed it. */
+      kind: z.enum(["agent", "human"]).default("human"),
       notes: Text.optional(),
     })
     .optional(),

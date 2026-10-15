@@ -1,0 +1,152 @@
+id: py.L023
+version: 1
+number: 23
+zone: py.zone.citadel
+title: Working with Modules
+description: Borrow tools from Python's standard library with import.
+status: published
+kind: standard
+prerequisites:
+  - py.L022
+skills:
+  - py.skill.modules
+estimatedMinutes: 12
+lesson:
+  objectives:
+    - Import a standard-library module and use its functions.
+    - Import specific names with from ... import.
+    - Use the math and random modules.
+  explanation: |-
+    A module is a file of Python code you can reuse. Python ships with a large standard library of modules, so you rarely need to write common tools yourself.
+
+    `import math` makes the math module available; you then use its contents with a dot, as in `math.sqrt(16)` or `math.pi`. `from math import sqrt` imports just one name, which you then use without the prefix: `sqrt(16)`. Put imports at the top of the file: a module must be imported before it is used.
+
+    The `random` module makes random choices, such as `random.randint(1, 6)` for a dice roll (both ends included) or `random.choice(items)`. Because the result changes every run, test the range of a random result rather than an exact value.
+
+    Your own files are modules too: a file named helpers.py can be imported from another file in the same folder with `import helpers`.
+  examples:
+    - code: |-
+        import math
+        print(math.sqrt(16))
+        print(math.pi > 3)
+        print(math.floor(2.7), math.ceil(2.1))
+      expectedOutput: |-
+        4.0
+        True
+        2 3
+    - code: |-
+        from math import sqrt
+        print(sqrt(81))
+      expectedOutput: "9.0"
+    - code: |-
+        import random
+        roll = random.randint(1, 6)
+        print(1 <= roll <= 6)
+      caption: The roll changes each time, but it is always between 1 and 6.
+      expectedOutput: "True"
+  misconceptions:
+    - After import math you can write sqrt(16). (Use math.sqrt, or import the name with from.)
+    - random.randint(1, 6) never returns 6. (Both ends are included.)
+  practicalContext: Dates and times, random choices, files, web requests and data formats all come from modules, from the standard library or from installed packages.
+challenges:
+  - id: py.L023.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      import math
+      print(math.ceil(7 / 2))
+      print(math.sqrt(9) + 1)
+    answer:
+      output: |-
+        4
+        4.0
+    feedback:
+      correct: "Correct: ceil rounds 3.5 up to 4, and sqrt returns the float 3.0."
+      incorrect: Check what type each function returns.
+      byAnswer:
+        "4\n4": math.sqrt returns a float, so the second result is 4.0.
+        "3\n4.0": ceil rounds up, not down.
+    hints:
+      - 7 / 2 is 3.5.
+      - ceil rounds up to the next whole number.
+      - sqrt always returns a float, even for perfect squares.
+    explanation: math.ceil(3.5) is 4. math.sqrt(9) is 3.0, and 3.0 + 1 is 4.0.
+  - id: py.L023.c2
+    version: 1
+    difficulty: 1
+    prompt: This program should print 5.0 but crashes. Find the line and the fix.
+    type: find_fix_bug
+    code: |-
+      print(math.sqrt(25))
+      import math
+    fixes:
+      - id: f1
+        text: Move import math above the line that uses it
+      - id: f2
+        text: Change math.sqrt to sqrt
+      - id: f3
+        text: Change import math to from math import sqrt
+    answer:
+      line: 1
+      fix: f1
+    buggyBehaviour:
+      expectedException: NameError
+    fixedCode: |-
+      import math
+      print(math.sqrt(25))
+    check:
+      expectedOutput: "5.0"
+    feedback:
+      correct: "Correct: a module must be imported before it is used."
+      incorrect: When line 1 runs, does Python know the name math?
+      byAnswer:
+        fix:f2: sqrt has not been imported either, so that is still a NameError.
+        fix:f3: The import would still come after the use.
+    hints:
+      - The error is a NameError on line 1.
+      - Python runs lines in order.
+      - Imports belong at the top of the file.
+    explanation: Line 1 uses math before the import has run. Importing first fixes it.
+  - id: py.L023.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: After the line from random import randint, which call works?
+    type: multiple_choice
+    options:
+      - id: a
+        text: randint(1, 6)
+      - id: b
+        text: random.randint(1, 6)
+      - id: c
+        text: random(1, 6)
+      - id: d
+        text: import randint(1, 6)
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: from ... import brings the name in directly."
+      incorrect: Which names exist after this kind of import?
+      byAnswer:
+        b: Only randint was imported; the name random itself was not.
+    hints:
+      - from ... import adds only the named function.
+      - The module name itself is not available after this kind of import.
+      - Call the imported function by its own name.
+    explanation: from random import randint makes randint available directly; random is not defined.
+sources:
+  - source: py-tutorial-modules
+    topic: Modules
+  - source: py-math
+    topic: math
+  - source: py-random
+    topic: random.randint
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

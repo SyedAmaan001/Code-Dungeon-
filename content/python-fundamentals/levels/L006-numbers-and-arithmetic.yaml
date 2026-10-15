@@ -1,0 +1,146 @@
+id: py.L006
+version: 1
+number: 6
+zone: py.zone.caverns
+title: Numbers and Arithmetic
+description: Split, share and scale numbers with //, %, ** and round().
+status: published
+kind: standard
+prerequisites:
+  - py.L005
+skills:
+  - py.skill.arithmetic
+estimatedMinutes: 12
+lesson:
+  objectives:
+    - Use // and % to get the whole-number quotient and the remainder.
+    - Use ** to raise a number to a power.
+    - Explain why decimal arithmetic can be slightly inexact, and use round().
+  explanation: |-
+    Besides + - * and /, Python has three more arithmetic operators:
+
+    - `//` floor division: divides and drops the fractional part, so `17 // 5` is 3
+    - `%` remainder (modulo): what is left over, so `17 % 5` is 2
+    - `**` power: `2 ** 3` is 8
+
+    Together, // and % answer questions like "how many full boxes, and how many left over?".
+
+    Floats are stored in binary, so some decimals cannot be represented exactly. `0.1 + 0.2` prints as `0.30000000000000004`. This is normal in nearly every programming language. Use `round(value, digits)` when you want to show a tidy result.
+
+    `print()` can show several values at once: separate them with commas and it puts a space between them, as in `print(3, 2)`.
+  examples:
+    - code: |-
+        print(17 // 5)
+        print(17 % 5)
+        print(2 ** 3)
+      expectedOutput: |-
+        3
+        2
+        8
+    - code: |-
+        print(0.1 + 0.2)
+        print(round(0.1 + 0.2, 2))
+      caption: Binary floats are slightly inexact; round() tidies the result.
+      expectedOutput: |-
+        0.30000000000000004
+        0.3
+    - code: |-
+        minutes = 135
+        print(minutes // 60, minutes % 60)
+      caption: 135 minutes is 2 hours and 15 minutes.
+      expectedOutput: 2 15
+  misconceptions:
+    - "% calculates a percentage. (In Python it gives the remainder.)"
+    - 0.1 + 0.2 is exactly 0.3 in a computer. (Floats are close approximations.)
+  practicalContext: Converting minutes to hours, splitting loot evenly, or checking whether a number is even all rely on // and %.
+challenges:
+  - id: py.L006.c1
+    version: 1
+    difficulty: 1
+    prompt: Twenty-three coins are shared into bags of five. What does this program print?
+    type: predict_output
+    code: |-
+      coins = 23
+      print(coins // 5, coins % 5)
+    answer:
+      output: 4 3
+    feedback:
+      correct: "Correct: four full bags, three coins left over."
+      incorrect: // counts full groups; % is what is left over.
+      byAnswer:
+        "4.6": // drops the fractional part, and the program prints two values.
+        3 4: The first value is the number of full bags, the second the remainder.
+    hints:
+      - How many full groups of five fit into 23?
+      - Whatever does not fit into a full group is the remainder.
+      - Work out the number of full bags first, then subtract to find the coins left over.
+    explanation: 23 // 5 is 4 because four fives make 20; 23 % 5 is the remaining 3.
+  - id: py.L006.c2
+    version: 1
+    difficulty: 1
+    prompt: Fill in the operator so the program prints the number of whole hours in 135 minutes.
+    type: fill_blank
+    template: |-
+      minutes = 135
+      hours = minutes {{blank:op}} 60
+      print(hours)
+    blanks:
+      - id: op
+        label: operator
+    answer:
+      accepted:
+        op:
+          - //
+    check:
+      expectedOutput: "2"
+    feedback:
+      correct: "Correct: floor division gives the whole hours."
+      incorrect: You want whole hours only, with no fraction.
+      byAnswer:
+        /: That gives 2.25, including the fraction of an hour.
+        "%": That gives the remainder, 15 minutes.
+    hints:
+      - The answer should be a whole number of hours.
+      - One operator divides and throws away the fractional part.
+      - It looks like the division operator, written twice.
+    explanation: "135 // 60 is 2: there are two whole hours in 135 minutes."
+  - id: py.L006.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: What is the value of 2 ** 4?
+    type: multiple_choice
+    options:
+      - id: a
+        text: "6"
+      - id: b
+        text: "8"
+      - id: c
+        text: "16"
+      - id: d
+        text: "24"
+    answer:
+      correct:
+        - c
+    feedback:
+      correct: "Correct: 2 × 2 × 2 × 2 is 16."
+      incorrect: "** means repeated multiplication."
+      byAnswer:
+        a: That would be 2 + 4.
+        b: That would be 2 * 4, or 2 ** 3.
+    hints:
+      - "** is not multiplication."
+      - a ** b multiplies a by itself b times.
+      - Multiply 2 by itself, using four 2s in total.
+    explanation: "2 ** 4 means 2 multiplied by itself four times: 16."
+sources:
+  - source: py-tutorial
+    topic: "Using Python as a Calculator: Numbers"
+  - source: py-tutorial-fp
+    topic: "Floating-Point Arithmetic: Issues and Limitations"
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

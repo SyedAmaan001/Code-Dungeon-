@@ -37,15 +37,17 @@ export function syntheticLevel(n: number): Record<string, unknown> {
     number: n,
     zone: zoneId(zone),
     title: `Synthetic Level ${n}`,
+    description: "Synthetic level for scale tests.",
     status: published ? "published" : "draft",
     kind: n === SYNTHETIC_LEVELS ? "boss" : posInZone === PER_ZONE ? "checkpoint" : "standard",
     prerequisites,
     ...(published && {
       estimatedMinutes: 5,
       lesson: {
-        objective: `Synthetic objective ${n}.`,
+        objectives: [`Synthetic objective ${n}.`],
         explanation: "Synthetic explanation.",
-        example: { code: `print(${n})`, expectedOutput: String(n) },
+        examples: [{ code: `print(${n})`, expectedOutput: String(n) }],
+        practicalContext: "Synthetic context.",
       },
       challenges: [
         {
@@ -57,11 +59,28 @@ export function syntheticLevel(n: number): Record<string, unknown> {
           code: `print(${n} * 2)`,
           answer: { output: String(n * 2) },
           feedback: { correct: "Correct.", incorrect: "Not quite." },
+          hints: ["Nudge.", "Clue.", "Strong hint."],
+          explanation: "Synthetic explanation.",
+        },
+        {
+          id: `${levelId(n)}.c2`,
+          version: 1,
+          type: "multiple_choice",
+          role: "check",
+          difficulty: 1,
+          prompt: "Synthetic knowledge check.",
+          options: [
+            { id: "a", text: "Right" },
+            { id: "b", text: "Wrong" },
+          ],
+          answer: { correct: ["a"] },
+          feedback: { correct: "Correct.", incorrect: "Not quite." },
+          hints: ["Nudge.", "Clue.", "Strong hint."],
           explanation: "Synthetic explanation.",
         },
       ],
       sources: [{ source: "syn.source" }],
-      review: { reviewer: "synthetic", date: "2026-10-15", pythonVersion: "3.13" },
+      review: { reviewer: "synthetic", date: "2026-10-15", pythonVersion: "3.13", kind: "human" },
     }),
   };
 }
@@ -69,7 +88,7 @@ export function syntheticLevel(n: number): Record<string, unknown> {
 export function syntheticPathFile(): Record<string, unknown> {
   const zones = SYNTHETIC_LEVELS / PER_ZONE;
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     subject: { id: "syn-subject", title: "Synthetic", description: "Synthetic subject for tests." },
     path: {
       id: "syn-path",

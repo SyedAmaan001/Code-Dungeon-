@@ -1,0 +1,193 @@
+id: py.L021
+version: 1
+number: 21
+zone: py.zone.citadel
+title: Parameters and Return Values
+description: Send values into functions and get results back out with return.
+status: published
+kind: standard
+prerequisites:
+  - py.L020
+skills:
+  - py.skill.parameters
+  - py.skill.return
+estimatedMinutes: 15
+lesson:
+  objectives:
+    - Pass arguments to a function's parameters, including default values.
+    - Send a result back with return and use it in an expression.
+    - Explain the difference between return and print.
+  explanation: |-
+    Parameters are a function's inputs. In `def area(width, height):` the parameters are width and height; the call `area(4, 5)` passes the arguments 4 and 5, matched in order.
+
+    `return` ends the function and sends a value back to the caller. The call then evaluates to that value, so you can store it or use it in a bigger expression: `room = area(4, 5)` or `area(2, 3) + 1`.
+
+    `print` and `return` are different. print shows a value to a person; return hands a value to the code that called the function. A function without a return statement returns the special value `None`.
+
+    A parameter can have a default value, used when the caller leaves that argument out: `def heal(hp, amount=10):`.
+  examples:
+    - code: |-
+        def area(width, height):
+            return width * height
+
+        room = area(4, 5)
+        print(room)
+        print(area(2, 3) + 1)
+      expectedOutput: |-
+        20
+        7
+    - code: |-
+        def shout(text):
+            print(text.upper())
+
+        result = shout("hi")
+        print(result)
+      caption: shout prints, but returns None.
+      expectedOutput: |-
+        HI
+        None
+    - code: |-
+        def heal(hp, amount=10):
+            return hp + amount
+
+        print(heal(50))
+        print(heal(50, 25))
+      expectedOutput: |-
+        60
+        75
+  misconceptions:
+    - print and return do the same thing. (print displays; return gives a value back.)
+    - Code after return still runs. (return ends the function immediately.)
+  practicalContext: Functions that calculate a price, validate an email or convert units return results so other code can use them.
+challenges:
+  - id: py.L021.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      def double(n):
+          return n * 2
+
+      x = double(3)
+      print(double(x) + 1)
+    answer:
+      output: "13"
+    feedback:
+      correct: "Correct: x is 6, double(6) is 12, plus 1 is 13."
+      incorrect: Work from the inside out.
+      byAnswer:
+        "7": double(x) uses x, which is already 6.
+    hints:
+      - What value is stored in x?
+      - double(x) doubles x, not 3.
+      - Double the value of x, then add 1.
+    explanation: x = double(3) = 6. double(6) = 12, and 12 + 1 = 13.
+  - id: py.L021.c2
+    version: 1
+    difficulty: 2
+    prompt: This program should print 12 but prints None. Find the line and the fix.
+    type: find_fix_bug
+    code: |-
+      def total_cost(price, qty):
+          cost = price * qty
+
+      bill = total_cost(3, 4)
+      print(bill)
+    fixes:
+      - id: f1
+        text: "Change line 2 to: return price * qty"
+      - id: f2
+        text: "Change line 5 to: print(cost)"
+      - id: f3
+        text: "Change line 4 to: bill = total_cost"
+    answer:
+      line: 2
+      fix: f1
+    buggyBehaviour:
+      expectedOutput: None
+    fixedCode: |-
+      def total_cost(price, qty):
+          return price * qty
+
+      bill = total_cost(3, 4)
+      print(bill)
+    check:
+      expectedOutput: "12"
+    feedback:
+      correct: "Correct: the function must return the result."
+      incorrect: What does a function without return give back?
+      byAnswer:
+        fix:f2: cost only exists inside the function, so printing it outside raises NameError.
+        line:5: print(bill) is fine; bill is None because of the function.
+    hints:
+      - The program runs without crashing, but bill is None.
+      - A function without return gives back None.
+      - The function calculates the cost but never hands it back.
+    explanation: The function computed cost but returned nothing (None). Returning price * qty fixes it.
+  - id: py.L021.c3
+    version: 1
+    difficulty: 1
+    prompt: Fill in the keyword so the function gives its answer back and the program prints True.
+    type: fill_blank
+    template: |-
+      def is_heavy(weight):
+          {{blank:b1}} weight > 20
+
+      print(is_heavy(25))
+    blanks:
+      - id: b1
+        label: keyword
+    answer:
+      accepted:
+        b1:
+          - return
+    check:
+      expectedOutput: "True"
+    feedback:
+      correct: "Correct: return hands the Boolean back to print()."
+      incorrect: The function needs to give its result to the caller.
+      byAnswer:
+        print: print would show True inside the function, but the call would still return None, so the program would also print None.
+    hints:
+      - The last line prints whatever the function gives back.
+      - Showing a value and giving it back are different keywords.
+      - Use the keyword that ends the function and sends a value to the caller.
+    explanation: return weight > 20 sends True back, which print() then displays.
+  - id: py.L021.c4
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: What is the main difference between return and print?
+    type: multiple_choice
+    options:
+      - id: a
+        text: return sends a value back to the caller; print only displays it
+      - id: b
+        text: They do the same thing
+      - id: c
+        text: print sends a value back to the caller; return only displays it
+      - id: d
+        text: return can only be used with numbers
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: Correct.
+      incorrect: Think about the shout() example that printed HI and then None.
+      byAnswer:
+        c: That is the other way round.
+    hints:
+      - One of them is for people, the other for code.
+      - Which one lets you store a function's result in a variable?
+      - A function with print but no return gives back None.
+    explanation: return gives a value to the calling code; print only shows text on the screen.
+sources:
+  - source: py-tutorial-control
+    topic: Defining Functions; Default Argument Values
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

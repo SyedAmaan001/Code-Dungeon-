@@ -1,0 +1,159 @@
+id: py.L019
+version: 1
+number: 19
+zone: py.zone.archive
+title: Sets
+description: Keep only unique values and compare groups with set operations.
+status: published
+kind: standard
+prerequisites:
+  - py.L018
+skills:
+  - py.skill.sets
+estimatedMinutes: 12
+lesson:
+  objectives:
+    - Create sets and explain that they keep each value only once.
+    - Test membership with in.
+    - Combine sets with union (|), intersection (&) and difference (-).
+  explanation: |-
+    A set is an unordered collection with no duplicates: `{"hall", "gate", "hall"}` contains just two items. Adding a value that is already there changes nothing. `set(some_list)` is a quick way to remove duplicates.
+
+    Sets are very fast at answering "is this in here?" with `in`.
+
+    Sets support the operations you may know from maths:
+
+    - `a | b` union: items in either set
+    - `a & b` intersection: items in both
+    - `a - b` difference: items in a but not in b
+
+    Sets have no order, so the order in which a set prints is not something to rely on. When you need a predictable order, use `sorted(my_set)`, which returns a sorted list. Also note that `{}` is an empty dictionary; an empty set is written `set()`.
+  examples:
+    - code: |-
+        visited = {"hall", "gate", "hall"}
+        print(len(visited))
+        print("gate" in visited)
+        print(sorted(visited))
+      expectedOutput: |-
+        2
+        True
+        ['gate', 'hall']
+    - code: |-
+        a = {1, 2, 3}
+        b = {2, 3, 4}
+        print(sorted(a | b))
+        print(sorted(a & b))
+        print(sorted(a - b))
+      expectedOutput: |-
+        [1, 2, 3, 4]
+        [2, 3]
+        [1]
+    - code: |-
+        names = ["Ari", "Bo", "Ari"]
+        print(len(set(names)))
+        print(type({}), type(set()))
+      expectedOutput: |-
+        2
+        <class 'dict'> <class 'set'>
+  misconceptions:
+    - A set keeps items in the order you added them. (Sets are unordered.)
+    - "{} creates an empty set. (It creates an empty dictionary.)"
+  practicalContext: Removing duplicate email addresses, finding friends in common, or tracking which rooms were visited are set problems.
+challenges:
+  - id: py.L019.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      keys = {"red", "blue"}
+      keys.add("red")
+      keys.add("green")
+      print(len(keys))
+      print(sorted(keys))
+    answer:
+      output: |-
+        3
+        ['blue', 'green', 'red']
+    feedback:
+      correct: "Correct: the duplicate red is ignored, and sorted() orders the result."
+      incorrect: Adding an existing item changes nothing.
+      byAnswer:
+        "4\n['blue', 'green', 'red', 'red']": Sets never contain duplicates; adding red again has no effect.
+    hints:
+      - Is "red" already in the set before line 2?
+      - Only the new colour actually adds an item.
+      - sorted() returns a list in alphabetical order.
+    explanation: The set ends with three colours; sorted() lists them alphabetically.
+  - id: py.L019.c2
+    version: 1
+    difficulty: 2
+    prompt: After this code runs, what are only_a and both?
+    type: trace
+    code: |-
+      a = {1, 2, 3, 4}
+      b = {4, 5}
+      only_a = len(a - b)
+      both = len(a & b)
+    fields:
+      - id: only_a
+        label: only_a
+      - id: both
+        label: both
+    answer:
+      values:
+        only_a:
+          - "3"
+        both:
+          - "1"
+    feedback:
+      correct: "Correct: a - b is {1, 2, 3}, and a & b is {4}."
+      incorrect: Work out each set before taking len().
+      byAnswer:
+        only_a=2;both=1: a - b removes only the items that are also in b, and only 4 is shared.
+    hints:
+      - Which numbers appear in both sets?
+      - a - b keeps the items of a that are not in b.
+      - Write out a - b and a & b, then count their items.
+    explanation: Only 4 is shared, so a - b is {1, 2, 3} (3 items) and a & b is {4} (1 item).
+  - id: py.L019.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: Which operation gives the items that are in both set a and set b?
+    type: multiple_choice
+    options:
+      - id: a
+        text: a & b
+      - id: b
+        text: a | b
+      - id: c
+        text: a - b
+      - id: d
+        text: a + b
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: & is intersection."
+      incorrect: Match each symbol to union, intersection and difference.
+      byAnswer:
+        b: "| is union: items in either set."
+        c: "- is difference: items in a but not in b."
+        d: Sets do not support +; it raises a TypeError.
+    hints:
+      - The answer is called the intersection.
+      - '| means "or" and & means "and".'
+      - You want items in a and in b.
+    explanation: "a & b is the intersection: the items both sets share."
+sources:
+  - source: py-tutorial-ds
+    topic: Sets
+  - source: py-stdtypes
+    topic: Set Types — set, frozenset
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

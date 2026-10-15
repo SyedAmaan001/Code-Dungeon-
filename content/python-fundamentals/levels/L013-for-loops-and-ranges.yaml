@@ -1,0 +1,157 @@
+id: py.L013
+version: 1
+number: 13
+zone: py.zone.forge
+title: For Loops and Ranges
+description: Visit every item in a sequence, and count with range().
+status: published
+kind: standard
+prerequisites:
+  - py.L012
+skills:
+  - py.skill.for
+  - py.skill.range
+estimatedMinutes: 14
+lesson:
+  objectives:
+    - Loop over the characters of a string with for.
+    - Generate number sequences with range(stop), range(start, stop) and range(start, stop, step).
+    - Predict which numbers range() produces, remembering that stop is excluded.
+  explanation: |-
+    A `for` loop takes each item of a sequence in turn and runs its block once per item:
+
+    ```
+    for letter in "orb":
+        print(letter)
+    ```
+
+    `range()` produces a sequence of whole numbers to loop over:
+
+    - `range(5)` gives 0, 1, 2, 3, 4
+    - `range(2, 6)` gives 2, 3, 4, 5
+    - `range(10, 0, -3)` gives 10, 7, 4, 1
+
+    The stop value is never included. With a negative step, range counts down. If the step goes the wrong way, as in `range(10, 0, 2)`, the range is empty and the loop body never runs.
+
+    Use for when you know what you are looping over; use while when you loop until something changes.
+  examples:
+    - code: |-
+        for i in range(3):
+            print(i)
+      expectedOutput: |-
+        0
+        1
+        2
+    - code: |-
+        for n in range(2, 11, 4):
+            print(n)
+      expectedOutput: |-
+        2
+        6
+        10
+    - code: |-
+        for letter in "orb":
+            print(letter.upper())
+      expectedOutput: |-
+        O
+        R
+        B
+  misconceptions:
+    - range(5) includes 5. (It stops before 5.)
+    - range(5) starts at 1. (It starts at 0.)
+  practicalContext: Processing every line of a file, every pixel in an image or every player in a game uses for loops.
+challenges:
+  - id: py.L013.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      total = 0
+      for i in range(1, 5):
+          total += i
+      print(total)
+    answer:
+      output: "10"
+    feedback:
+      correct: "Correct: 1 + 2 + 3 + 4 is 10."
+      incorrect: List the numbers range(1, 5) produces.
+      byAnswer:
+        "15": range(1, 5) stops before 5, so 5 is not added.
+        "1\n3\n6\n10": print(total) is not indented, so it runs once, after the loop.
+    hints:
+      - Which numbers does range(1, 5) produce?
+      - The stop value is not included.
+      - Add up the numbers from the start value up to, but not including, the stop value.
+    explanation: range(1, 5) is 1, 2, 3, 4. Their sum is 10, printed once after the loop.
+  - id: py.L013.c2
+    version: 1
+    difficulty: 2
+    prompt: Fill in the step so the program prints 10, 8, 6, 4, 2 on separate lines.
+    type: fill_blank
+    template: |-
+      for n in range(10, 0, {{blank:step}}):
+          print(n)
+    blanks:
+      - id: step
+        label: step
+    answer:
+      accepted:
+        step:
+          - "-2"
+    check:
+      expectedOutput: |-
+        10
+        8
+        6
+        4
+        2
+    feedback:
+      correct: "Correct: a step of -2 counts down by two."
+      incorrect: Which direction must the numbers go?
+      byAnswer:
+        "2": With a positive step from 10 towards 0, the range is empty and nothing is printed.
+        "-1": That counts down by one, printing every number from 10 to 1.
+    hints:
+      - The numbers are getting smaller.
+      - A negative step makes range count down.
+      - Each printed number is two less than the one before it.
+    explanation: range(10, 0, -2) starts at 10 and subtracts 2 each time, stopping before 0.
+  - id: py.L013.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: Which numbers does range(5) produce?
+    type: multiple_choice
+    options:
+      - id: a
+        text: 0, 1, 2, 3, 4
+      - id: b
+        text: 1, 2, 3, 4, 5
+      - id: c
+        text: 0, 1, 2, 3, 4, 5
+      - id: d
+        text: "5"
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: five numbers, starting at 0 and stopping before 5."
+      incorrect: Where does range start, and is the stop value included?
+      byAnswer:
+        b: range starts at 0 by default and never includes the stop value.
+        c: The stop value 5 is not included.
+    hints:
+      - With one argument, where does range start?
+      - The stop value is excluded.
+      - range(5) produces exactly five numbers.
+    explanation: range(5) produces 0, 1, 2, 3, 4.
+sources:
+  - source: py-tutorial-control
+    topic: for Statements; The range() Function
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

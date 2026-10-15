@@ -57,11 +57,15 @@ describe("public projection", () => {
 
   it("keeps what learners need to attempt each challenge", () => {
     const pub = toPublicLevel(pack.levels[0]!);
-    expect(pub.lesson?.objective).toBeTruthy();
+    expect(pub.lesson?.objectives[0]).toBeTruthy();
+    expect(pub.lesson?.examples).toHaveLength(1);
+    expect(pub.lesson?.practicalContext).toBeTruthy();
     expect(pub.challenges[0]).toMatchObject({
       type: "predict_output",
       code: 'print("2" + "3")',
-      hintCount: 1,
+      hintCount: 3,
+      role: "exercise",
+      required: true,
     });
     expect(pub.challenges[1]).toMatchObject({ type: "multiple_choice" });
   });

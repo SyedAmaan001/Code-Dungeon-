@@ -1,0 +1,161 @@
+id: py.L016
+version: 1
+number: 16
+zone: py.zone.archive
+title: List Indexing and Slicing
+description: Count from the end, cut out slices, and understand IndexError.
+status: published
+kind: standard
+prerequisites:
+  - py.L015
+skills:
+  - py.skill.indexing
+  - py.skill.slicing
+estimatedMinutes: 14
+lesson:
+  objectives:
+    - Use negative indexes to count from the end of a list or string.
+    - Take slices with [start:stop] and [start:stop:step].
+    - Recognise IndexError when an index is out of range.
+  explanation: |-
+    Indexes work on both lists and strings. Negative indexes count from the end: `[-1]` is the last item, `[-2]` the one before it.
+
+    A slice takes a range of items and returns a new list (or string): `items[start:stop]` includes start but stops before stop, just like range(). Leave a number out to mean "from the beginning" or "to the end": `items[:2]` is the first two, `items[2:]` everything from index 2. A third number is the step: `items[::2]` takes every second item, and `items[::-1]` is a reversed copy.
+
+    Asking for a single index that does not exist raises `IndexError`. A list with three items has indexes 0, 1 and 2 (or -1, -2 and -3), so `items[3]` fails. Slices are forgiving: `items[1:100]` simply stops at the end.
+  examples:
+    - code: |-
+        path = ["gate", "hall", "sanctum", "deep", "citadel"]
+        print(path[-1])
+        print(path[1:3])
+        print(path[:2])
+        print(path[::2])
+      expectedOutput: |-
+        citadel
+        ['hall', 'sanctum']
+        ['gate', 'hall']
+        ['gate', 'sanctum', 'citadel']
+    - code: |-
+        word = "python"
+        print(word[0], word[-1])
+        print(word[2:5])
+        print(word[::-1])
+      expectedOutput: |-
+        p n
+        tho
+        nohtyp
+    - code: |-
+        path = ["gate"]
+        print(path[1])
+      caption: Index 1 does not exist in a one-item list.
+      expectedException: IndexError
+  misconceptions:
+    - items[1:3] includes items[3]. (The stop index is excluded.)
+    - items[-1] is an error. (It is the last item.)
+  practicalContext: Taking the latest few log entries, a file extension, or the first characters of a postcode are all slicing tasks.
+challenges:
+  - id: py.L016.c1
+    version: 1
+    difficulty: 1
+    prompt: What does this program print?
+    type: predict_output
+    code: |-
+      letters = "dungeon"
+      print(letters[1:4])
+      print(letters[-3:])
+    answer:
+      output: |-
+        ung
+        eon
+    feedback:
+      correct: "Correct: indexes 1, 2, 3, and then the last three characters."
+      incorrect: Number the characters from 0, then apply each slice.
+      byAnswer:
+        "dun\neon": Index 1 is the second character; slicing starts there.
+        "ung\ngeon": "[-3:] takes exactly the last three characters."
+    hints:
+      - Write the indexes 0 to 6 under the letters.
+      - "[1:4] includes index 1 but stops before index 4."
+      - "[-3:] starts three characters from the end and runs to the end."
+    explanation: letters[1:4] is indexes 1–3, and letters[-3:] is the final three characters.
+  - id: py.L016.c2
+    version: 1
+    difficulty: 2
+    prompt: This program should print the last room, vault, but crashes. Find the line and the fix.
+    type: find_fix_bug
+    code: |-
+      rooms = ["entry", "hall", "vault"]
+      last = rooms[3]
+      print(last)
+    fixes:
+      - id: f1
+        text: Change rooms[3] to rooms[-1]
+      - id: f2
+        text: Change rooms[3] to rooms[len(rooms)]
+      - id: f3
+        text: Change rooms[3] to rooms[3:]
+    answer:
+      line: 2
+      fix: f1
+    buggyBehaviour:
+      expectedException: IndexError
+    fixedCode: |-
+      rooms = ["entry", "hall", "vault"]
+      last = rooms[-1]
+      print(last)
+    check:
+      expectedOutput: vault
+    feedback:
+      correct: "Correct: -1 always means the last item."
+      incorrect: What are the valid indexes of a three-item list?
+      byAnswer:
+        fix:f2: len(rooms) is 3, which is the same out-of-range index.
+        fix:f3: That slice is valid but empty, so it prints [] instead of vault.
+    hints:
+      - The error is an IndexError.
+      - A three-item list has indexes 0, 1 and 2.
+      - Use the index that counts from the end.
+    explanation: rooms[3] does not exist. rooms[-1] (or rooms[2]) is the last item.
+  - id: py.L016.c3
+    version: 1
+    role: check
+    difficulty: 1
+    prompt: |-
+      items = ["a", "b", "c", "d"]
+      Which expression gives ['b', 'c']?
+    type: multiple_choice
+    options:
+      - id: a
+        text: items[1:3]
+      - id: b
+        text: items[1:2]
+      - id: c
+        text: items[2:4]
+      - id: d
+        text: items[-3:-2]
+    answer:
+      correct:
+        - a
+    feedback:
+      correct: "Correct: start at index 1 and stop before index 3."
+      incorrect: "Apply each slice: include start, exclude stop."
+      byAnswer:
+        b: That stops before index 2, so it only contains 'b'.
+        c: That gives ['c', 'd'].
+        d: That gives ['b'] only.
+    hints:
+      - "'b' is at index 1."
+      - A slice stops just before its second number, so that number must be one past the last item you want.
+      - You need a slice that starts at the index of 'b' and stops just after 'c'.
+    explanation: "items[1:3] includes indexes 1 and 2: ['b', 'c']."
+sources:
+  - source: py-tutorial
+    topic: "Using Python as a Calculator: Text (indexing and slicing)"
+  - source: py-stdtypes
+    topic: Common Sequence Operations
+review:
+  reviewer: Claude Code (AI agent) with automated content checks
+  date: 2026-10-15
+  pythonVersion: "3.13"
+  kind: agent
+  notes: Every runnable claim was executed with CPython 3.13.16 by content:verify-python. Awaiting human review.

@@ -14,8 +14,9 @@ export default function Home() {
       <section className="panel" aria-labelledby="status-heading">
         <h2 id="status-heading">Under construction</h2>
         <p>
-          Code Dungeon is in early development. There are no accounts, playable levels, scores or
-          leaderboards yet, and nothing you do here is saved.
+          Code Dungeon is in early development. The learning engine and the first lesson content
+          exist, but there is no way to play them here yet: no game interface, accounts, saved
+          progress or leaderboards.
         </p>
         <h3>Learning paths in the repository</h3>
         {paths.length === 0 ? (
@@ -24,8 +25,11 @@ export default function Home() {
           <ul>
             {paths.map((p) => (
               <li key={p.id}>
-                <strong>{p.title}</strong>: {p.levels} levels outlined across {p.zones} zones,{" "}
-                {p.published} published{p.valid ? "" : " (content has validation errors)"}.
+                <strong>{p.title}</strong>: {p.published} of {p.levels} levels written and
+                automatically checked, across {p.zones} zones
+                {p.valid ? "" : " (content has validation errors)"}.
+                {p.awaitingHumanReview > 0 &&
+                  ` ${p.awaitingHumanReview} level(s) are awaiting human review.`}
               </li>
             ))}
           </ul>
