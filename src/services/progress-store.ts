@@ -1,10 +1,9 @@
 /**
  * Persistence port for learner progress.
  *
- * Only `InMemoryProgressStore` exists today. It is a DEVELOPMENT/TEST adapter: progress
- * lives in this process's memory, is lost on restart, is not shared between server
- * instances and is not synchronised across devices. Durable, per-account storage
- * arrives with authentication and the database (Phase 4 in docs/next-steps.md).
+ * `InMemoryProgressStore` is a DEVELOPMENT/TEST adapter: progress lives in this process's
+ * memory, is lost on restart and is not shared between server instances. The durable
+ * adapter is `PostgresPlayerStore` (src/services/postgres-player-store.ts, Phase 4).
  */
 import type { LearnerProgress } from "@/domain";
 import type { SubmitResult } from "./learning-service";
@@ -23,9 +22,21 @@ export class ProgressConflictError extends Error {
   }
 }
 
+export interface LoadOptions {
+  /**
+   * The submission id the caller is about to check. Durable stores load only this entry
+   * of `submissions` (the map is a partial view there); in-memory stores load everything.
+   */
+  submissionId?: string;
+}
+
 export interface ProgressStore {
   readonly durable: boolean;
-  load(learnerId: string, pathId: string): Promise<ProgressRecord | undefined>;
+  load(
+    learnerId: string,
+    pathId: string,
+    options?: LoadOptions,
+  ): Promise<ProgressRecord | undefined>;
   /** Saves only if the stored revision still equals `expectedRevision`. */
   save(
     learnerId: string,

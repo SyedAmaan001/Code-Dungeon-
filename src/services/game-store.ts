@@ -7,6 +7,7 @@
  * not a persistent leaderboard. Durable adapters arrive with storage and auth.
  */
 import { validateHandle, type GameEvent, type GameState } from "@/domain";
+import type { LoadOptions } from "./progress-store";
 
 export interface GameStateRecord {
   state: GameState;
@@ -23,7 +24,11 @@ export class GameStateConflictError extends Error {
 
 export interface GameStateStore {
   readonly durable: boolean;
-  load(learnerId: string, pathId: string): Promise<GameStateRecord | undefined>;
+  load(
+    learnerId: string,
+    pathId: string,
+    options?: LoadOptions,
+  ): Promise<GameStateRecord | undefined>;
   save(
     learnerId: string,
     pathId: string,

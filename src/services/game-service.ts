@@ -28,6 +28,7 @@ import {
   type GamePredicate,
   type GameRules,
   type GameView,
+  type LearnerProgress,
   type Leaderboard,
   type ProgressionPolicy,
 } from "@/domain";
@@ -40,11 +41,17 @@ import {
 } from "./game-store";
 import {
   HintRequest,
+  SubmitRequest,
   type HintResult,
   type LearningService,
   type PathView,
   type SubmitResult,
 } from "./learning-service";
+import {
+  emptyRecords,
+  type LeaderboardSource,
+  type TransactionalPlayerStore,
+} from "./player-store";
 
 /** Content predicates map 1:1 onto engine predicates (checked by the compiler). */
 const toGamePredicate = (p: Predicate): GamePredicate => p;
@@ -121,6 +128,13 @@ export interface GameServiceOptions {
   policy?: GamePolicy;
   progressionPolicy?: ProgressionPolicy;
   now?: () => Date;
+  /**
+   * When set, submissions and hints save learning progress and game state in one
+   * transaction (Phase 4). Without it, the two stores are written one after the other.
+   */
+  transactional?: TransactionalPlayerStore;
+  /** When set, the leaderboard reads public records from it instead of per-player progress. */
+  leaderboardSource?: LeaderboardSource;
 }
 
 export class GameService {
@@ -132,6 +146,8 @@ export class GameService {
   private readonly policy: GamePolicy;
   private readonly progressionPolicy: ProgressionPolicy;
   private readonly now: () => Date;
+  private readonly transactional?: TransactionalPlayerStore;
+  private readonly leaderboardSource?: LeaderboardSource;
 
   constructor(options: GameServiceOptions) {
     this.pack = options.pack;
@@ -142,15 +158,17 @@ export class GameService {
     this.progressionPolicy = options.progressionPolicy ?? DEFAULT_POLICY;
     this.now = options.now ?? (() => new Date());
     this.rules = buildGameRules(options.pack);
+    this.transactional = options.transactional;
+    this.leaderboardSource = options.leaderboardSource;
   }
 
   private get pathId() {
     return this.pack.meta.path.id;
   }
 
-  private async load(learnerId: string): Promise<GameStateRecord> {
+  private async load(learnerId: string, submissionId?: string): Promise<GameStateRecord> {
     return (
-      (await this.store.load(learnerId, this.pathId)) ?? {
+      (await this.store.load(learnerId, this.pathId, submissionId ? { submissionId } : {})) ?? {
         state: emptyGameState(this.pathId),
         processed: {},
         revision: 0,
@@ -177,14 +195,16 @@ export class GameService {
     }
   }
 
-  async submit(learnerId: string, body: unknown): Promise<GameSubmitResult> {
-    const learning = await this.learning.submit(learnerId, body);
-    if (learning.status !== "evaluated") return { learning, game: { status: "none", events: [] } };
+  /** Game consequences of one evaluated learning result, computed against a loaded record. */
+  private planGame(
+    current: GameStateRecord,
+    learning: Extract<SubmitResult, { status: "evaluated" }>,
+    progress: LearnerProgress,
+  ): { update: GameUpdate; record?: GameStateRecord } {
+    const prior = current.processed[learning.submissionId];
+    if (prior) return { update: { status: "applied", events: prior, duplicate: true } };
 
-    const record = await this.load(learnerId);
-    const prior = record.processed[learning.submissionId];
-    if (prior) return { learning, game: { status: "applied", events: prior, duplicate: true } };
-
+    const record = structuredClone(current);
     const at = this.now().toISOString();
     const attempt = applyVerifiedAttempt(
       this.rules,
@@ -197,35 +217,122 @@ export class GameService {
       },
       this.policy,
     );
-    const settled = reconcile(await this.context(learnerId), attempt.state, at);
+    const settled = reconcile(
+      {
+        rules: this.rules,
+        pathRules: this.learning.rules,
+        progress,
+        progressionPolicy: this.progressionPolicy,
+      },
+      attempt.state,
+      at,
+    );
     const events = [...attempt.events, ...settled.events];
     record.state = settled.state;
     record.processed[learning.submissionId] = events;
+    return { update: { status: "applied", events, duplicate: false }, record };
+  }
 
-    if (!(await this.save(learnerId, record)))
+  async submit(learnerId: string, body: unknown): Promise<GameSubmitResult> {
+    if (this.transactional) return this.submitInTransaction(this.transactional, learnerId, body);
+
+    const learning = await this.learning.submit(learnerId, body);
+    if (learning.status !== "evaluated") return { learning, game: { status: "none", events: [] } };
+    const plan = this.planGame(
+      await this.load(learnerId, learning.submissionId),
+      learning,
+      await this.learning.progressSnapshot(learnerId),
+    );
+    if (!plan.record) return { learning, game: plan.update };
+    if (!(await this.save(learnerId, plan.record)))
       return { learning, game: { status: "conflict", events: [] } };
-    return { learning, game: { status: "applied", events, duplicate: false } };
+    return { learning, game: plan.update };
+  }
+
+  /** Learning result and game events are saved together, or not at all. */
+  private async submitInTransaction(
+    store: TransactionalPlayerStore,
+    learnerId: string,
+    body: unknown,
+  ): Promise<GameSubmitResult> {
+    if (!learnerId) throw new Error("learnerId must come from a verified session");
+    const req = SubmitRequest.safeParse(body);
+    if (!req.success) {
+      const learning = this.learning.planSubmit(emptyRecords(this.pathId).progress, body).result;
+      return { learning, game: { status: "none", events: [] } };
+    }
+    return store.transaction<GameSubmitResult>(
+      learnerId,
+      this.pathId,
+      { submissionId: req.data.submissionId },
+      (records) => {
+        const learningPlan = this.learning.planSubmit(records.progress, body);
+        const learning = learningPlan.result;
+        if (learning.status !== "evaluated")
+          return {
+            value: { learning, game: { status: "none", events: [] } },
+            progress: learningPlan.record,
+          };
+        const progress = (learningPlan.record ?? records.progress).progress;
+        const gamePlan = this.planGame(records.game, learning, progress);
+        return {
+          value: { learning, game: gamePlan.update },
+          progress: learningPlan.record,
+          game: gamePlan.record,
+        };
+      },
+    );
   }
 
   async requestHint(learnerId: string, body: unknown): Promise<GameHintResult> {
+    if (this.transactional) {
+      if (!learnerId) throw new Error("learnerId must come from a verified session");
+      return this.transactional.transaction<GameHintResult>(
+        learnerId,
+        this.pathId,
+        {},
+        (records) => {
+          const plan = this.learning.planHint(records.progress, body);
+          const req = HintRequest.safeParse(body);
+          if (plan.result.status !== "ok" || !req.success)
+            return { value: { learning: plan.result, game: { status: "none", events: [] } } };
+          const applied = this.hintEffect(records.game.state, req.data.levelId);
+          return {
+            value: {
+              learning: plan.result,
+              game: { status: "applied", events: applied.events, duplicate: false },
+            },
+            progress: plan.record,
+            ...(applied.state !== records.game.state && {
+              game: { ...records.game, state: applied.state },
+            }),
+          };
+        },
+      );
+    }
+
     const learning = await this.learning.requestHint(learnerId, body);
     const req = HintRequest.safeParse(body);
     if (learning.status !== "ok" || !req.success)
       return { learning, game: { status: "none", events: [] } };
 
     const record = await this.load(learnerId);
-    const applied = applyHintRevealed(
-      this.rules,
-      record.state,
-      { levelId: req.data.levelId, at: this.now().toISOString() },
-      this.policy,
-    );
+    const applied = this.hintEffect(record.state, req.data.levelId);
     if (applied.state === record.state)
       return { learning, game: { status: "applied", events: [], duplicate: false } };
     record.state = applied.state;
     if (!(await this.save(learnerId, record)))
       return { learning, game: { status: "conflict", events: [] } };
     return { learning, game: { status: "applied", events: applied.events, duplicate: false } };
+  }
+
+  private hintEffect(state: GameStateRecord["state"], levelId: string) {
+    return applyHintRevealed(
+      this.rules,
+      state,
+      { levelId, at: this.now().toISOString() },
+      this.policy,
+    );
   }
 
   async getView(learnerId: string): Promise<PlayerGameView> {
@@ -268,6 +375,20 @@ export class GameService {
     viewerId: string | undefined,
     options: { limit?: number } = {},
   ): Promise<Leaderboard & { persistent: boolean }> {
+    if (this.leaderboardSource) {
+      const records = await this.leaderboardSource.records(this.pathId, viewerId);
+      return {
+        ...rankLeaderboard(
+          records,
+          {
+            ...(viewerId && { viewerId }),
+            ...(options.limit !== undefined && { limit: options.limit }),
+          },
+          this.policy,
+        ),
+        persistent: this.leaderboardSource.durable,
+      };
+    }
     const players = (await this.players?.list()) ?? [];
     const records = await Promise.all(
       players.map(async (p) =>

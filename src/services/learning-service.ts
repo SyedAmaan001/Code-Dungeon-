@@ -33,7 +33,12 @@ import {
 } from "@/learning/evaluation";
 import { toPublicLevel, type PublicLevel } from "@/learning/projection";
 import { Id, type ContentPack, type Level } from "@/learning/schema";
-import { ProgressConflictError, type ProgressRecord, type ProgressStore } from "./progress-store";
+import {
+  ProgressConflictError,
+  type LoadOptions,
+  type ProgressRecord,
+  type ProgressStore,
+} from "./progress-store";
 
 // ---------------------------------------------------------------------------
 // Request / response contracts
@@ -206,10 +211,10 @@ export class LearningService {
     return this.pack.meta.path.id;
   }
 
-  private async record(learnerId: string): Promise<ProgressRecord> {
+  private async record(learnerId: string, options: LoadOptions = {}): Promise<ProgressRecord> {
     if (!learnerId) throw new Error("learnerId must come from a verified session");
     return (
-      (await this.store.load(learnerId, this.pathId)) ?? {
+      (await this.store.load(learnerId, this.pathId, options)) ?? {
         progress: emptyProgress(this.pathId),
         submissions: {},
         revision: 0,
@@ -282,28 +287,36 @@ export class LearningService {
     };
   }
 
-  async submit(learnerId: string, body: unknown): Promise<SubmitResult> {
+  /**
+   * Decide the outcome of a submission against a loaded record, without touching storage.
+   * Returns the updated record when it must be persisted (evaluated or not-counted results);
+   * rejections and duplicate resends change nothing.
+   */
+  planSubmit(
+    current: ProgressRecord,
+    body: unknown,
+  ): { result: SubmitResult; record?: ProgressRecord } {
     const req = SubmitRequest.safeParse(body);
-    if (!req.success) return reject("bad_request");
+    if (!req.success) return { result: reject("bad_request") };
     const { submissionId, levelId, challengeId, answer } = req.data;
 
-    const record = await this.record(learnerId);
+    const record = structuredClone(current);
     const prior = record.submissions[submissionId];
     if (prior) {
       if (
         prior.status !== "rejected" &&
         (prior.levelId !== levelId || prior.challengeId !== challengeId)
       )
-        return reject("submission_id_reused");
-      return prior.status === "rejected" ? prior : { ...prior, duplicate: true };
+        return { result: reject("submission_id_reused") };
+      return { result: prior.status === "rejected" ? prior : { ...prior, duplicate: true } };
     }
 
     const level = this.published.get(levelId);
-    if (!level) return reject("unknown_level");
+    if (!level) return { result: reject("unknown_level") };
     const challenge = level.challenges.find((c) => c.id === challengeId);
-    if (!challenge) return reject("unknown_challenge");
+    if (!challenge) return { result: reject("unknown_challenge") };
     if (levelView(this.rules, record.progress, levelId, this.policy).status === "locked")
-      return reject("level_locked");
+      return { result: reject("level_locked") };
 
     const evaluation = this.registry.evaluate(challenge, answer);
     const feedback = composeFeedback(challenge, evaluation);
@@ -321,7 +334,7 @@ export class LearningService {
         },
         this.policy,
       );
-      if (!applied.ok) return fromDomain(applied.error);
+      if (!applied.ok) return { result: fromDomain(applied.error) };
       record.progress = applied.progress;
       result = {
         status: "evaluated",
@@ -353,36 +366,58 @@ export class LearningService {
     }
 
     record.submissions[submissionId] = result;
-    return (await this.persist(learnerId, record)) ?? result;
+    return { result, record };
   }
 
-  async requestHint(learnerId: string, body: unknown): Promise<HintResult> {
+  async submit(learnerId: string, body: unknown): Promise<SubmitResult> {
+    const req = SubmitRequest.safeParse(body);
+    const record = await this.record(
+      learnerId,
+      req.success ? { submissionId: req.data.submissionId } : {},
+    );
+    const plan = this.planSubmit(record, body);
+    if (!plan.record) return plan.result;
+    return (await this.persist(learnerId, plan.record)) ?? plan.result;
+  }
+
+  /** Decide a hint request against a loaded record, without touching storage. */
+  planHint(
+    current: ProgressRecord,
+    body: unknown,
+  ): { result: HintResult; record?: ProgressRecord } {
     const req = HintRequest.safeParse(body);
-    if (!req.success) return reject("bad_request");
+    if (!req.success) return { result: reject("bad_request") };
     const { levelId, challengeId } = req.data;
     const level = this.published.get(levelId);
-    if (!level) return reject("unknown_level");
+    if (!level) return { result: reject("unknown_level") };
     const challenge = level.challenges.find((c) => c.id === challengeId);
-    if (!challenge) return reject("unknown_challenge");
+    if (!challenge) return { result: reject("unknown_challenge") };
 
-    const record = await this.record(learnerId);
+    const record = structuredClone(current);
     const applied = applyHintReveal(
       this.rules,
       record.progress,
       { levelId, challengeId },
       this.policy,
     );
-    if (!applied.ok) return fromDomain(applied.error);
+    if (!applied.ok) return { result: fromDomain(applied.error) };
     record.progress = applied.progress;
-    const conflict = await this.persist(learnerId, record);
-    if (conflict) return conflict;
     return {
-      status: "ok",
-      tier: applied.tier,
-      hint: challenge.hints[applied.tier - 1]!,
-      revealed: challenge.hints.slice(0, applied.tier),
-      remaining: challenge.hints.length - applied.tier,
+      record,
+      result: {
+        status: "ok",
+        tier: applied.tier,
+        hint: challenge.hints[applied.tier - 1]!,
+        revealed: challenge.hints.slice(0, applied.tier),
+        remaining: challenge.hints.length - applied.tier,
+      },
     };
+  }
+
+  async requestHint(learnerId: string, body: unknown): Promise<HintResult> {
+    const plan = this.planHint(await this.record(learnerId), body);
+    if (!plan.record) return plan.result;
+    return (await this.persist(learnerId, plan.record)) ?? plan.result;
   }
 
   private async persist(learnerId: string, record: ProgressRecord): Promise<Rejection | undefined> {
