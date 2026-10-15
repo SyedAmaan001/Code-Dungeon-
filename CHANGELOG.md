@@ -1,5 +1,17 @@
 # Changelog
 
+## Phase 5 — First playable slice: sign-in, interface and decisions (2026-10-15)
+
+- Decisions recorded (DEC-009 to DEC-013, owner-confirmed): Supabase Auth with Google OAuth and email magic link, verified email, no passwords; 13+ audience with jurisdiction questions documented; distinct AI/human review statuses with human review required for public release; game rules locked; local-first hosting with Supabase and Vercel intended but nothing provisioned. DEC-014 (leaderboard opt-in) proposed.
+- Authentication: Supabase integration via `@supabase/ssr` (server-verified sessions, email verification enforced, callback and confirm routes, cookie refresh in `src/proxy.ts`), not connected to a real project yet; development-only sign-in refused in production builds; `requirePlayer()`/`playerForAction()` on every page and server action.
+- Onboarding with a neutral 13+ age screen; migration `0002_age_check` stores only the check's outcome; identity-linked players must have passed it.
+- Content: `review.kind` is required (no silent "human" default); `CONTENT_RELEASE=public` serves human-reviewed levels only; `npm run content:release-check`.
+- Interface: original dark-fantasy design system and SVG art (five zone scenes, ten reward items, icons, medallions); landing, sign-in, onboarding, home, dungeon map, level room (all six challenge formats, feedback, hints, encounter lives and runs, completion), quest journal, collection, leaderboard, profile; loading, empty, error and locked states; responsive with a phone bottom bar; keyboard, focus, reduced-motion and forced-colours support.
+- Services (additive): level-room read model with the active encounter run, zones and maximum XP in the player view, quest objective titles, presenter for display-ready results, process-local rate limiter, runtime wiring.
+- Tests: 242 Vitest tests with a database (212 without) and 13 Playwright browser tests (auth boundaries, under-13 refusal, persistence across sessions, two-account isolation, no answer leakage, encounter lives, all challenge formats, full path at 2,455 XP, rewards, mobile layout, axe accessibility, reduced motion). CI gains an end-to-end job.
+- New dependencies: `@supabase/supabase-js` 2.117.2, `@supabase/ssr` 0.12.7, three OFL font packages; dev: `@playwright/test`, `playwright-core` 1.56.1, `@axe-core/playwright` 4.13.0. Runtime audit: 0 vulnerabilities.
+- Unchanged: `src/domain` (XP policy, progression, game engine, leaderboard rules), evaluators and all 25 levels.
+
 ## Phase 4 — Saved progress and accounts, local first (2026-10-15)
 
 - PostgreSQL schema (`db/migrations/0001_initial.sql`): players, learning progress, append-only XP ledger with database-enforced award-once, idempotent submissions, encounters, checkpoints, quests, achievements, reward items; row-level security on every player table through the non-owner role `code_dungeon_app`; narrow `SECURITY DEFINER` functions for the leaderboard and identity lookup.

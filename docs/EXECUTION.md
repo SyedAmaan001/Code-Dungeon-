@@ -12,11 +12,12 @@ The delivery phases in the reports are numbered by session and do not map one-to
 | 1 — Architecture and local foundation | Done | `docs/phase-1-report.md` (DEC-001) |
 | 2 — Curriculum and content validation | Done; 25 levels agent-reviewed, **human review pending** (DEC-004) | `docs/PHASE_2_REPORT.md` |
 | 3 — Domain/game engine | Done as pure domain + services on non-durable in-memory stores: progression (Phase 2), encounters, checkpoints, quests, achievements, leaderboard ranking (Phase 3) | `docs/PHASE_2_REPORT.md`, `docs/PHASE_3_REPORT.md` |
-| 4 — Account, persistence and permissions | Persistence and permissions done locally (PostgreSQL, migrations, row-level security, single-transaction saves, isolation tests); **authentication designed but not configured** (provider needs owner approval) | `docs/PHASE_4_REPORT.md`, `docs/auth-design.md` |
-| 5 — First playable vertical slice | Not started | — |
-| 6 — Full 25-level path, zones and quests | Content and rules done; UI not started | Phase 2/3 reports |
-| 7 — XP, achievements, profile and leaderboard | Rules and persistence done (profiles, ledger, leaderboard function); UI not started | Phase 3 and 4 reports |
-| 8–12 | Not started | — |
+| 4 — Account, persistence and permissions | Done locally: PostgreSQL, migrations, row-level security, single-transaction saves, isolation tests (Phase 4); Supabase Auth (Google + magic link, verified email) integrated and unit-tested but **not connected to a real project** (credentials need approval); development-only sign-in for local play (Phase 5) | `docs/PHASE_4_REPORT.md`, `docs/PHASE_5_REPORT.md`, `docs/auth-design.md` |
+| 5 — First playable vertical slice | Done locally and exceeded: the full 25-level path is playable in the browser with saved progress (home, map, level room, encounters, journal, collection, leaderboard, profile); 13 browser tests | `docs/PHASE_5_REPORT.md` |
+| 6 — Full 25-level path, zones and quests | Content, rules and interface done; **human content review pending** before public release (DEC-011) | Phase 2, 3 and 5 reports |
+| 7 — XP, achievements, profile and leaderboard | Done locally (rules, persistence, interface) | Phase 3, 4 and 5 reports |
+| 8 — Art and world polish | Original SVG design system and zone scenes done; owner review of the slice and any larger art set pending (P-006) | `docs/DESIGN_SYSTEM.md`, `docs/ASSETS.md` |
+| 9–12 | Not started (hosting needs approval: DEC-013) | — |
 
 Nothing is deployed. No external service or cloud resource has been created.
 

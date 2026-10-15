@@ -4,6 +4,8 @@
 - **Where we are:** "0" on the `00_TO_100.md` scale — the audit is complete and the truth is documented (`docs/initial-audit.md`). No application code exists.
 - **Companion docs:** `docs/architecture-proposal.md` (stack and design), `docs/risk-register.md` (risks), `docs/EXECUTION.md` (phase gates, unchanged).
 
+> **Update 2026-10-15 (Phase 5):** the game is playable locally end to end — sign-in (Supabase Auth integrated but not connected to a project; development-only sign-in for local play), onboarding with a neutral 13+ age check, home, dungeon map, level room with all six challenge formats, hints and encounter lives, quest journal, collection, leaderboard and profile, all on the PostgreSQL services — with 13 browser tests; see `docs/PHASE_5_REPORT.md`. Owner decisions recorded as DEC-009 to DEC-013 (O-5, O-8, O-13, O-14 resolved; O-1b partly). Next: approval to create the Supabase project (and verify it end to end), human content review, launch jurisdictions, and confirmation of DEC-014 (leaderboard opt-in).
+>
 > **Update 2026-10-15 (Phase 4):** saved progress is implemented locally — PostgreSQL schema and migrations, row-level security, learning and game state saved in one transaction, player accounts, persistent leaderboard source — with isolation, rollback and duplicate-submission tests; see `docs/PHASE_4_REPORT.md`. Authentication is designed (`docs/auth-design.md`) but **not configured**: it needs owner decisions on the provider, O-5 and O-8. Recommended next phase: **Phase 5 — First playable vertical slice** (local, behind a development-only sign-in), once the owner either approves a provider or approves a clearly local-only development sign-in for the slice.
 >
 > **Update 2026-10-15 (Phase 3):** the game engine is implemented — encounters (checkpoint, major, boss) with runs and lives, checkpoints, 6 quests, 11 achievements, cosmetic items and deterministic leaderboard ranking — on non-durable in-memory stores; see `docs/PHASE_3_REPORT.md`, DEC-005, DEC-006. The recommended next phase is **Phase 4 — Persistence and identity (local first)**: SQL migrations, RLS and a durable store for learning and game state in one transaction, plus the authentication design; it needs owner decisions O-5 (sign-in methods) and O-8 (minimum learner age) before a provider is integrated. New open item **O-14**: confirm the game defaults in DEC-005 (3 lives per major/boss run; no quest XP; encounters do not gate unlocks).
@@ -71,16 +73,16 @@ Only items that repository evidence cannot settle. Each has a recommendation so 
 | O-2 | Scoring numbers, retry/hint rules, tie-break | Adopt the table in `architecture-proposal.md` §5.2 and §7 as v1 | Phase 2 (can start with defaults) | P-005 |
 | O-3 | Python version for curriculum | Write content valid for Python ≥ 3.10, verify with CPython 3.13 in CI (installed in sandbox); revisit if a runner uses another version (current Pyodide reportedly tracks 3.14) | Phase 3 | CONTENT_QUALITY_STANDARD |
 | O-4 | Is graded code-writing required for the first public MVP? | No — ship Tier 0 deterministic formats; optionally add a Pyodide practice scratchpad that never awards XP; decide Tier 2 after the slice | Phase 9 | P-004 |
-| O-5 | Sign-in methods | Email + password with confirmation, plus GitHub OAuth; production SMTP chosen at cloud-plan time | Phase 4 | P-003 |
+| O-5 | Sign-in methods | **RESOLVED (DEC-009):** Supabase Auth, Google OAuth + email magic link, verified email, no passwords | — | P-003 |
 | O-6 | Should the legacy prototype files (`index.html`, `codeclash.html`, `page.js`, …) be added to the repo for reference? | Not needed for the build; if wanted, add under `legacy/` in a separate PR, never served | Any time | Audit §3 |
 | O-7 | Docs naming convention | Keep existing UPPER_SNAKE docs canonical; new docs lower-kebab; `decision.md` remains the decision log; no lower-case duplicates | Phase 1 | Audit §6 |
-| O-8 | Minimum learner age / audience | Decide before public launch; affects privacy obligations and consent flows | Phase 4 design, before public release | P-007 |
-| O-9 | Leaderboard visibility default | Visible by default with an opt-out toggle in profile; handle (never email) only | Phase 7 | P-005/P-007 |
+| O-8 | Minimum learner age / audience | **RESOLVED (DEC-010):** 13+; launch jurisdictions still open, legal questions listed in DEC-010 | Before public release (jurisdictions) | P-007 |
+| O-9 | Leaderboard visibility default | **Implemented as opt-in (DEC-014, PROPOSED):** unchecked at onboarding, changeable in profile; handle only. Confirm or switch to visible-by-default | Before public release | P-005/P-007 |
 | O-10 | Reference images in Git: keep, or replace with a provenance note? Is the repo public? | Keep in Git only while the repo is private and record their source; never ship them | Before making the repo public | P-006, R-12 |
 | O-11 | Source of original art (commission, licensed packs, owner-created, AI-assisted with licence review) | Decide after the representative slice is reviewed | Phase 8 | P-006 |
 | O-12 | Confirm cloud-session credit expiry year | Check the Claude UI; plan sessions accordingly | Now | decision.md §3 |
-| O-13 | Keep the 25 agent-reviewed Python levels published until a human reviews them? | Keep them published with the visible "awaiting human review" notice; review zone by zone and set `review.kind: human` | Before any public release | DEC-004, R-34 |
-| O-14 | Confirm the game defaults: 3 lives per major/boss run, cosmetic-only rewards (no quest/achievement XP), encounters do not gate unlocks | Keep the defaults until learner testing | Before UI work on encounters | DEC-005, R-39 |
+| O-13 | Keep the 25 agent-reviewed Python levels published until a human reviews them? | **RESOLVED (DEC-011):** playable in development; human review required for public release (release gate) | — | DEC-004, R-34 |
+| O-14 | Confirm the game defaults: 3 lives per major/boss run, cosmetic-only rewards (no quest/achievement XP), encounters do not gate unlocks | **RESOLVED (DEC-012):** confirmed as implemented | — | DEC-005, R-39 |
 
 ## 4. What the owner should do now
 

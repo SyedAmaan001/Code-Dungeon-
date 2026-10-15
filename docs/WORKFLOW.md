@@ -180,7 +180,7 @@ The `$100` shown in Claude is cloud-session credit for development sessions. It 
 - [ ] PR/commit and review steps provided.
 - [ ] Deployment claims verified separately from code/PR status.
 
-## 14. Verified commands and layout (as of Phase 3)
+## 14. Verified commands and layout (as of Phase 3; see §16 for Phase 5 additions)
 
 The repository now has a real toolchain; these commands replace the placeholders above for day-to-day work:
 
@@ -208,3 +208,22 @@ npm run db:local -- stop       # or: reset (deletes local data)
 ```
 
 Rules: never edit a migration that has been applied anywhere shared — add a new numbered file. Every new player-owned table needs row-level security, a policy and an isolation test. Never connect the app or tests to production data. CI runs the migrations twice and all database tests against a PostgreSQL 16 service container.
+
+## 16. Playing, sign-in and browser tests (as of Phase 5)
+
+```bash
+npm run db:local -- start                      # local PostgreSQL
+# .env.local (git-ignored): DATABASE_URL=..., AUTH_MODE=dev, DEV_AUTH_SECRET=$(openssl rand -hex 32)
+DATABASE_URL=... npm run db:migrate
+npm run dev                                    # http://localhost:3000, sign in with any short name
+TEST_DATABASE_URL=... npm run test:e2e         # Playwright: next dev on :3100 + fresh code_dungeon_e2e database
+npm run content:release-check                  # public-release gate: fails until levels are human-reviewed
+```
+
+Rules:
+- **Authorization lives on the server.** Every protected page calls `requirePlayer()`; every server action calls `playerForAction()` and passes the body unchanged to the services, which validate it strictly. The proxy only refreshes cookies and redirects early. Never read a player id, XP, completion or reward from a request.
+- **Only public projections reach the browser.** Client components receive `PublicLevel`/`PublicChallenge` and presenter results; `src/learning/keys` is lint-blocked in `src/app` and `src/ui`. The e2e suite checks that level HTML holds no hints, explanations or answer feedback.
+- **No business logic in the UI.** Components render service read models (`getView`, `levelRoom`, `leaderboard`) and call actions; the encounter run, XP and unlock state shown always come from the server (refreshed after every answer).
+- **Development sign-in stays development-only.** `AUTH_MODE=dev` is refused when `NODE_ENV=production`; never set it in a hosted environment. Supabase credentials are added only after approval, through the environment's secret settings — never committed.
+- **Run one `next dev` per folder.** Stop your own dev server before `npm run test:e2e`; reach the dev server via `localhost` (Next.js blocks dev resources for other hostnames).
+- **UI changes** keep the design tokens (`docs/DESIGN_SYSTEM.md`), visible focus, keyboard operation and reduced-motion behaviour; new art is original and recorded in `docs/ASSETS.md`. Check 390px and desktop widths; the axe scan must stay free of serious/critical violations.

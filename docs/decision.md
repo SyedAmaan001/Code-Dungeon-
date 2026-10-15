@@ -223,3 +223,12 @@
 - Decision: development stays local (PostgreSQL via `npm run db:local`, development sign-in). **Supabase** is the intended hosted authentication and PostgreSQL service. **Vercel** is the proposed frontend host, pending compatibility and cost verification. No production deployment, paid resource or external service is created or activated without explicit approval.
 - Compatibility notes to verify before approval: Supabase connection pooling vs. the app's `SET LOCAL ROLE` + `set_config` per transaction (transaction pooling is compatible because both are transaction-scoped; verify) and the `code_dungeon_app` role creation on Supabase (R-44); serverless connection limits on Vercel (use the Supabase pooler); region choice for latency and data residency (DEC-010).
 - Revisit trigger: owner approves creating the projects and the cost plan.
+
+### DEC-014 — Leaderboard visibility is opt-in at onboarding
+- Status: PROPOSED (implemented in Phase 5; owner to confirm — open item O-9)
+- Date: 2026-10-15
+- Context: the earlier recommendation (O-9) was visible by default with an opt-out. Phase 5 set the audience to 13+ (DEC-010) and asked to minimise personal information.
+- Decision: the onboarding checkbox "Show my handle and XP on the leaderboard" starts unchecked; players can change it at any time in their profile. Only handles (never emails) are shown. Ranking rules are unchanged (DEC-006).
+- Why: high-privacy defaults are expected for services that minors may use (e.g. UK Age Appropriate Design Code), and the leaderboard still works for everyone who opts in.
+- Consequences: an emptier leaderboard early on; no fake players are added to compensate.
+- Revisit trigger: owner prefers visible-by-default, or legal review of launch jurisdictions.

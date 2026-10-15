@@ -1,40 +1,57 @@
-# Code Dungeon — Project Documentation Pack
+# Code Dungeon
 
-This folder is a **documentation and operating-system pack** for the Code Dungeon repository. It is intentionally not a claim that the application has already been implemented. It captures the product contract, decisions, development workflow, execution plan and enough information to reconstruct the project from an empty repository.
+A gamified programming-learning experience: learn Python by exploring an illustrated fantasy dungeon. This repository holds the application (Next.js, PostgreSQL) and its documentation pack — the product contract, decisions, development workflow and execution plan. What is verified to work is stated in the phase reports under `docs/`; documentation alone is never evidence that a feature works.
 
-## Develop the app (Phase 1 foundation)
+## Develop and play the game (Phase 5)
 
-The application skeleton exists; gameplay, accounts and published lessons do not yet. See `docs/phase-1-report.md` for what is verified.
+Code Dungeon is playable locally: sign in, create an adventurer, explore the dungeon map, play the 25 Python Fundamentals levels (lessons, six server-checked challenge formats, hints, encounter lives), follow quests, collect rewards and see the leaderboard. Progress is saved in PostgreSQL. Nothing is deployed or hosted. See `docs/PHASE_5_REPORT.md` for what is verified and what is not.
 
-Requirements: Node.js 22 (`.nvmrc`) and Python 3.10+ (CI uses 3.13) for verifying curriculum examples.
+Requirements: Node.js 22 (`.nvmrc`), PostgreSQL 15+ (the script below runs a local one; no Docker needed) and Python 3.10+ for verifying curriculum examples (CI uses 3.13).
+
+### Run it locally
 
 ```bash
-npm ci                          # install exact locked dependencies
-npm run dev                     # local server at http://localhost:3000
+npm ci
+npm run db:local -- start       # throwaway PostgreSQL in .local/postgres (loopback only)
+```
+
+Create `.env.local` (git-ignored; never commit it):
+
+```bash
+DATABASE_URL=postgresql://postgres@127.0.0.1:54329/code_dungeon_dev
+AUTH_MODE=dev                   # development-only sign-in (refused in production builds)
+DEV_AUTH_SECRET=<output of: openssl rand -hex 32>
+```
+
+```bash
+DATABASE_URL=postgresql://postgres@127.0.0.1:54329/code_dungeon_dev npm run db:migrate
+npm run dev                     # http://localhost:3000 — sign in with any short name, e.g. "alice"
+```
+
+**Sign-in.** The product uses Supabase Auth with Google and email magic links (DEC-009). It is implemented (`AUTH_MODE=supabase`) but **not configured**: creating the Supabase project and its credentials needs the owner's approval. Until then, `AUTH_MODE=dev` provides a clearly labelled development sign-in that the app refuses to enable in a production build. Variable names are listed in `.env.example`; only the Supabase *publishable* key may ever reach the browser.
+
+**Content release.** `CONTENT_RELEASE=development` (default) plays all 25 levels. `public` serves only human-reviewed levels; `npm run content:release-check` lists what still needs human review (DEC-011). All 25 levels are currently AI-reviewed only.
+
+### Checks
+
+```bash
 npm run lint                    # ESLint incl. layer-boundary rules
 npm run format:check            # Prettier
 npm run typecheck               # TypeScript
-npm test                        # Vitest (runs real Python for content checks)
+npm test                        # Vitest unit/service/content tests (database suites skip without TEST_DATABASE_URL)
+TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:54329/postgres npm test   # include database tests
+TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:54329/postgres npm run test:e2e   # browser tests (Playwright)
 npm run content:validate        # validate content packs in content/
 npm run content:verify-python   # run curriculum examples with real Python
 npm run build                   # production build
-npm run check                   # all of the above
+npm run db:status               # migration state
 ```
 
-Layout: `content/` curriculum data (25 Python levels) · `src/learning/` learning engine (schemas, evaluators, feedback, validation, Python verification) · `src/domain/` progression rules (unlocks, completion, mastery, XP policy) and `src/domain/game/` game engine (encounters, checkpoints, quests, achievements, leaderboard ranking) · `src/services/` server-side learning and game services with non-durable in-memory stores · `src/app/` status page · `src/runner/` disabled code runner · `tests/` unit, content, service and synthetic 100-level tests. See `docs/PHASE_2_REPORT.md` and `docs/PHASE_3_REPORT.md`. Nothing is saved permanently yet and there is no playable interface. No environment variables are needed yet; `.env.example` lists future names only.
+The end-to-end tests start `next dev` on port 3100 with the development sign-in and a fresh `code_dungeon_e2e` database, so stop any other `next dev` in the same folder first. Playwright needs Chromium (`npx playwright install chromium`; preinstalled in Claude cloud sessions).
 
-### Database (Phase 4, local only)
+### Layout
 
-Saved progress uses PostgreSQL. Nothing is hosted; no external service is required.
-
-```bash
-npm run db:local -- start       # local PostgreSQL 15+ in .local/postgres; prints the URLs to use
-export DATABASE_URL=postgresql://postgres@127.0.0.1:54329/code_dungeon_dev
-npm run db:migrate              # create/upgrade the schema (safe to re-run)
-TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:54329/postgres npm test   # include database tests
-```
-
-Without `TEST_DATABASE_URL` the database test suites are skipped (CI runs them against PostgreSQL 16). Data isolation, transactions and the schema are described in `docs/PHASE_4_REPORT.md`; sign-in is designed in `docs/auth-design.md` but not configured, so nothing is exposed over HTTP yet.
+`content/` curriculum data · `src/learning/` learning engine (schemas, evaluators, feedback, validation, release policy, Python verification) · `src/domain/` progression rules and `src/domain/game/` game engine · `src/services/` server-side services, PostgreSQL store, presenter, runtime wiring · `src/auth/` session resolution (Supabase, dev-only), age check, redirects · `src/app/` Next.js routes, server actions and auth callbacks · `src/ui/` design-system components and original SVG art · `src/world/` world-layer catalogue (item names, zone themes) · `db/migrations/` SQL · `tests/` Vitest · `e2e/` Playwright. Design tokens and accessibility notes: `docs/DESIGN_SYSTEM.md`; asset provenance: `docs/ASSETS.md`.
 
 ## Add it to GitHub
 

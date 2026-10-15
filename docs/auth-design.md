@@ -1,6 +1,7 @@
 # Authentication integration design
 
-- **Status:** DESIGN ONLY (Phase 4). No identity provider is configured, no credentials exist, nothing external has been created. Choosing and configuring a provider needs owner approval (open items O-5, O-8, and the provider itself; decision DEC-008).
+- **Status (Phase 5):** IMPLEMENTED, NOT CONNECTED. The owner chose Supabase Auth with Google OAuth and email magic link, verified email required, no passwords (DEC-009). The integration is in `src/auth/`, `src/proxy.ts`, `src/app/actions/auth.ts` and `src/app/auth/{callback,confirm}`; it is unit-tested with stubs but has not run against a real Supabase project, because creating one needs approval (DEC-013, R-47). A development-only sign-in (`AUTH_MODE=dev`, refused in production) is used for local play and browser tests.
+- **Original status (Phase 4):** design only.
 - **Date:** 15 October 2026
 
 ## 1. What already exists (and is tested)
@@ -68,3 +69,19 @@ interface SessionResolver {
 2. Sign-in methods (O-5) and minimum learner age / consent rules (O-8).
 3. A transactional email sender, if email sign-in is chosen.
 4. The hosting target for the app and database (P-002), which determines where secrets live.
+
+## 6. As implemented (Phase 5)
+
+| Design element | Implementation |
+|---|---|
+| `SessionResolver` | `src/auth/identity.ts`: `resolveSupabaseIdentity` (calls `auth.getUser()`, which verifies the token with Supabase; rejects users without `email_confirmed_at`; fails closed on errors) and `resolveDevIdentity` (HMAC-signed cookie, 7-day expiry). `src/auth/server.ts` wires them to Next.js cookies |
+| Identity → player | `getSession()` → `accounts.playerIdForIdentity(provider, subject)`; no player → `/onboarding` |
+| Authorization | `requirePlayer()` in every `/play` page and the layout; `playerForAction()` in every server action. The proxy refreshes Supabase cookies and redirects signed-out visitors; it is not the security check |
+| Sign-in | `signInWithGoogle` (OAuth, PKCE) and `sendMagicLink` (`signInWithOtp`, same response whether or not the address exists); redirects built from `APP_URL` and a sanitised `next` path |
+| Cookies | Set by `@supabase/ssr` (Supabase mode) or HttpOnly, SameSite=Lax, Secure in production (dev mode) |
+| Secrets | Only `NEXT_PUBLIC_SUPABASE_URL` and the publishable key; a key starting `sb_secret_` is refused; no service-role key is used anywhere |
+| Onboarding | Handle + neutral age screen (DEC-010); account created with `identity` and the age-check outcome only |
+| CSRF | Next.js server actions compare Origin and Host; state changes happen only in server actions and POSTs |
+| Tests | `tests/auth/*.test.ts` (config, tokens, identity, age, redirects, action boundary); `e2e/game.spec.ts` (signed-out redirects, forged cookie, under-13 refusal, two-account isolation) |
+
+Still to do once a project is approved: Supabase dashboard settings (Site URL, redirect allow-list for `/auth/callback`, email template, Google OAuth client), an end-to-end check against the real project, account deletion with an admin credential (R-46), and production rate limits.
