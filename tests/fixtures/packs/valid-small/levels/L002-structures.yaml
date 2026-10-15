@@ -118,3 +118,4 @@ review:
   reviewer: fixture
   date: "2026-10-15"
   pythonVersion: "3.13"
+  kind: human

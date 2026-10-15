@@ -45,12 +45,12 @@
 | ID | Open question | Recommendation | Why it remains open | Required before |
 |---|---|---|---|---|
 | P-001 | What framework/build system actually exists in GitHub? | **RESOLVED 2026-10-15** — see DEC-001. | Audit (`initial-audit.md`) found documentation only; owner approved the proposed stack for Phase 1. | — |
-| P-002 | Which production hosting provider/project is available? | Identify from owner account/access; Claude cloud is not assumed to host the app. | No production provider was confirmed. | External deployment. |
-| P-003 | Which auth/database vendor will be used? | Managed auth + managed relational DB if cost/fit/access checks pass. | Credentials, current pricing and provider not yet confirmed. | Provisioning and integration. |
+| P-002 | Which production hosting provider/project is available? | **PARTLY RESOLVED 2026-10-15** — see DEC-013: Supabase (auth + PostgreSQL) intended, Vercel proposed for the frontend; nothing provisioned. | Compatibility, region and cost verification, then explicit approval to create resources. | External deployment. |
+| P-003 | Which auth/database vendor will be used? | **RESOLVED 2026-10-15** — Supabase Auth and Supabase PostgreSQL (DEC-009, DEC-013). | Project creation and credentials still need explicit approval. | Provisioning and integration. |
 | P-004 | Is arbitrary Python execution required in the first public MVP? | Launch deterministic challenge modes first; add safe sandbox only if feasible. | Security, service availability and current provider prices need research. | Exposing code-runner UI. |
 | P-005 | Exact XP, retries, hint and leaderboard rules? | Correctness/completion dominate; speed bonus capped; no lost mastery. | Product requires rules, but exact numbers and tie method need formal testable spec. | Scoring implementation. |
 | P-006 | Final typography/assets/licenses and per-biome art style? | Produce one approved map/room/challenge slice, then scale art. | References set direction, not finished production assets. | Bulk asset generation. |
-| P-007 | Public launch/privacy terms/account deletion/analytics choices? | Minimize data; document retention and deletion. | Jurisdiction, audience and provider details must be known. | Public release. |
+| P-007 | Public launch/privacy terms/account deletion/analytics choices? | Minimize data; document retention and deletion. Audience is 13+ (DEC-010); launch jurisdictions are still unknown. | Jurisdiction and provider region must be known; legal questions are listed in DEC-010. | Public release. |
 
 ## 5. Decision workflow
 
@@ -96,7 +96,7 @@
 - **Content storage:** curriculum lives in Git as YAML content packs (`content/<pack>/`); the database will later hold only a registry of IDs/versions. Status: DEFAULT (architecture-proposal §6.2).
 
 ### DEC-002 — Progression policy: XP, completion, mastery, unlocks and replay
-- Status: DEFAULT (applied in Phase 2; configurable; awaiting owner confirmation — open item O-2)
+- Status: CONFIRMED by DEC-012 (2026-10-15); was DEFAULT (applied in Phase 2)
 - Date: 2026-10-15
 - Context/problem: The learning engine needs explicit, testable rules for attempts, completion, mastery, XP and replay (P-005). No owner-approved numbers existed.
 - Options considered: speed/time bonuses; XP penalties for wrong answers or hints; mastery from a single answer; repeat XP on replay.
@@ -120,7 +120,7 @@
 - Consequences: `00_TO_100.md` §6 and the blueprint §5 outline are superseded for level content; those documents are kept unchanged as history.
 
 ### DEC-004 — Content schema v2 and agent-reviewed publication
-- Status: DEFAULT (pending owner decision on human review — open item O-13)
+- Status: REFINED by DEC-011 (2026-10-15): human review required before public release
 - Decision: content schema v2 adds lesson objectives/examples/practical context, level descriptions, challenge roles (exercise/check), exactly three progressive hints for published challenges, and runnable checks for fill-in, ordering, tracing and bug-fix challenges. The 25 Python levels are `published` with `review.kind: agent`; validation emits a warning while any published level lacks human review, and the home page states it.
 - Why: the levels pass every automated gate, but CONTENT_QUALITY_STANDARD asks for reviewer verification; an AI agent's self-review is recorded honestly rather than presented as human review.
 - Revisit trigger: a human reviewer signs off a level (set `review.kind: human`) or the owner decides that agent review is insufficient for publication (then set levels to `review`).
@@ -129,7 +129,7 @@
 `docs/PHASE_2_REPORT.md` uses the UPPER_SNAKE name the owner requested; this is an explicit exception to the O-7 lower-kebab default. `docs/phase-1-report.md` keeps its existing name.
 
 ### DEC-005 — Game engine rules: encounters, checkpoints, quests, achievements and rewards
-- Status: DEFAULT (applied in Phase 3; values configurable in `src/domain/game/policy.ts`; awaiting owner confirmation)
+- Status: CONFIRMED by DEC-012 (2026-10-15); was DEFAULT (applied in Phase 3; values in `src/domain/game/policy.ts`)
 - Date: 2026-10-15
 - Context/problem: Phase 3 adds quests, achievements, checkpoint and boss encounters on top of the learning engine, with the instruction to preserve the XP policy (DEC-002) and the prerequisite rules.
 - Decision:
@@ -143,7 +143,7 @@
 - Revisit trigger: owner wants boss gating, quest XP, different lives, or penalties; learner testing shows lives are too strict or too lenient.
 
 ### DEC-006 — Leaderboard ranking and public handles
-- Status: DEFAULT (ranking implemented; persistent leaderboard pending storage and authentication)
+- Status: CONFIRMED by DEC-012 (2026-10-15); persistent since Phase 4, shown in the interface since Phase 5
 - Date: 2026-10-15
 - Decision: metric = lifetime XP from the verified XP ledger (R-005). Order: XP descending → time the current XP total was reached, earliest first → handle (case-insensitive, then exact) → internal player id (never displayed). Rank = competition ranking (1, 2, 2, 4) on equal XP *and* equal reached-at time; the later rules only fix display order within a shared rank. Only visible players with at least 1 XP are ranked; output shows rank, handle and XP only, plus the viewer's own rank or the reason they are unranked (hidden, no XP, unknown). Default top 10, maximum 100. Handles: 3–20 characters, starting with a letter, letters/digits/`_`/`-`, reserved words refused, unique case-insensitively. No offensive-word filter yet (R-08).
 - Consequences: with in-memory adapters the leaderboard only compares players held in one server process and is flagged `persistent: false`. It is not a persistent or cross-session leaderboard.
@@ -166,7 +166,60 @@
 - Revisit trigger: hosting/database provider approval; content registry need; scale (index or partition the ledger).
 
 ### DEC-008 — Authentication integration design (provider pending approval)
-- Status: PROPOSED — design in `docs/auth-design.md`; **no provider configured**
+- Status: SUPERSEDED by DEC-009 (2026-10-15) — the owner chose the provider and methods; the design in `docs/auth-design.md` stands
 - Date: 2026-10-15
 - Decision so far: player ids come only from a server-verified session; `players.auth_provider/auth_subject` link one provider identity to one player; `player_id_for_identity()` resolves it under RLS. Recommended provider: Supabase Auth with GitHub/Google OAuth plus email magic link, no passwords at launch.
 - Needs owner approval: the provider, sign-in methods (O-5), minimum learner age and consent (O-8), an email sender if email sign-in is chosen, and hosting (P-002).
+
+### DEC-009 — Authentication: Supabase Auth with Google OAuth and email magic link
+- Status: CONFIRMED (owner, Phase 5 instruction, 2026-10-15). Supersedes DEC-008.
+- Context/problem: accounts and saved progress are required (D-005). Phase 4 prepared the identity link (`players.auth_provider/auth_subject`) and RLS, but no provider was chosen.
+- Decision:
+  - **Provider:** Supabase Auth. **Methods:** Google OAuth and email magic link. **No passwords** in the initial release.
+  - **Email verification is required** for new accounts: the server rejects any session whose user has no confirmed email (`email_confirmed_at`), whatever the sign-in method.
+  - **Server-side authorization:** every protected page and server action resolves the session on the server (`supabase.auth.getUser()`, which verifies the token with Supabase) and maps it to a player id with `player_id_for_identity`. The Next.js proxy only refreshes cookies and redirects signed-out visitors early; it is never the security check.
+  - **Credentials** live in environment variables. Only the Supabase URL and *publishable* key may reach the browser. No service-role key is used by the application.
+  - **No external credentials are configured** without the owner's approval. Until then the Supabase mode is implemented and unit-tested but not exercised against a real project.
+  - **Development-only sign-in** (`AUTH_MODE=dev`): an HMAC-signed cookie identity used to play and test the whole app locally against PostgreSQL. It is refused when `NODE_ENV=production`, shows a visible "development sign-in" label and never talks to Supabase. Added because neither a Supabase project (needs approval) nor the Supabase local stack (needs Docker, unavailable here) can be used in this environment.
+- Why: managed authentication avoids custom password storage and reset flows; magic link and Google cover learners without a GitHub account; verified email reduces throwaway and mistyped accounts.
+- Consequences: the provider identity (`provider = 'supabase'`, `subject = auth user id`) is the only link between Supabase and game data; email addresses are not copied into the game database. Account deletion must also delete the Supabase user, which needs a server-only admin credential — deferred until approved (R-46).
+- Security/privacy/cost impact: Supabase free tier is sufficient for development; production plan and cost are part of DEC-013 approval. Session cookies are HttpOnly and set by `@supabase/ssr`.
+- Revisit trigger: owner approves creating the Supabase project and credentials; other sign-in methods requested.
+- Evidence: `src/auth/`, `tests/auth/`, `docs/auth-design.md`, `docs/PHASE_5_REPORT.md`.
+
+### DEC-010 — Age and consent: 13+ audience, jurisdiction-specific controls pending
+- Status: CONFIRMED (audience 13+); launch jurisdictions PENDING
+- Date: 2026-10-15
+- Decision:
+  - Initial target audience is **13 and older**.
+  - Onboarding asks a **neutral age question** (birth month and year, no pre-selected answer, no hint about the threshold). The server decides; only the fact that the 13+ check passed, its time and the policy version are stored — **not the birth date**. Under-13 answers create no account and store nothing in the database; a short-lived cookie discourages immediate re-entry.
+  - **No further age or consent controls are implemented** until launch jurisdictions are agreed, because no single threshold is universally compliant.
+  - **Personal data is minimised:** the game database holds a chosen handle, leaderboard visibility, the provider subject id and the age-check record. Emails stay with the identity provider.
+- Unresolved legal requirements (documented, not assumed):
+  - **United States (COPPA):** under-13 users need verifiable parental consent; a general-audience service with actual knowledge of under-13 users has obligations. Neutral age screening is the FTC-recognised approach; whether it is sufficient for this product is a legal question.
+  - **EU/EEA (GDPR Art. 8):** the age of digital consent varies by member state from 13 to 16; users below it need parental consent where consent is the legal basis. A 13+ threshold is not enough for every member state.
+  - **United Kingdom:** UK GDPR sets 13; the ICO Age Appropriate Design Code applies to services likely to be accessed by children under 18 (high-privacy defaults, no nudging, data minimisation).
+  - **Other jurisdictions** (e.g. India's DPDP Act defines children as under 18 and requires verifiable parental consent) may make an 18+ or parental-consent flow necessary.
+  - Also needed before public release: privacy notice, terms, data retention schedule, account deletion process, and a lawful basis per jurisdiction (P-007).
+- Revisit trigger: the owner names launch jurisdictions; legal review.
+
+### DEC-011 — Curriculum publication: distinct AI and human review statuses
+- Status: CONFIRMED (owner, 2026-10-15). Refines DEC-004.
+- Decision:
+  - All 25 existing levels stay playable in **local development and testing**.
+  - AI review and human review are **distinct statuses**: `review.kind` is now required (`agent` or `human`); it no longer defaults to `human`, so AI review can never be recorded as human approval by omission. The interface labels agent-reviewed levels "AI-reviewed · human review pending" and never shows them as approved.
+  - **Human review is required before public release.** The content release mode (`CONTENT_RELEASE=development|public`, default `development`) decides what is playable: `public` publishes only human-reviewed levels (others are withheld and anything depending on them stays locked), and `npm run content:release-check` fails while any published level lacks human review.
+- Consequences: a public build today would have no playable levels; that is intended until a person reviews them.
+- Revisit trigger: human review sign-off per level.
+
+### DEC-012 — Game rules locked for Phase 5
+- Status: CONFIRMED (owner, 2026-10-15). Confirms DEC-002, DEC-005 and DEC-006, which were DEFAULT.
+- Decision: three lives per major or boss run; checkpoint runs cannot be lost; quests and achievements grant **no XP** (cosmetic items only); a boss victory does **not** gate the next level; the Python path maximum stays **2,455 XP**; all progression, checkpoint, quest, achievement and leaderboard rules stay as implemented. Any change needs a new recorded decision with an explanation first.
+- Evidence: `src/domain` is unchanged in Phase 5; the domain tests and the 25-level playthrough test (2,455 XP) still pass.
+
+### DEC-013 — Hosting: local first; Supabase and Vercel intended, nothing provisioned
+- Status: CONFIRMED direction; provisioning PENDING explicit approval
+- Date: 2026-10-15
+- Decision: development stays local (PostgreSQL via `npm run db:local`, development sign-in). **Supabase** is the intended hosted authentication and PostgreSQL service. **Vercel** is the proposed frontend host, pending compatibility and cost verification. No production deployment, paid resource or external service is created or activated without explicit approval.
+- Compatibility notes to verify before approval: Supabase connection pooling vs. the app's `SET LOCAL ROLE` + `set_config` per transaction (transaction pooling is compatible because both are transaction-scoped; verify) and the `code_dungeon_app` role creation on Supabase (R-44); serverless connection limits on Vercel (use the Supabase pooler); region choice for latency and data residency (DEC-010).
+- Revisit trigger: owner approves creating the projects and the cost plan.

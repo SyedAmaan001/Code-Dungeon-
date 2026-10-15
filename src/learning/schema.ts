@@ -283,8 +283,11 @@ export const Level = z.strictObject({
       date: IsoDate,
       /** Python version the examples and answer keys were verified with. */
       pythonVersion: z.string().regex(/^3\.\d+$/),
-      /** `agent` = written/checked by an AI agent and automated tests; `human` = a person reviewed it. */
-      kind: z.enum(["agent", "human"]).default("human"),
+      /**
+       * Required, never defaulted (DEC-011): `agent` = written/checked by an AI agent and
+       * automated tests; `human` = a person reviewed it. AI review is never human approval.
+       */
+      kind: z.enum(["agent", "human"]),
       notes: Text.optional(),
     })
     .optional(),
