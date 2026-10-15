@@ -5,7 +5,8 @@
  * account deletion through the admin API). They are NOT a test of real Google OAuth or
  * real Supabase: those need the approved Supabase project (R-47).
  */
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { MOCK_SUPABASE } from "../scripts/e2e/config";
 import { onboard, query } from "./helpers";
 

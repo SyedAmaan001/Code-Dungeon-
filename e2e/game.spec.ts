@@ -1,6 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { signDevSession } from "../src/auth/dev-session";
 import { DEFAULT_POLICY } from "../src/domain/policy";
+import { E2E_DEV_SECRET } from "../scripts/e2e/config";
+import { expect, test } from "./fixtures";
 import {
   answer,
   level,
@@ -229,27 +231,145 @@ test("profile changes are saved and hide the player from the leaderboard", async
   await expect(page.getByText("Saved")).toBeVisible();
 });
 
-test("phone-sized layouts have no horizontal scrolling and a bottom navigation", async ({
-  browser,
+test("phone-sized layouts have no horizontal scrolling on any screen or any of the 25 rooms", async ({
+  page,
 }) => {
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  const page = await context.newPage();
-  await signIn(page, "erin");
-  for (const path of [
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page, "fay"); // fay has every level open
+  const paths = [
     "/play",
     "/play/map",
-    `/play/level/${level(6).id}`,
     "/play/journal",
     "/play/collection",
     "/play/leaderboard",
-  ]) {
+    "/play/profile",
+    ...python.levels.map((l) => `/play/level/${l.id}`),
+  ];
+  for (const path of paths) {
     await page.goto(path);
     await expect(page.locator("h1").first()).toBeVisible();
     await noHorizontalScroll(page);
   }
   await expect(page.getByRole("navigation", { name: "Game (mobile)" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Game", exact: true })).toBeHidden();
-  await context.close();
+});
+
+test("tablet widths keep the room readable without horizontal scrolling", async ({ page }) => {
+  await signIn(page, "fay");
+  for (const [width, height] of [
+    [820, 1180],
+    [1024, 768],
+  ] as const) {
+    await page.setViewportSize({ width, height });
+    for (const n of [1, 10, 25]) {
+      await page.goto(`/play/level/${level(n).id}`);
+      await expect(page.getByRole("heading", { name: "Challenges" })).toBeVisible();
+      await noHorizontalScroll(page);
+    }
+  }
+});
+
+test("an expired session is refused and signing out ends the session", async ({
+  page,
+  context,
+}) => {
+  const expired = signDevSession("alice", E2E_DEV_SECRET, new Date(Date.now() - 8 * 86_400_000));
+  await context.addCookies([
+    { name: "cd_dev_session", value: expired, url: "http://localhost:3100" },
+  ]);
+  await page.goto("/play");
+  await expect(page).toHaveURL(/\/sign-in/);
+
+  await signIn(page, "alice");
+  await page.goto("/play/profile");
+  await page.getByRole("button", { name: "Sign out" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  expect((await context.cookies()).some((c) => c.name === "cd_dev_session")).toBe(false);
+  await page.goto("/play/journal");
+  await expect(page).toHaveURL(/\/sign-in/);
+});
+
+test.describe("offline", () => {
+  test.use({ allowNetworkFailures: true });
+
+  test("an answer sent offline can be retried and is counted exactly once", async ({
+    page,
+    context,
+  }) => {
+    await signIn(page, "olive");
+    await onboard(page, "Olive");
+    const l1 = level(1);
+    const c = l1.challenges[0]!;
+    await page.goto(`/play/level/${l1.id}`);
+    await expect(page.getByRole("heading", { name: "Challenges" })).toBeVisible();
+
+    await context.setOffline(true);
+    await expect(page.getByText(/You are offline/)).toBeVisible();
+    await page
+      .getByRole("tabpanel")
+      .locator("textarea")
+      .fill((c as { answer: { output: string } }).answer.output);
+    await page
+      .getByRole("tabpanel")
+      .getByRole("button", { name: /^Submit/ })
+      .click();
+    await expect(page.getByText("Something went wrong")).toBeVisible();
+
+    await context.setOffline(false);
+    await expect(page.getByText(/You are offline/)).toHaveCount(0);
+    await page.getByRole("button", { name: "Retry" }).click();
+    await expect(page.getByRole("tabpanel").locator(".feedback__head")).toContainText("Correct");
+    const { xp } = DEFAULT_POLICY;
+    const expected = xp.perDifficulty * c.difficulty + xp.firstTryBonus; // still a first try
+    await expect(xpChip(page)).toContainText(String(expected));
+    const rows = await query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM submissions s JOIN players p ON p.id = s.player_id
+       WHERE p.handle = 'Olive'`,
+    );
+    expect(rows[0]!.n).toBe(1);
+  });
+});
+
+test("the leaderboard ranks visible players by verified XP", async ({ page }) => {
+  await signIn(page, "fay");
+  await page.goto("/play/leaderboard");
+  const rows = page.getByRole("table").getByRole("row");
+  await expect(rows.nth(1)).toContainText("Fay"); // 2,455 XP: the most on the path
+  const cells = await page.locator(".board tbody tr").evaluateAll((trs) =>
+    trs.map((tr) => ({
+      rank: Number(tr.querySelector(".board__rank")!.textContent!.replace("#", "")),
+      xp: Number(tr.querySelector("td.num")!.textContent!.replace(/,/g, "")),
+    })),
+  );
+  expect(cells.length).toBeGreaterThan(1);
+  for (let i = 1; i < cells.length; i++) {
+    expect(cells[i]!.xp).toBeLessThanOrEqual(cells[i - 1]!.xp);
+    expect(cells[i]!.rank).toBeGreaterThanOrEqual(cells[i - 1]!.rank);
+  }
+  // Ranks and XP shown match the database's own ledger totals.
+  const db = await query<{ handle: string; xp: number }>(
+    `SELECT p.handle, sum(x.amount)::int AS xp FROM players p JOIN xp_ledger x ON x.player_id = p.id
+     WHERE p.leaderboard_visible GROUP BY p.handle ORDER BY xp DESC`,
+  );
+  expect(cells.map((c) => c.xp)).toEqual(db.map((d) => d.xp).slice(0, cells.length));
+  await expect(page.getByText(/You are #1 of/)).toBeVisible();
+});
+
+test("a development account can be deleted and its name reused", async ({ page }) => {
+  await signIn(page, "zed");
+  await onboard(page, "Zed");
+  await page.goto("/play/profile");
+  await page.getByLabel(/Type your handle/).fill("Zed");
+  await page.getByLabel(/I understand this is permanent/).check();
+  await page.getByRole("button", { name: "Delete my account" }).click();
+  await expect(page).toHaveURL(/\/account-deleted$/);
+  expect(await query("SELECT 1 FROM players WHERE handle = 'Zed'")).toHaveLength(0);
+  await page.goto("/play");
+  await expect(page).toHaveURL(/\/sign-in/);
+  await signIn(page, "zed");
+  await expect(page).toHaveURL(/\/onboarding$/);
+  await onboard(page, "Zed"); // the handle is free again
+  await expect(page).toHaveURL(/\/play$/);
 });
 
 test("main screens have no serious or critical accessibility violations", async ({ page }) => {
@@ -281,6 +401,9 @@ test("main screens have no serious or critical accessibility violations", async 
     await expect(page.locator("h1").first()).toBeVisible();
     await scan(path);
   }
+  await page.goto("/play/map");
+  await page.getByText("How to read the map").click();
+  await scan("map legend open");
 });
 
 test("reduced motion stops decorative animation", async ({ browser }) => {
