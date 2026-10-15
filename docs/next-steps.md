@@ -4,6 +4,8 @@
 - **Where we are:** "0" on the `00_TO_100.md` scale — the audit is complete and the truth is documented (`docs/initial-audit.md`). No application code exists.
 - **Companion docs:** `docs/architecture-proposal.md` (stack and design), `docs/risk-register.md` (risks), `docs/EXECUTION.md` (phase gates, unchanged).
 
+> **Update 2026-10-15 (Phase 3):** the game engine is implemented — encounters (checkpoint, major, boss) with runs and lives, checkpoints, 6 quests, 11 achievements, cosmetic items and deterministic leaderboard ranking — on non-durable in-memory stores; see `docs/PHASE_3_REPORT.md`, DEC-005, DEC-006. The recommended next phase is **Phase 4 — Persistence and identity (local first)**: SQL migrations, RLS and a durable store for learning and game state in one transaction, plus the authentication design; it needs owner decisions O-5 (sign-in methods) and O-8 (minimum learner age) before a provider is integrated. New open item **O-14**: confirm the game defaults in DEC-005 (3 lives per major/boss run; no quest XP; encounters do not gate unlocks).
+>
 > **Update 2026-10-15 (Phase 2):** the learning engine and all 25 Python Fundamentals levels are implemented — see `docs/PHASE_2_REPORT.md`. The recommended next phase is **Phase 3 — Game engine: quests, achievements, checkpoints and leaderboard ranking** (pure domain on top of the Phase 2 progression events). New open item **O-13**: should agent-reviewed levels stay published until a human reviews them (DEC-004)? O-2 (scoring numbers) is now implemented as a configurable default (DEC-002) and needs confirmation before a leaderboard is built on it.
 >
 > **Update 2026-10-15:** Phase 1 was approved and implemented on `claude/tender-cerf-ooekni` — see `docs/phase-1-report.md`. The next phase is **Phase 2 — Domain/game engine** (§2). O-1 is resolved (DEC-001); O-3 and O-7 have defaults applied (see `decision.md` §7).
@@ -76,6 +78,7 @@ Only items that repository evidence cannot settle. Each has a recommendation so 
 | O-11 | Source of original art (commission, licensed packs, owner-created, AI-assisted with licence review) | Decide after the representative slice is reviewed | Phase 8 | P-006 |
 | O-12 | Confirm cloud-session credit expiry year | Check the Claude UI; plan sessions accordingly | Now | decision.md §3 |
 | O-13 | Keep the 25 agent-reviewed Python levels published until a human reviews them? | Keep them published with the visible "awaiting human review" notice; review zone by zone and set `review.kind: human` | Before any public release | DEC-004, R-34 |
+| O-14 | Confirm the game defaults: 3 lives per major/boss run, cosmetic-only rewards (no quest/achievement XP), encounters do not gate unlocks | Keep the defaults until learner testing | Before UI work on encounters | DEC-005, R-39 |
 
 ## 4. What the owner should do now
 

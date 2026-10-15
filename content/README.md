@@ -46,6 +46,10 @@ Every published challenge needs:
   `buggyBehaviour`, `fixedCode` and `check` for `find_fix_bug`. `predict_output` answers and
   `trace` values are run automatically.
 
+## Quests and achievements (path.yaml)
+
+Quests have an optional `activation` predicate, objectives (each with a `predicate`, optionally `optional: true`) and a `reward`. Achievements have one `predicate` and a `reward`. Rewards are cosmetic `item` keys only: `reward.xp` must be 0 (DEC-005). Predicates come from a closed list evaluated by `src/domain/game/predicates.ts`: `complete_levels`, `complete_level_count`, `complete_zone`, `master_level_count`, `correct_challenges_of_type`, `level_no_hints_first_try`, `earn_xp`, `level_unlocked`, `encounter_won`, `encounters_won`, `flawless_encounters`. Encounter predicates must point at checkpoint, major or boss levels; published quests and achievements may reference published levels only.
+
 ## Rules
 
 - Write original explanations; record every source in `sources.yaml` with edition and licence.

@@ -1,5 +1,15 @@
 # Changelog
 
+## Phase 3 — Game engine (2026-10-15)
+
+- Pure game engine (`src/domain/game/`): encounter runs for checkpoint, major and boss levels (checkpoints cannot be lost; 3 lives for major/boss; flawless victories), checkpoint records, quests with activation and optional objectives, achievements, cosmetic item rewards, and a read model for journals.
+- Deterministic leaderboard ranking with documented tie-breaking and competition ranks, viewer rank, visibility and limits; public-handle validation and uniqueness (DEC-006).
+- `GameService` derives every game event from verified `LearningService` results; idempotent per submission id with conflict recovery; quests and achievements re-derived from verified progress and awarded once. In-memory game store and player directory, flagged non-persistent.
+- Content: 6 quests and 11 achievements for Python Fundamentals, all proven reachable by a full playthrough; additive schema predicates; validation of game references and of reward XP (rewards are cosmetic; DEC-005).
+- `LearningService` additions (non-breaking): progress snapshot for server-side engines and per-level review status in the path view.
+- XP policy, curriculum, evaluation and prerequisite rules unchanged (maximum path XP still 2,455).
+- Tests: 174 (from 122). No new dependencies, database, authentication, external services or cloud resources.
+
 ## Phase 2 — Learning engine (2026-10-15)
 
 - Content schema v2: lesson objectives, multiple worked examples, practical context, level descriptions, challenge roles (exercise / knowledge check), three progressive hints, and runnable checks for fill-in, ordering, tracing and bug-fix challenges.

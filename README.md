@@ -21,7 +21,7 @@ npm run build                   # production build
 npm run check                   # all of the above
 ```
 
-Layout: `content/` curriculum data (25 Python levels) · `src/learning/` learning engine (schemas, evaluators, feedback, validation, Python verification) · `src/domain/` progression rules (unlocks, completion, mastery, XP policy) · `src/services/` server-side learning service and a non-durable in-memory progress store · `src/app/` status page · `src/runner/` disabled code runner · `tests/` unit, content, service and synthetic 100-level tests. See `docs/PHASE_2_REPORT.md`. No environment variables are needed yet; `.env.example` lists future names only.
+Layout: `content/` curriculum data (25 Python levels) · `src/learning/` learning engine (schemas, evaluators, feedback, validation, Python verification) · `src/domain/` progression rules (unlocks, completion, mastery, XP policy) and `src/domain/game/` game engine (encounters, checkpoints, quests, achievements, leaderboard ranking) · `src/services/` server-side learning and game services with non-durable in-memory stores · `src/app/` status page · `src/runner/` disabled code runner · `tests/` unit, content, service and synthetic 100-level tests. See `docs/PHASE_2_REPORT.md` and `docs/PHASE_3_REPORT.md`. Nothing is saved permanently yet and there is no playable interface. No environment variables are needed yet; `.env.example` lists future names only.
 
 ## Add it to GitHub
 

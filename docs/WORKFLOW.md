@@ -179,3 +179,19 @@ The `$100` shown in Claude is cloud-session credit for development sessions. It 
 - [ ] External services, permissions and costs documented.
 - [ ] PR/commit and review steps provided.
 - [ ] Deployment claims verified separately from code/PR status.
+
+## 14. Verified commands and layout (as of Phase 3)
+
+The repository now has a real toolchain; these commands replace the placeholders above for day-to-day work:
+
+```bash
+npm ci                                                   # exact locked dependencies (Node 22, .nvmrc)
+npm run lint && npm run format:check && npm run typecheck
+npm test                                                 # Vitest; needs Python 3.10+ (CI: 3.13)
+npm run content:validate
+npm run content:verify-python -- content tests/fixtures/packs
+npm run build
+npm audit --omit=dev --audit-level=high                  # CI gate for runtime dependencies
+```
+
+Actual layout: `content/` (YAML content packs) · `src/learning/` (schemas, evaluators, validation, Python verification) · `src/domain/` (progression and `game/`: encounters, quests, achievements, leaderboard) · `src/services/` (server-only learning and game services, in-memory stores) · `src/app/` (status page) · `src/runner/` (disabled) · `tests/`. Work happens on the review branch `claude/tender-cerf-ooekni`; CI runs on every push; nothing is merged to `main` without owner review.

@@ -127,3 +127,24 @@
 
 ### Note on report file naming
 `docs/PHASE_2_REPORT.md` uses the UPPER_SNAKE name the owner requested; this is an explicit exception to the O-7 lower-kebab default. `docs/phase-1-report.md` keeps its existing name.
+
+### DEC-005 — Game engine rules: encounters, checkpoints, quests, achievements and rewards
+- Status: DEFAULT (applied in Phase 3; values configurable in `src/domain/game/policy.ts`; awaiting owner confirmation)
+- Date: 2026-10-15
+- Context/problem: Phase 3 adds quests, achievements, checkpoint and boss encounters on top of the learning engine, with the instruction to preserve the XP policy (DEC-002) and the prerequisite rules.
+- Decision:
+  - **Encounters** are checkpoint, major and boss levels, played in runs. A run starts with the first counted answer or revealed hint. Checkpoint runs cannot be lost; major and boss runs have **3 lives**, and each counted wrong answer costs one. At zero lives the run is defeated and the next answer starts a fresh run. An encounter is won when every required challenge is solved within one run; "flawless" means the winning run had no wrong answers and no hints. Replays after victory are practice and start no runs.
+  - **Checkpoints** are recorded when a checkpoint encounter is won; the latest one is shown as the last checkpoint. The resume point is the first unlocked, unfinished level.
+  - **Encounters do not gate unlocks or change XP.** Level completion and unlocks remain exactly as DEC-002; a defeat never removes progress or XP. (Gating the next level on boss victory would change the approved prerequisite rules and was not done.)
+  - **Quests** activate when their optional `activation` predicate is met (or immediately), complete when all required objectives are met, and keep tracking optional objectives afterwards. **Achievements** unlock when their predicate is met. Both are evaluated from verified progress and awarded at most once.
+  - **Rewards are cosmetic items only.** Quest/achievement XP is disabled (`rewards.xpEnabled: false`), and validation rejects `reward.xp > 0`, because paying it would change the approved XP totals. Enabling it needs an owner decision.
+  - Content schema additions are additive (v2 files still parse): predicates `level_unlocked`, `master_level_count`, `encounter_won`, `encounters_won`, `flawless_encounters`; quest `activation`; objective `optional`.
+- Consequences: the maximum XP of the Python path stays 2,455. Encounter state is a separate game record; until storage is transactional, an encounter update can be lost if its save fails, while quests and achievements self-heal (R-37).
+- Revisit trigger: owner wants boss gating, quest XP, different lives, or penalties; learner testing shows lives are too strict or too lenient.
+
+### DEC-006 — Leaderboard ranking and public handles
+- Status: DEFAULT (ranking implemented; persistent leaderboard pending storage and authentication)
+- Date: 2026-10-15
+- Decision: metric = lifetime XP from the verified XP ledger (R-005). Order: XP descending → time the current XP total was reached, earliest first → handle (case-insensitive, then exact) → internal player id (never displayed). Rank = competition ranking (1, 2, 2, 4) on equal XP *and* equal reached-at time; the later rules only fix display order within a shared rank. Only visible players with at least 1 XP are ranked; output shows rank, handle and XP only, plus the viewer's own rank or the reason they are unranked (hidden, no XP, unknown). Default top 10, maximum 100. Handles: 3–20 characters, starting with a letter, letters/digits/`_`/`-`, reserved words refused, unique case-insensitively. No offensive-word filter yet (R-08).
+- Consequences: with in-memory adapters the leaderboard only compares players held in one server process and is flagged `persistent: false`. It is not a persistent or cross-session leaderboard.
+- Revisit trigger: persistence/authentication phase; weekly boards; moderation needs.
