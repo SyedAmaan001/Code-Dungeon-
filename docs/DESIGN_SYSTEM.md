@@ -53,4 +53,5 @@ All text pairs pass AA (4.5:1). The locked-room numeral (#6e6676, 3.1–3.5:1) i
 - Motion is decorative only: torch flicker and sigil pulse in scenes, the open room's beckon, feedback/hint rise-in. `prefers-reduced-motion: reduce` stops all of it (checked in e2e). `forced-colors` gives frames, buttons, options and seals a system border.
 - Keyboard: skip link, visible focus ring, tablist keyboard model, order-the-lines uses move-up/down buttons (no drag required), radio/checkbox inputs for choices and lines.
 - Screen readers: landmarks, one `h1` per page, labelled regions, `role="status"`/`aria-live` for feedback and hints, `sr-only` text for state that is otherwise shown by icons, progress bar values.
+- Code fidelity: ligatures are disabled for code, `pre`, textareas and inputs, so `>=`, `!=` and `->` appear exactly as typed; lesson fences render as indented code blocks.
 - Responsive: 16px gutters, no horizontal scrolling at 390px (checked in e2e), bottom navigation with safe-area padding, "Jump to challenges" link when the lesson and challenges stack.

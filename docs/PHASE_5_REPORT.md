@@ -1,6 +1,6 @@
 # Phase 5 report — Decision lock and first playable slice
 
-- **Status:** PASS locally and in CI. The full 25-level Python path is playable in the browser with saved progress. All checks are green, including 242 Vitest tests against PostgreSQL and 13 Playwright browser tests. CI run #5 passed both jobs on GitHub.
+- **Status:** PASS locally and in CI. The full 25-level Python path is playable in the browser with saved progress. All checks are green, including 245 Vitest tests against PostgreSQL and 14 Playwright browser tests. CI run #5 passed both jobs on GitHub for the code commits; the final fix commit is reported in the hand-off.
 - **Not verified:** sign-in against a real Supabase project. The project and its credentials need owner approval (DEC-013), and this environment has no Docker for Supabase's local stack. Supabase mode is implemented and unit-tested with stubs; play and browser tests use the development-only sign-in.
 - **Date:** 15 October 2026
 - **Branch:** `claude/tender-cerf-ooekni` (not merged to `main`, nothing deployed)
@@ -83,9 +83,9 @@ Run from a clean `rm -rf node_modules .next && npm ci`, with local PostgreSQL 16
 | `npm run lint` | exit 0 |
 | `npm run format:check` | all files formatted |
 | `npm run typecheck` | exit 0 |
-| `npm test`, with database and `REQUIRE_DB_TESTS=1` | **22 files, 242 passed** |
-| `npm test`, without database | 212 passed, 30 skipped |
-| `npm run test:e2e` | **13 passed** locally; also 13 passed in CI on GitHub |
+| `npm test`, with database and `REQUIRE_DB_TESTS=1` | **23 files, 245 passed** |
+| `npm test`, without database | 215 passed, 30 skipped |
+| `npm run test:e2e` | **14 passed** locally (13 of them also passed in CI run #5, before the code-display test was added) |
 | `npm run content:validate` | 0 errors, 1 warning (AI review only) |
 | `npm run content:verify-python` | 140/140 curriculum snippets and 8/8 fixtures |
 | `npm run content:release-check` | exit 1 as intended: 25 levels blocked for public release |
@@ -111,6 +111,9 @@ Run from a clean `rm -rf node_modules .next && npm ci`, with local PostgreSQL 16
 11. At 390px there is no horizontal scrolling on six screens, and the bottom nav is shown instead of the top nav.
 12. axe (WCAG 2.1 A/AA) finds no serious or critical violations on landing, sign-in and eight game screens.
 13. Reduced motion stops decorative animation.
+14. Lesson code blocks keep their indentation and show exact characters (no ligatures, no stray fences).
+
+**Fixed after the final visual review:** JetBrains Mono's ligatures drew `>=` as `≥`, which a learner could copy into invalid Python. Ligatures are now off for all code and inputs. Fenced code blocks in five lessons (levels 10, 12, 13, 20 and 24) were collapsed onto one line with their indentation lost; they now render as code blocks. Both are covered by tests.
 
 **Other new unit tests:** auth config, dev tokens, Supabase identity (verified, unverified and error cases), the age rule, redirect safety, the action boundary (signed-out callers, forged `playerId`/`xp`, server-judged answers, rate limit, hidden errors), presenter and level room, the release policy, and the account age-check constraint in the database.
 

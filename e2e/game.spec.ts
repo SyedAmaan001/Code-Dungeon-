@@ -190,6 +190,15 @@ test("every challenge format can be answered with its own controls", async ({ pa
   await expect(xpChip(page)).toContainText("2,455");
 });
 
+test("lesson code keeps its indentation and exact characters", async ({ page }) => {
+  await signIn(page, "fay");
+  await page.goto(`/play/level/${level(10).id}`);
+  const block = page.locator(".lesson pre").first();
+  await expect(block).toContainText('    print("Hot")');
+  expect(await block.evaluate((el) => getComputedStyle(el).fontVariantLigatures)).toBe("none");
+  await expect(page.locator(".lesson")).not.toContainText("```");
+});
+
 test("the journal and collection show quests and rewards earned on the path", async ({ page }) => {
   seedPlayer("erin", "Erin", 5);
   await signIn(page, "erin");
