@@ -44,7 +44,7 @@
 
 | ID | Open question | Recommendation | Why it remains open | Required before |
 |---|---|---|---|---|
-| P-001 | What framework/build system actually exists in GitHub? | Audit first; preserve a viable existing stack. | The provided file set mixed static HTML/CSS/JS with legacy compiled CodeClash artifacts; actual repo may differ. | Architecture choice. |
+| P-001 | What framework/build system actually exists in GitHub? | Audit first; preserve a viable existing stack. | The provided file set mixed static HTML/CSS/JS with legacy compiled CodeClash artifacts; actual repo may differ. **Audit 2026-10-15 (`initial-audit.md`): the repository contains documentation only — no framework, manifest or legacy source files. Stack proposal awaiting owner approval in `architecture-proposal.md` (open item O-1 in `next-steps.md`).** | Architecture choice. |
 | P-002 | Which production hosting provider/project is available? | Identify from owner account/access; Claude cloud is not assumed to host the app. | No production provider was confirmed. | External deployment. |
 | P-003 | Which auth/database vendor will be used? | Managed auth + managed relational DB if cost/fit/access checks pass. | Credentials, current pricing and provider not yet confirmed. | Provisioning and integration. |
 | P-004 | Is arbitrary Python execution required in the first public MVP? | Launch deterministic challenge modes first; add safe sandbox only if feasible. | Security, service availability and current provider prices need research. | Exposing code-runner UI. |
