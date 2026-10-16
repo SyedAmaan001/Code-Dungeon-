@@ -11,6 +11,7 @@ import { CodeBlock } from "@/ui/code";
 import { formatXp, LEVEL_KIND_LABEL, LEVEL_STATUS_LABEL, REVIEW_LABEL, plural } from "@/ui/labels";
 import { ChallengePanel } from "@/ui/level-room/challenge-panel";
 import { InlineText, RichText } from "@/ui/rich-text";
+import { OnyxEntrance } from "@/ui/onyx-motion";
 import { loadPlayerView } from "../../data";
 
 type Params = Promise<{ levelId: string }>;
@@ -213,6 +214,7 @@ export default async function LevelPage({ params }: { params: Params }) {
 
   return (
     <div data-zone={theme}>
+      <OnyxEntrance />
       <header className="room-header">
         <ZoneScene theme={theme} />
         <div className="room-header__body">

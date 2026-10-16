@@ -56,3 +56,39 @@ All text pairs pass AA (4.5:1). The locked-room numeral (#6e6676, 3.1–3.5:1) i
 - Screen readers: landmarks, one `h1` per page, labelled regions, `role="status"`/`aria-live` for feedback and hints, `sr-only` text for state that is otherwise shown by icons, progress bar values.
 - Code fidelity: ligatures are disabled for code, `pre`, textareas and inputs, so `>=`, `!=` and `->` appear exactly as typed; lesson fences render as indented code blocks.
 - Responsive: 16px gutters, no horizontal scrolling at 390px (checked in e2e), bottom navigation with safe-area padding, "Jump to challenges" link when the lesson and challenges stack.
+
+## 6. Themes and styling infrastructure (DEC-019)
+
+- **Themes:** `<html data-theme="fantasy|onyx">`, set by the server from the `cd_theme` preference cookie (`src/ui/theme.ts`, `src/ui/current-theme.ts`). Fantasy (§1–5) is the approved default. Switch: Profile › Appearance (shadcn Buttons with `aria-pressed`) and a top-bar toggle on screens ≥ 640px.
+- **Stylesheet entry** `src/app/app.css`, in cascade layers: `base` = `globals.css` (this design system, unchanged) < `components` = `theme-onyx.css` (every rule scoped to `[data-theme="onyx"]`) < `utilities` = Tailwind v4. Tailwind's preflight and default theme are not loaded; a small `@theme` maps utility tokens (`bg-primary`, `text-sm`, `rounded-md`, `font-heading`, …) onto the design-system variables, so utilities follow the active theme. Never give a Tailwind theme key the same name as a design-system variable (it would refer to itself).
+- **shadcn/ui:** `components.json` places components in `src/ui/shadcn/`, helper `cn()` in `src/ui/cn.ts`. Because there is no preflight, `[data-slot]` elements get the resets shadcn relies on. Semantic roles: `--primary-fill`, `--primary-ink`, `--focus-color`.
+- **Fantasy unchanged:** a pixel comparison of 20 screenshots (5 screens × 4 widths) before and after the infrastructure showed no difference beyond the new switch (under 0.01% animation-timing noise).
+
+## 7. Onyx preview theme
+
+| Group | Tokens |
+|---|---|
+| Surfaces | canvas `#14141d`, `#191924`, card `#1d1d29`, `#242432`, `#2c2c3c`; lines `#2f2f40` / `#4b4b5e`; faint dot grid and a cobalt glow behind the page |
+| Text | ivory `#ececf3`, muted `#c4c4ce`, dim `#a8a8b8` |
+| Action | cobalt `#4f5fe6` fill with white text (hover `#4555d8`); cobalt text `#8d9bff` / `#b4bdff` for progress and links |
+| Semantic | cyan `#6ccbe2` (current room, hints), ember `#f29a6b` (encounters), success `#7ed9a6`, danger `#f3958a`; zone accents kept for orientation |
+| Type | Bitcount Ink for page titles (colour font recoloured with `@font-palette-values --onyx`), Bitcount Single for section headings, eyebrows, badges, tabs and numbers, Inter for all reading text and buttons, JetBrains Mono for code |
+| Shape | radii 4/8/12px; room seals are rounded squares; ornate frame corners removed |
+| Scenes | the illustrated zone scenes stay but recede (desaturated, 55% opacity) behind a 24px grid tinted with the zone accent |
+
+Measured contrast (WCAG 2.1):
+
+| Foreground | on canvas | on card | on surface-2 |
+|---|---|---|---|
+| ivory `#ececf3` | 15.6 | 14.2 | 13.0 |
+| muted `#c4c4ce` | 10.6 | 9.6 | 8.8 |
+| dim `#a8a8b8` | 7.8 | 7.1 | 6.5 |
+| cobalt text `#8d9bff` | 7.2 | 6.6 | 6.0 |
+| cobalt bright `#b4bdff` | 10.2 | 9.3 | 8.5 |
+| cyan `#6ccbe2` | 9.8 | 9.0 | 8.2 |
+| success / danger | 10.8 / 8.3 | 9.8 / 7.5 | 9.0 / 6.9 |
+| ember `#f29a6b` | 8.4 | 7.6 | 7.0 |
+
+White on cobalt 5.1 (hover 5.9); locked numerals `#85859c` on their seal 4.95; code line numbers 5.7. The axe scan passes (no serious/critical issues) on every game screen, all 25 rooms, the public pages and with feedback shown.
+
+**Motion (Onyx only, `src/ui/onyx-motion.tsx`):** Lenis smooth wheel scrolling; GSAP ScrollTrigger reveals each zone and draws its trail (`--trail`); Motion springs in map rooms, the level room, feedback and hints. Libraries load on demand (the Fantasy theme downloads none of them) and nothing runs under `prefers-reduced-motion: reduce`. Content is fully rendered before any animation, and animations always end at full opacity with no transform (asserted in e2e).

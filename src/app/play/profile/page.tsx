@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { signOut } from "@/app/actions/auth";
 import { getSession, requirePlayer } from "@/auth/server";
+import { currentTheme } from "@/ui/current-theme";
 import { DeleteAccountForm } from "@/ui/forms/delete-account-form";
 import { ProfileForm } from "@/ui/forms/profile-form";
+import { ThemeSwitcher } from "@/ui/forms/theme-switcher";
 
 export const metadata: Metadata = { title: "Profile" };
 
 export default async function ProfilePage() {
   const player = await requirePlayer();
-  const session = await getSession();
+  const [session, theme] = await Promise.all([getSession(), currentTheme()]);
   const signInLabel =
     session.config.mode === "supabase"
       ? "Supabase Auth (Google or email link)"
@@ -26,6 +28,15 @@ export default async function ProfilePage() {
       <section className="frame frame--ornate stack" aria-labelledby="profile-title">
         <h2 id="profile-title">Public profile</h2>
         <ProfileForm handle={player.handle} visible={player.visible} />
+      </section>
+
+      <section className="frame stack" aria-labelledby="appearance-title">
+        <h2 id="appearance-title">Appearance</h2>
+        <p className="muted">
+          Onyx is a preview of a new look. Your choice is saved in this browser only and changes
+          nothing about your progress.
+        </p>
+        <ThemeSwitcher current={theme} />
       </section>
 
       <section className="frame stack" aria-labelledby="data-title">

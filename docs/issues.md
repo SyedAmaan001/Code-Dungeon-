@@ -28,3 +28,12 @@ Baseline before any change: lint, format, typecheck, build, 245 Vitest tests (wi
 | I-16 | Content | 25 of 25 levels AI-reviewed only | Release gate | NEEDS APPROVAL | Human review using `docs/CURRICULUM_REVIEW_CHECKLIST.md` |
 | I-17 | Ops | Real Supabase project, Google OAuth client and email sender not created | DEC-013 | NEEDS APPROVAL | Owner approval of the project and cost plan |
 | I-18 | Tests | CI run #11 (`7d5adab`) failed one e2e test: the `onboard()` helper returned before the onboarding server action finished, so the deletion test navigated to the profile before the account existed | CI | FIXED `1f9c02f` | `onboard()` now waits for the game shell, the refusal page or a form error; 26/26 locally and CI run #12 green |
+
+## Onyx preview theme (2026-10-16, DEC-019)
+
+| ID | Area | Issue | Found by | Status | Fix / guard |
+|---|---|---|---|---|---|
+| I-19 | UI | Onyx: locked-room numerals 3.42:1 (the pixel face at weight 600 does not count as bold) and locked-quest captions 4.11:1 | axe in `e2e/theme.spec.ts` | FIXED | Lighter locked numerals (4.95:1), lighter dim text, less fade on locked quests; axe clean on every screen and all 25 rooms in Onyx |
+| I-20 | UI | Onyx scroll animations ran before the page hydrated (React hydration warning) and a spring ended at `scale(0)`, hiding the rooms | Review script | FIXED | Entrance effects live inside the page (`OnyxEntrance`); independent `y`/`scale` values; e2e asserts rooms end at opacity 1 with no transform |
+| I-21 | Tooling | The shadcn registry (`ui.shadcn.com`) is blocked by this cloud environment's network policy | `npx shadcn add` | WORKED AROUND | Button added by hand from the upstream source; allow the host in the environment's network settings to use the CLI |
+

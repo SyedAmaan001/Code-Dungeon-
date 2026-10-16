@@ -1,5 +1,13 @@
 # Changelog
 
+## Onyx preview theme from the owner's Design.docx (2026-10-16)
+
+- New display preference: **Fantasy** (default, unchanged) or **Onyx (preview)** — onyx surfaces, ivory text, one cobalt action colour, Bitcount pixel titles and headings, Inter reading text. Switch on Profile › Appearance or with the top-bar palette button; stored in a cookie, never in the game database (DEC-019).
+- Onyx motion: Lenis smooth scrolling, GSAP scroll reveals of zones and trails, Motion spring entrances for rooms, feedback and hints; loaded only in Onyx and off with reduced motion.
+- Styling infrastructure: Tailwind CSS v4 (utilities only, mapped to the design tokens) and shadcn/ui (Button), in cascade layers above the existing design system; Fantasy screens verified pixel-identical apart from the new switch.
+- Not added from the document: Redis, the Motion AI kit, paid fonts, extra component registries, terminal UI libraries (reasons in `docs/design-input-2026-10-16.md`).
+- Tests: 273 Vitest with a database (227 without); 35 Playwright tests (7 new for the theme in `dev-signin`, 2 new on the production build). Runtime audit 0 vulnerabilities.
+
 ## Phase 6 — Security, account lifecycle, polish and QA (2026-10-15)
 
 - Audit baseline recorded (`docs/issues.md`): every check green before changes; found and fixed a 97px phone overflow in encounter rooms, an unreachable sticky challenge column on laptops, cramped rooms on landscape tablets and non-HttpOnly Supabase cookies.

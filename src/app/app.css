@@ -1,0 +1,99 @@
+/*
+ * Stylesheet entry (DEC-019).
+ *
+ * Cascade layers, lowest to highest priority:
+ *   base        the hand-written design system (globals.css), unchanged
+ *   components  theme overrides (theme-onyx.css), active only under [data-theme="onyx"]
+ *   utilities   Tailwind v4 utilities, for components adopted from shadcn/ui
+ *
+ * Tailwind's preflight reset and default theme are deliberately not loaded: the design system
+ * already provides base styles, and Tailwind's default token names (--text-xl, --radius-md, …)
+ * would collide with ours. The @theme block below maps a small set of utility tokens onto the
+ * design-system variables, so utilities follow whichever theme is active.
+ */
+@layer theme, base, components, utilities;
+
+@import "./globals.css" layer(base);
+@import "./theme-onyx.css" layer(components);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+
+@source "../ui";
+@source "../app";
+
+/*
+ * shadcn/ui components assume Tailwind's preflight reset, which is not loaded. This restores the
+ * few resets they rely on, only for elements they render (data-slot), so nothing else changes.
+ */
+@layer base {
+  [data-slot] {
+    margin: 0;
+    border: 0 solid;
+    padding: 0;
+    background-color: transparent;
+    color: inherit;
+    font: inherit;
+  }
+  button[data-slot] {
+    cursor: pointer;
+    appearance: none;
+  }
+}
+
+/* The top-bar theme toggle is hidden on phones, where the top bar has no room; the same
+   choice is on the profile page. */
+@layer components {
+  @media (max-width: 639px) {
+    .theme-toggle-form {
+      display: none;
+    }
+  }
+}
+
+@theme inline {
+  --*: initial;
+  --spacing: 0.25rem;
+
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+
+  /* Utility names must not reuse design-system variable names (a token that refers to itself
+     is invalid CSS), hence font-heading/font-ui/font-code and text-caption. */
+  --font-heading: var(--font-display);
+  --font-ui: var(--font-body);
+  --font-code: var(--font-mono);
+
+  --text-caption: var(--text-xs);
+  --text-sm: var(--text-s);
+  --text-base: var(--text-m);
+  --text-lg: var(--text-l);
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --radius-sm: var(--radius-s);
+  --radius-md: var(--radius-m);
+  --radius-lg: var(--radius-l);
+  --radius-full: 9999px;
+
+  /* shadcn/ui semantic colour names, mapped to the active theme */
+  --color-background: var(--night-0);
+  --color-foreground: var(--parchment);
+  --color-card: var(--surface-1);
+  --color-card-foreground: var(--parchment);
+  --color-muted: var(--surface-2);
+  --color-muted-foreground: var(--parchment-muted);
+  --color-primary: var(--primary-fill);
+  --color-primary-foreground: var(--primary-ink);
+  --color-secondary: var(--surface-3);
+  --color-secondary-foreground: var(--parchment);
+  --color-accent: var(--surface-2);
+  --color-accent-foreground: var(--parchment);
+  --color-destructive: var(--danger);
+  --color-border: var(--line-strong);
+  --color-input: var(--line-strong);
+  --color-ring: var(--focus-color);
+  --color-transparent: transparent;
+}

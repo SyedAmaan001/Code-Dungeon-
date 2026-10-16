@@ -1,0 +1,507 @@
+/*
+ * Onyx preview theme (DEC-019), from the owner's Design.docx: onyx surfaces, ivory text, one
+ * cobalt action colour, Bitcount pixel display type. The colour values are original, inspired by
+ * that palette family, not copied from any brand. Contrast is measured in docs/DESIGN_SYSTEM.md
+ * (§7); every text pair passes WCAG AA.
+ *
+ * This file sits in the "components" cascade layer (src/app/app.css), above the base design
+ * system, and every rule is scoped to [data-theme="onyx"], so the default theme is untouched.
+ * Readable text (lessons, prompts, feedback) uses Inter: the pixel faces are for headings,
+ * labels and numbers only.
+ */
+
+:root[data-theme="onyx"] {
+  color-scheme: dark;
+
+  --night-0: #14141d;
+  --night-1: #191924;
+  --surface-1: #1d1d29;
+  --surface-2: #242432;
+  --surface-3: #2c2c3c;
+  --line: #2f2f40;
+  --line-strong: #4b4b5e;
+  --line-gold: rgb(141 155 255 / 0.38);
+
+  --parchment: #ececf3;
+  --parchment-muted: #c4c4ce;
+  --parchment-dim: #a8a8b8;
+
+  /* "gold" is the progress/reward role; in Onyx it is cobalt */
+  --gold: #8d9bff;
+  --gold-bright: #b4bdff;
+  --gold-deep: #4f5fe6;
+  --ember: #f29a6b;
+  --teal: #6ccbe2;
+  --moss: #8fc4a0;
+  --violet: #b2a2f5;
+  --success: #7ed9a6;
+  --danger: #f3958a;
+
+  --primary-fill: #4f5fe6;
+  --primary-ink: #ffffff;
+  --focus-color: #b4bdff;
+  --cobalt: #4f5fe6;
+  --cobalt-hover: #4555d8;
+
+  --zone-accent: var(--gold);
+
+  --font-display: "Bitcount Ink", "Bitcount Single", ui-monospace, monospace;
+  --font-label: "Bitcount Single", ui-monospace, monospace;
+  --font-body: "Inter Variable", "Inter", "Segoe UI", system-ui, sans-serif;
+
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+  --shadow-panel: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 16px 32px -20px rgb(0 0 0 / 0.8);
+  --ring: 0 0 0 2px var(--night-0), 0 0 0 4px var(--focus-color);
+}
+
+[data-theme="onyx"] [data-zone="overgrown-gate"] {
+  --zone-accent: var(--moss);
+}
+[data-theme="onyx"] [data-zone="ember-hall"] {
+  --zone-accent: var(--ember);
+}
+[data-theme="onyx"] [data-zone="sigil-sanctum"] {
+  --zone-accent: var(--teal);
+}
+[data-theme="onyx"] [data-zone="rootbound-deep"] {
+  --zone-accent: #e2b46a;
+}
+[data-theme="onyx"] [data-zone="world-tree-citadel"] {
+  --zone-accent: var(--gold-bright);
+}
+
+/*
+ * Bitcount Ink is a colour font (COLRv1) whose single built-in palette is a rainbow. This palette
+ * replaces all 29 entries with ivory and cobalt tints so headings match the theme. Entry order
+ * follows the font's CPAL table (hues, then translucent hues, then neutrals).
+ */
+@font-palette-values --onyx {
+  font-family: "Bitcount Ink";
+  override-colors:
+    0 #ececf3,
+    1 #b4bdff,
+    2 #ececf3,
+    3 #8d9bff,
+    4 #b4bdff,
+    5 #8d9bff,
+    6 #ececf3aa,
+    7 #b4bdffaa,
+    8 #ececf3aa,
+    9 #8d9bffaa,
+    10 #b4bdffaa,
+    11 #8d9bffaa,
+    12 #ffffff,
+    13 #9d9dad,
+    14 #b4bdff80,
+    15 #ffffff80,
+    16 #4f5fe680,
+    17 #8d9bff80,
+    18 #ececf380,
+    19 #b4bdff80,
+    20 #14141d,
+    21 #4f5fe6,
+    22 #8d9bff,
+    23 #b4bdff,
+    24 #ececf3,
+    25 #eeeeee,
+    26 #222222,
+    27 #444444,
+    28 #666666;
+}
+[data-theme="onyx"] {
+  font-palette: --onyx;
+}
+
+/* ---------------------------------------------------------------- base */
+[data-theme="onyx"] body {
+  font-size: 1rem;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  background-color: var(--night-0);
+  background-image:
+    radial-gradient(1100px 520px at 50% -12%, rgb(79 95 230 / 0.16), transparent 62%),
+    radial-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px);
+  background-size:
+    auto,
+    22px 22px;
+  background-attachment: fixed;
+}
+
+[data-theme="onyx"] h1,
+[data-theme="onyx"] h2,
+[data-theme="onyx"] .display {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.12;
+}
+[data-theme="onyx"] h1 {
+  color: var(--parchment);
+}
+/* The dotted colour face reads well only at title size; section headings use the solid face. */
+[data-theme="onyx"] h2 {
+  font-family: var(--font-label);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+[data-theme="onyx"] h3,
+[data-theme="onyx"] h4 {
+  font-family: var(--font-body);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+[data-theme="onyx"] .eyebrow {
+  font-family: var(--font-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+[data-theme="onyx"] a {
+  text-decoration-color: rgb(180 189 255 / 0.45);
+}
+[data-theme="onyx"] :not(pre) > code {
+  background: rgb(141 155 255 / 0.1);
+  color: #d6dbff;
+}
+[data-theme="onyx"] .skip-link {
+  background: var(--cobalt);
+  color: #fff;
+}
+
+/* ---------------------------------------------------------------- shell */
+[data-theme="onyx"] .topbar {
+  background: rgb(20 20 29 / 0.82);
+  border-bottom-color: var(--line);
+}
+[data-theme="onyx"] .brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+[data-theme="onyx"] .nav__link:hover {
+  background: rgb(255 255 255 / 0.05);
+}
+[data-theme="onyx"] .nav__link[aria-current="page"] {
+  background: rgb(79 95 230 / 0.18);
+  color: var(--parchment);
+}
+[data-theme="onyx"] .bottomnav {
+  background: rgb(20 20 29 / 0.96);
+}
+[data-theme="onyx"] .xp-chip {
+  font-family: var(--font-label);
+  background: rgb(79 95 230 / 0.14);
+  border-color: rgb(141 155 255 / 0.35);
+  color: var(--gold-bright);
+}
+[data-theme="onyx"] .dev-banner {
+  background: repeating-linear-gradient(-45deg, #1d1d2b, #1d1d2b 10px, #191926 10px, #191926 20px);
+  color: #c9cfff;
+  border-bottom-color: #33335a;
+}
+
+/* ---------------------------------------------------------------- surfaces */
+[data-theme="onyx"] .frame {
+  background: var(--surface-1);
+  border-color: var(--line);
+}
+[data-theme="onyx"] .frame--ornate::before,
+[data-theme="onyx"] .frame--ornate::after {
+  display: none;
+}
+[data-theme="onyx"] .frame__title,
+[data-theme="onyx"] .ledger__value,
+[data-theme="onyx"] .zone__count {
+  font-family: var(--font-label);
+}
+[data-theme="onyx"] .banner {
+  background: linear-gradient(90deg, rgb(79 95 230 / 0.2), rgb(79 95 230 / 0.04));
+}
+[data-theme="onyx"] .trophy {
+  background:
+    radial-gradient(circle at 50% 0%, rgb(79 95 230 / 0.12), transparent 60%), var(--night-1);
+}
+[data-theme="onyx"] .board tr.is-viewer td {
+  background: rgb(79 95 230 / 0.12);
+}
+/* Locked quests fade less than in the default theme so their dimmed text keeps AA contrast. */
+[data-theme="onyx"] .quest--locked {
+  opacity: 0.8;
+}
+[data-theme="onyx"] .offline-notice {
+  background: #2a1f1a;
+}
+
+/* ---------------------------------------------------------------- buttons */
+[data-theme="onyx"] .btn {
+  font-weight: 600;
+  letter-spacing: 0;
+  border-radius: var(--radius-m);
+}
+[data-theme="onyx"] .btn:hover {
+  border-color: var(--gold);
+}
+[data-theme="onyx"] .btn--primary {
+  --btn-bg: var(--cobalt);
+  --btn-fg: #fff;
+  --btn-border: var(--cobalt);
+  box-shadow: 0 10px 24px -14px rgb(79 95 230 / 0.9);
+}
+[data-theme="onyx"] .btn--primary:hover {
+  --btn-bg: var(--cobalt-hover);
+  border-color: var(--gold-bright);
+}
+[data-theme="onyx"] .btn--ghost:hover {
+  background: rgb(255 255 255 / 0.05);
+}
+[data-theme="onyx"] .btn--danger {
+  --btn-bg: #351c22;
+  --btn-fg: #ffd8d2;
+  --btn-border: #7d3440;
+}
+
+[data-theme="onyx"] .badge {
+  font-family: var(--font-label);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border-radius: var(--radius-s);
+}
+[data-theme="onyx"] .badge--ember,
+[data-theme="onyx"] .room__kind,
+[data-theme="onyx"] .room[data-kind="boss"] .room__tag,
+[data-theme="onyx"] .legend--boss .legend__swatch {
+  color: var(--ember);
+}
+[data-theme="onyx"] .badge--review {
+  color: #cfd3ea;
+}
+
+[data-theme="onyx"] .meter,
+[data-theme="onyx"] .meter__fill {
+  border-radius: 2px;
+}
+
+/* ---------------------------------------------------------------- scenes */
+/* The illustrated scenes stay (zone identity) but recede into a tinted, gridded backdrop. */
+[data-theme="onyx"] .zone-scene {
+  filter: grayscale(0.85) contrast(1.05) brightness(0.7);
+  opacity: 0.55;
+}
+[data-theme="onyx"] .zone__banner,
+[data-theme="onyx"] .room-header,
+[data-theme="onyx"] .hero {
+  background:
+    linear-gradient(0deg, rgb(255 255 255 / 0.04) 1px, transparent 1px) 0 0 / 100% 24px,
+    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px) 0 0 / 24px 100%,
+    radial-gradient(
+      120% 140% at 85% 0%,
+      color-mix(in srgb, var(--zone-accent) 30%, transparent),
+      transparent 60%
+    ),
+    var(--night-1);
+}
+[data-theme="onyx"] .zone__banner::after {
+  background: linear-gradient(180deg, transparent 15%, rgb(29 29 41 / 0.96));
+}
+[data-theme="onyx"] .room-header::after {
+  background: linear-gradient(180deg, rgb(20 20 29 / 0.3), rgb(20 20 29 / 0.94) 72%);
+}
+[data-theme="onyx"] .hero::after {
+  background:
+    linear-gradient(180deg, rgb(20 20 29 / 0) 15%, rgb(20 20 29 / 0.82) 70%, rgb(20 20 29 / 0.96)),
+    linear-gradient(90deg, rgb(20 20 29 / 0.6), transparent 65%);
+}
+[data-theme="onyx"] .zone--locked .zone__banner {
+  filter: grayscale(1) brightness(0.7);
+}
+
+/* ---------------------------------------------------------------- map */
+[data-theme="onyx"] .zone {
+  border-color: var(--line);
+  background: var(--surface-1);
+}
+[data-theme="onyx"] .zone__heading h2 {
+  font-size: 1.45rem;
+}
+/* The trail is drawn in on scroll (GSAP animates --trail); it is fully drawn by default. */
+[data-theme="onyx"] .path::before {
+  border-top: 2px solid rgb(141 155 255 / 0.28);
+  transform-origin: left center;
+  transform: scaleX(var(--trail, 1));
+}
+[data-theme="onyx"] .room__seal {
+  border-radius: 14px;
+  background: linear-gradient(160deg, #2c2c3d, #1b1b26);
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+[data-theme="onyx"] .room__title {
+  font-family: var(--font-body);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+[data-theme="onyx"] .room__tag {
+  font-family: var(--font-label);
+  letter-spacing: 0.08em;
+}
+[data-theme="onyx"] a.room:hover .room__seal {
+  border-color: var(--gold-bright);
+}
+[data-theme="onyx"] .room[data-status="completed"] .room__seal {
+  color: #fff;
+  border-color: #7d8cff;
+  background: linear-gradient(160deg, #5f6ff0, #3b4bd0);
+}
+[data-theme="onyx"] .room[data-status="completed"] .room__state,
+[data-theme="onyx"] .room[data-mastered] .room__state,
+[data-theme="onyx"] .room[data-won] .room__kind {
+  color: #fff;
+  background: var(--cobalt);
+}
+[data-theme="onyx"] .room[data-status="in_progress"] .room__seal {
+  box-shadow: 0 0 0 5px rgb(108 203 226 / 0.14);
+}
+[data-theme="onyx"] .room[data-status="locked"] .room__seal {
+  color: #85859c;
+  background: #17171f;
+}
+[data-theme="onyx"] .room[data-mastered] .room__seal {
+  box-shadow:
+    0 0 0 3px var(--night-0),
+    0 0 0 5px rgb(180 189 255 / 0.65),
+    0 0 26px rgb(79 95 230 / 0.55);
+}
+[data-theme="onyx"] .room__seal::after {
+  border-radius: 18px;
+}
+[data-theme="onyx"] .legend__swatch {
+  border-radius: 6px;
+}
+
+/* ---------------------------------------------------------------- level room */
+[data-theme="onyx"] .room-progress {
+  background: rgb(20 20 29 / 0.78);
+}
+[data-theme="onyx"] .room-progress__label {
+  font-family: var(--font-label);
+  letter-spacing: 0.06em;
+}
+[data-theme="onyx"] .lesson,
+[data-theme="onyx"] .challenge__prompt {
+  font-family: var(--font-body);
+}
+[data-theme="onyx"] .misconceptions li {
+  border-left-color: rgb(242 154 107 / 0.5);
+}
+[data-theme="onyx"] .code,
+[data-theme="onyx"] .order-item,
+[data-theme="onyx"] .line-picker {
+  background: #0f0f16;
+  border-color: var(--line);
+}
+[data-theme="onyx"] .code pre,
+[data-theme="onyx"] .order-item code {
+  color: #e6e8f5;
+}
+[data-theme="onyx"] .code__label {
+  font-family: var(--font-label);
+  background: rgb(255 255 255 / 0.03);
+}
+[data-theme="onyx"] .code__output pre {
+  color: #b7ecd0;
+}
+[data-theme="onyx"] .code-line::before,
+[data-theme="onyx"] .line-pick__no {
+  color: #8a8aa0;
+}
+[data-theme="onyx"] .blank {
+  background: #15151f;
+  color: #dfe3ff;
+}
+
+[data-theme="onyx"] .tab {
+  font-family: var(--font-label);
+  font-weight: 400;
+  border-radius: var(--radius-s);
+}
+[data-theme="onyx"] .tab[aria-selected="true"] {
+  border-color: var(--cobalt);
+  color: var(--parchment);
+  background: rgb(79 95 230 / 0.2);
+}
+[data-theme="onyx"] .option:has(input:checked) {
+  background: rgb(79 95 230 / 0.14);
+}
+[data-theme="onyx"] .order-item--moved {
+  background: rgb(79 95 230 / 0.22);
+}
+[data-theme="onyx"] .line-pick:has(input:checked) {
+  background: rgb(79 95 230 / 0.18);
+  outline-color: rgb(141 155 255 / 0.6);
+}
+[data-theme="onyx"] .check input {
+  accent-color: var(--cobalt);
+}
+
+[data-theme="onyx"] .encounter {
+  border-color: rgb(242 154 107 / 0.35);
+  background: linear-gradient(180deg, rgb(242 154 107 / 0.06), transparent 60%), var(--surface-1);
+}
+[data-theme="onyx"] .encounter--won {
+  border-color: rgb(141 155 255 / 0.4);
+  background: linear-gradient(180deg, rgb(79 95 230 / 0.12), transparent 60%), var(--surface-1);
+}
+[data-theme="onyx"] .life {
+  color: #ef6f6f;
+}
+[data-theme="onyx"] .life--spent {
+  color: #4a4a5c;
+}
+
+[data-theme="onyx"] .feedback {
+  border-radius: var(--radius-m);
+}
+[data-theme="onyx"] .feedback__head {
+  font-family: var(--font-label);
+  font-weight: 600;
+}
+[data-theme="onyx"] .feedback--correct {
+  border-color: rgb(126 217 166 / 0.5);
+  background: linear-gradient(180deg, rgb(126 217 166 / 0.08), transparent), var(--night-1);
+}
+[data-theme="onyx"] .feedback--incorrect {
+  border-color: rgb(243 149 138 / 0.5);
+}
+[data-theme="onyx"] .feedback--error .feedback__head {
+  color: #ffd7b8;
+}
+[data-theme="onyx"] .hint {
+  border-color: rgb(108 203 226 / 0.3);
+  background: rgb(108 203 226 / 0.05);
+}
+[data-theme="onyx"] .hint__tier {
+  font-family: var(--font-label);
+}
+
+/* The theme toggle in the top bar (a shadcn Button). */
+[data-theme="onyx"] .theme-toggle {
+  color: var(--gold-bright);
+}
+
+/* Lenis smooth scrolling (from lenis/dist/lenis.css, MIT). */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}

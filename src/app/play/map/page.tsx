@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { requirePlayer } from "@/auth/server";
 import { DungeonMap, MapLegend } from "@/ui/dungeon-map";
 import { Icon } from "@/ui/art/icons";
+import { OnyxEntrance } from "@/ui/onyx-motion";
 import { loadPlayerView } from "../data";
 
 export const metadata: Metadata = { title: "Dungeon map" };
@@ -29,6 +30,7 @@ export default async function MapPage() {
       ) : (
         <DungeonMap view={view} />
       )}
+      <OnyxEntrance />
     </div>
   );
 }

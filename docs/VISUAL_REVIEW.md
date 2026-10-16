@@ -37,3 +37,18 @@ Use this to review the interface on real devices before any public release. Auto
 - [ ] Empty states (no quests yet, no keepsakes, nobody ranked) explain what to do next.
 - [ ] Offline notice appears when the connection drops; Retry works after reconnecting. **auto**.
 - [ ] Error pages say progress is safe and offer a way on.
+
+## Onyx preview theme (DEC-019)
+
+Switch with the palette button in the top bar or Profile › Appearance, then review the same screens in both themes.
+
+- [ ] Onyx reads as calm onyx and cobalt, with one cobalt primary action per view; nothing looks like a generic dashboard unless that is the intent.
+- [ ] Page titles in Bitcount Ink are legible at every width; section headings, badges and numbers in Bitcount Single are legible; lesson text stays in a plain reading face.
+- [ ] Map: locked, open, in-progress, complete and mastered rooms are distinguishable; checkpoint, major and boss rings still stand out.
+- [ ] Level room: progress strip, encounter panel, tabs, all six challenge formats, feedback and hints.
+- [ ] Motion: zones and trails reveal on scroll, rooms spring in, feedback and hints spring in; nothing moves with reduced motion turned on. **auto** for reduced motion and for animations finishing fully visible.
+- [ ] Contrast and accessibility. **auto (axe):** every game screen, all 25 rooms, public pages and feedback in Onyx.
+- [ ] No horizontal scrolling at 390px. **auto** for home, map, room and profile.
+- [ ] Safari / iPhone: the Bitcount Ink titles render (colour font, R-56).
+- [ ] Decision for the owner: keep Fantasy, switch the default to Onyx, keep both, or drop Onyx.
+

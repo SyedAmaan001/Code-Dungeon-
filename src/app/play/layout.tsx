@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { getSession, requirePlayer } from "@/auth/server";
 import { Icon } from "@/ui/art/icons";
 import { BrandMark } from "@/ui/art/zone-scene";
+import { currentTheme } from "@/ui/current-theme";
+import { ThemeToggle } from "@/ui/forms/theme-switcher";
 import { formatXp } from "@/ui/labels";
 import { GameNav } from "@/ui/nav";
 import { OfflineNotice } from "@/ui/offline-notice";
@@ -12,7 +14,11 @@ export const dynamic = "force-dynamic";
 
 export default async function PlayLayout({ children }: { children: ReactNode }) {
   const player = await requirePlayer();
-  const [session, view] = await Promise.all([getSession(), loadPlayerView(player.playerId)]);
+  const [session, view, theme] = await Promise.all([
+    getSession(),
+    loadPlayerView(player.playerId),
+    currentTheme(),
+  ]);
   const devMode = session.config.mode === "dev";
 
   return (
@@ -38,6 +44,7 @@ export default async function PlayLayout({ children }: { children: ReactNode }) 
                 <span aria-hidden="true"> XP</span>
               </span>
             </span>
+            <ThemeToggle current={theme} />
             <Link
               href="/play/profile"
               className="nav__link"

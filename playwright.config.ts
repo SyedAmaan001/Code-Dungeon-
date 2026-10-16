@@ -39,12 +39,12 @@ export default defineConfig({
   projects: [
     {
       name: "dev-signin",
-      testMatch: /game\.spec\.ts/,
+      testMatch: /(game|theme)\.spec\.ts/,
       use: { ...devices["Desktop Chrome"], baseURL: `http://localhost:${E2E_PORT}` },
     },
     {
       name: "supabase-mock",
-      testMatch: /supabase-auth\.spec\.ts/,
+      testMatch: /(supabase-auth|theme-production)\.spec\.ts/,
       use: { ...devices["Desktop Chrome"], baseURL: `http://localhost:${SUPABASE_E2E_PORT}` },
     },
   ],

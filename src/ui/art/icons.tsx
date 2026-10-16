@@ -30,7 +30,8 @@ export type IconName =
   | "info"
   | "x"
   | "spark"
-  | "eye-off";
+  | "eye-off"
+  | "palette";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   home: (
@@ -140,6 +141,14 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
   x: <path d="M6 6l12 12M18 6 6 18" />,
   spark: <path d="M12 3v5M12 16v5M3 12h5M16 12h5M6 6l3 3M15 15l3 3M18 6l-3 3M9 15l-3 3" />,
+  palette: (
+    <>
+      <path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.8-1.6 0-1.2-1-1.5-1-2.6 0-1 .8-1.6 1.8-1.6h2.2a3.7 3.7 0 0 0 3.7-3.8C20.5 6.9 16.7 3.5 12 3.5z" />
+      <circle cx="7.6" cy="11.2" r="1" />
+      <circle cx="10.4" cy="7.4" r="1" />
+      <circle cx="15" cy="7.6" r="1" />
+    </>
+  ),
   "eye-off": (
     <>
       <path d="M3 3l18 18" />

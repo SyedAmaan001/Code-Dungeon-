@@ -35,6 +35,11 @@
   --success: #8fd0a2;
   --danger: #f0907a;
 
+  /* semantic roles used by Tailwind/shadcn components (src/app/app.css) */
+  --primary-fill: var(--gold);
+  --primary-ink: #1f150a;
+  --focus-color: var(--gold-bright);
+
   /* zone accent (overridden per zone) */
   --zone-accent: var(--gold);
 
