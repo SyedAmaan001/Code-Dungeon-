@@ -142,4 +142,10 @@ test("with motion allowed, Onyx enables smooth scrolling and rooms finish fully 
         }),
     )
     .toBe("1 none");
+  // Zones below the fold are revealed as they scroll into view.
+  const zones = page.locator(".zone");
+  await zones.last().scrollIntoViewIfNeeded();
+  await expect
+    .poll(() => zones.evaluateAll((els) => els.map((el) => getComputedStyle(el).opacity)))
+    .toEqual(Array(await zones.count()).fill("1"));
 });

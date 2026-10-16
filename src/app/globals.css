@@ -1087,6 +1087,14 @@ a.room:hover .room__seal {
   .room__seal {
     grid-row: span 2;
   }
+  /* Checkpoint, major and boss rooms have a third text line (their kind tag): keep every text
+     line in the second column so the status never drops under the seal. */
+  .room > :not(.room__seal) {
+    grid-column: 2;
+  }
+  .room:not([data-kind="standard"]) .room__seal {
+    grid-row: span 3;
+  }
   .path__item:nth-child(odd) .room {
     margin-right: 18%;
   }

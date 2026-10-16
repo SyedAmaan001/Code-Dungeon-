@@ -8,7 +8,8 @@
  *   GSAP    scroll-linked reveal of map zones and their trails (ScrollTrigger)
  *   Motion  spring entrances for map rooms, the level room, challenge feedback and hints
  *
- * Everything here is decoration: content is fully rendered and readable before any of it runs.
+ * Everything here is decoration. All content is in the page from the first render (and read by
+ * assistive technology); map zones below the fold fade in as they scroll into view.
  */
 import { useEffect } from "react";
 
