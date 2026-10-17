@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
 import type { z } from "zod";
 import type { ContentIssue } from "./issues";
@@ -62,7 +62,8 @@ export function loadPack(dir: string): LoadResult {
       .filter((f) => f.endsWith(".yaml") || f.endsWith(".yml"))
       .sort();
     for (const f of files) {
-      const rel = relative(dir, join(levelsDir, f));
+      // Content-relative and POSIX-style on every OS, so messages and the checklist are stable.
+      const rel = `levels/${f}`;
       const raw = readYaml(join(levelsDir, f), rel, issues);
       if (raw === undefined) continue;
       const parsed = Level.safeParse(raw);

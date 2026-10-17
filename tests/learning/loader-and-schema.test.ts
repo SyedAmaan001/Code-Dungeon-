@@ -25,7 +25,7 @@ describe("loadPack", () => {
     const { pack, issues } = loadPack(VALID_SMALL);
     expect(issues).toEqual([]);
     expect(pack?.levels.map((l) => l.number)).toEqual([1, 2, 3]);
-    expect(pack?.levelFiles["fx.L002"]).toBe(join("levels", "L002-structures.yaml"));
+    expect(pack?.levelFiles["fx.L002"]).toBe("levels/L002-structures.yaml");
   });
 
   it("reports a missing path.yaml", () => {
