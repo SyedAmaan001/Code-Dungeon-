@@ -5,7 +5,7 @@
 - **Local path:** `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1\.claude\worktrees\code-dungeon-recovery-b0a626`. This is a git worktree of the checkout at `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1`, which stays on `main`.
 - **Branch:** `claude/tender-cerf-ooekni`, tracking `origin/claude/tender-cerf-ooekni`. `main` is only the three documentation commits and is an ancestor of this branch. Never treat `main` as the application.
 - **Starting commit:** `a431bed`, "fix(ui): phone map status line under tagged rooms; scroll-reveal coverage", the remote tip on 17 October 2026.
-- **Current commit:** see `git log -1`. This session's commits are listed in §3. Their push status is in §8.
+- **Current commit:** the code is at `b82b2c7`, and the tip is one docs-only commit after it (`git log -3 --oneline`). Push status is in §8.
 
 ## 1. Verified Phase 1–6 status (re-run here, not copied from the reports)
 
@@ -48,7 +48,7 @@
 |---|---|---|
 | `e968f31` | Level-file references are now POSIX (`levels/L001.yaml`) on every OS. Added `.gitattributes` with `* text=auto eol=lf` | On Windows, 6 unit tests failed: backslash paths, and CRLF in the checklist freshness test. Prettier also flagged 187 files, all CRLF-only. CI on Linux never saw either problem |
 | `4847e04` | `scripts/db/local-postgres.sh` supports the Windows EnterpriseDB binaries in `.local/pgsql`: TCP only, relative `pg_ctl` paths, psql options before the URL | The laptop had no PostgreSQL or Docker. `pg_ctl.exe` can't start a data directory whose path has spaces |
-| (third commit, see `git log`) | `scripts/e2e/prepare-db.ts` uses `fileURLToPath`, and the `e2e/helpers.ts` seed runs with `process.execPath`. **Nonce-based script CSP** (`src/csp.ts`, `src/proxy.ts`). The static CSP header was removed from `next.config.ts`. Added `tests/auth/csp.test.ts` and e2e assertions. Added `docs/API_CONTRACTS.md` and this handoff | The e2e DB setup broke on Windows (`C:\C:\…`). I-15 and R-52 were the only open security engineering items |
+| `b82b2c7` | `scripts/e2e/prepare-db.ts` uses `fileURLToPath`, and the `e2e/helpers.ts` seed runs with `process.execPath`. **Nonce-based script CSP** (`src/csp.ts`, `src/proxy.ts`). The static CSP header was removed from `next.config.ts`. Added `tests/auth/csp.test.ts` and e2e assertions. Added `docs/API_CONTRACTS.md` and this handoff | The e2e DB setup broke on Windows (`C:\C:\…`). I-15 and R-52 were the only open security engineering items |
 
 CSP details: `script-src 'self' 'nonce-<per request>' 'strict-dynamic'`, plus `'unsafe-eval'` under `next dev` only. It also keeps `object-src 'none'; base-uri 'self'; frame-ancestors 'none'`. Every route is already dynamic (the root layout reads the theme cookie), so every page gets its nonce. Styles are not restricted, because motion and GSAP set inline styles. `form-action` is not set, so the Google OAuth redirect after a no-JS form post keeps working.
 
@@ -126,6 +126,6 @@ bash scripts/db/local-postgres.sh stop
 
 ## 8. Push status and next task
 
-- **Push:** the commits are pushed to `origin/claude/tender-cerf-ooekni` only if the remote hadn't moved. The final note of this session states the outcome. Check with `git status -sb` after `git fetch`. Nothing was merged, and `main` was not touched.
+- **Push:** `a431bed..b82b2c7` was pushed (fast-forward) to `origin/claude/tender-cerf-ooekni` on 17 October 2026, followed by a docs-only commit that records this. Nothing was merged and `main` was not touched. CI (GitHub Actions, Linux, Node 22) runs on that push. Its result was not checked in this session, so check the Actions tab for the run on this branch.
 - **Next task:** leaderboard scaling, then rate limits for profile, onboarding and deletion actions. Exact scope is in `docs/NEXT_CHAT_PROMPT.md`.
 - **After that:** Phase 7 still needs owner approval: a Supabase project, a Google OAuth client, an email sender and a Vercel preview with a cost plan (`docs/PHASE_6_REPORT.md` §8). Until it's approved, keep to non-billable backend work.

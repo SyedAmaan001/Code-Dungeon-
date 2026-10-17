@@ -15,7 +15,7 @@ You are the lead engineer continuing Code Dungeon on the owner's Windows laptop 
 | Repository | https://github.com/SyedAmaan001/Code-Dungeon-.git |
 | Local worktree | `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1\.claude\worktrees\code-dungeon-recovery-b0a626` |
 | Main checkout | `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1`. It stays on `main`, which is only the docs. Don't work there |
-| Branch | `claude/tender-cerf-ooekni`, tracking `origin/claude/tender-cerf-ooekni`. The previous session started from `a431bed`. Its last commit is the tip of this branch; check it with `git log -3 --oneline` and compare with `git status -sb` / `git fetch` before working |
+| Branch | `claude/tender-cerf-ooekni`, tracking `origin/claude/tender-cerf-ooekni`. The previous session started at `a431bed`, pushed its code as `b82b2c7` (CSP and Windows fixes), then added one docs-only commit recording the push. Run `git fetch && git status -sb && git log -5 --oneline` before working. Also check that the GitHub Actions run for that push is green: it was not checked in the previous session |
 
 **Read first:**
 - `CLAUDE.md`
