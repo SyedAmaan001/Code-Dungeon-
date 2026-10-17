@@ -1,16 +1,12 @@
 import type { NextConfig } from "next";
 
 /**
- * Baseline security headers for every response. A full script CSP needs per-request
- * nonces and is tracked separately (docs/risk-register.md R-52); these headers already
- * block framing (clickjacking of actions such as account deletion), MIME sniffing and
- * referrer leakage, and turn off device APIs the game never uses.
+ * Baseline security headers for every response: they block framing (clickjacking of
+ * actions such as account deletion), MIME sniffing and referrer leakage, and turn off
+ * device APIs the game never uses. The Content-Security-Policy needs a fresh script
+ * nonce per request, so the proxy sends it (src/csp.ts, src/proxy.ts; R-52).
  */
 const securityHeaders = [
-  {
-    key: "Content-Security-Policy",
-    value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
-  },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

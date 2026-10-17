@@ -3,6 +3,7 @@
  * Needs TEST_DATABASE_URL (an admin connection that may CREATE/DROP DATABASE).
  * Local/CI only: it drops the e2e database, never any other.
  */
+import { fileURLToPath } from "node:url";
 import postgres from "postgres";
 import { createSql } from "../../src/db/client";
 import { migrate } from "../../src/db/migrate";
@@ -20,6 +21,6 @@ await root.unsafe(`CREATE DATABASE ${E2E_DATABASE}`);
 await root.end();
 
 const sql = createSql({ url: e2eDatabaseUrl(admin), max: 1 });
-const result = await migrate(sql, new URL("../../db/migrations", import.meta.url).pathname);
+const result = await migrate(sql, fileURLToPath(new URL("../../db/migrations", import.meta.url)));
 await sql.end();
 console.log(`e2e database ready (${result.applied.length} migration(s) applied)`);

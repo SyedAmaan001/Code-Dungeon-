@@ -29,7 +29,10 @@ export async function query<T extends object>(text: string, params: unknown[] = 
 
 /** Play the first `levels` levels for a new player through the real services. */
 export function seedPlayer(name: string, handle: string, levels: number) {
-  execFileSync("npx", ["tsx", "scripts/e2e/seed.ts", name, handle, String(levels)], {
+  // The test runner's own Node with the tsx loader: `npx` is not directly executable on
+  // Windows and may resolve to a different Node version there.
+  const args = ["--import", "tsx", "scripts/e2e/seed.ts", name, handle, String(levels)];
+  execFileSync(process.execPath, args, {
     env: { ...process.env, DATABASE_URL: dbUrl(), NODE_OPTIONS: "--conditions=react-server" },
     stdio: "pipe",
   });

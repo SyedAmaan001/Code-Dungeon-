@@ -1,5 +1,12 @@
 # Changelog
 
+## Local backend session — Windows setup, script CSP, contracts (2026-10-17)
+
+- Script Content-Security-Policy (R-52, I-15): per-request nonce with `strict-dynamic`, sent by the proxy; the static CSP header moved out of `next.config.ts`.
+- Windows: content issue paths are POSIX on every OS, `.gitattributes` keeps LF checkouts, `scripts/db/local-postgres.sh` runs the EnterpriseDB binaries from `.local/pgsql`, and the e2e database setup resolves the migrations folder correctly.
+- Docs: `docs/API_CONTRACTS.md` (the backend surface for the redesigned interface) and `docs/LOCAL_BACKEND_HANDOFF.md`.
+- Unchanged: curriculum, answer checking, XP, progression, quests, achievements, encounters, interface design.
+
 ## Onyx preview theme from the owner's Design.docx (2026-10-16)
 
 - New display preference: **Fantasy** (default, unchanged) or **Onyx (preview)** — onyx surfaces, ivory text, one cobalt action colour, Bitcount pixel titles and headings, Inter reading text. Switch on Profile › Appearance or with the top-bar palette button; stored in a cookie, never in the game database (DEC-019).

@@ -33,6 +33,14 @@ test("production build serves security headers and refuses to be framed", async 
   const h = res.headers();
   expect(h["x-frame-options"]).toBe("DENY");
   expect(h["content-security-policy"]).toContain("frame-ancestors 'none'");
+  // Script CSP (R-52): a fresh nonce per response, no eval in production, and the
+  // page's own scripts carry it (every page test's console guard would catch a block).
+  const nonce = /'nonce-([A-Za-z0-9+/=]+)'/.exec(h["content-security-policy"]!)?.[1];
+  expect(nonce).toBeTruthy();
+  expect(h["content-security-policy"]).not.toContain("unsafe-eval");
+  expect(await res.text()).toContain(`nonce="${nonce}"`);
+  const again = (await request.get("/")).headers()["content-security-policy"];
+  expect(again).not.toContain(`'nonce-${nonce}'`);
   expect(h["x-content-type-options"]).toBe("nosniff");
   expect(h["referrer-policy"]).toBe("strict-origin-when-cross-origin");
   expect(h["strict-transport-security"]).toContain("max-age=");
