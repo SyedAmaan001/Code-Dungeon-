@@ -1,5 +1,12 @@
 # Changelog
 
+## Leaderboard totals and account-write rate limits (2026-10-17, local session 2)
+
+- Leaderboard scaling (migration 0004, DEC-020): `player_path_xp` keeps XP totals per player and path, maintained by a trigger in the same transaction as each award and backfilled from the ledger; `leaderboard_page()` ranks in SQL and returns only the top N plus the viewer. Ranking rules unchanged and proven equal to `rankLeaderboard()` (random, tie, duplicate, rollback, concurrency, deletion and RLS tests).
+- Account writes rate-limited (migration 0005, DEC-021): profile update, onboarding and account deletion, 10 per 10 minutes each, shared across instances; fails closed. Answer and hint limits unchanged.
+- Tooling: test `hookTimeout` 60 s for database setup; local Windows clusters initialise as UTF-8.
+- Tests: 303 Vitest with PostgreSQL (26 new). XP, curriculum, quests, achievements, encounters and the interface unchanged.
+
 ## Local backend session — Windows setup, script CSP, contracts (2026-10-17)
 
 - Script Content-Security-Policy (R-52, I-15): per-request nonce with `strict-dynamic`, sent by the proxy; the static CSP header moved out of `next.config.ts`.

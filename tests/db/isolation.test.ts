@@ -2,6 +2,7 @@
  * Cross-account isolation: one account must never read or modify another account's data.
  * Checked at the SQL level (row-level security, grants) and through the services.
  */
+import type postgres from "postgres";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { GameService } from "@/services/game-service";
 import { LearningService } from "@/services/learning-service";
@@ -16,11 +17,14 @@ import { PostgresRateLimiter } from "@/services/postgres-rate-limit";
 import { createTestDatabase, describeDb, type TestDatabase } from "../support/db";
 import { loadOrThrow, VALID_SMALL } from "../support/packs";
 
+type Tx = postgres.TransactionSql;
+
 const TABLES = [
   "player_paths",
   "level_progress",
   "challenge_progress",
   "xp_ledger",
+  "player_path_xp",
   "submissions",
   "encounters",
   "checkpoints",
@@ -143,6 +147,15 @@ describeDb("cross-account isolation", () => {
     await expect(scoped(db.sql, b, (tx) => tx`DELETE FROM xp_ledger`)).rejects.toMatchObject({
       code: "42501",
     });
+    // The maintained totals are read-only too; only the ledger trigger writes them.
+    for (const write of [
+      (tx: Tx) => tx`UPDATE player_path_xp SET xp = 9999`,
+      (tx: Tx) => tx`DELETE FROM player_path_xp`,
+      (tx: Tx) => tx`
+        INSERT INTO player_path_xp (player_id, path_id, xp, reached_at)
+        VALUES (${b}, 'forged-path', 9999, now())`,
+    ])
+      await expect(scoped(db.sql, b, write)).rejects.toMatchObject({ code: "42501" });
   });
 
   it("sees nothing at all without a verified player id", async () => {

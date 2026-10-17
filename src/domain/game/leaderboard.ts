@@ -75,13 +75,33 @@ export function compareRecords(a: LeaderboardRecord, b: LeaderboardRecord): numb
   return a.playerId === b.playerId ? 0 : a.playerId < b.playerId ? -1 : 1;
 }
 
+/** The page size actually used for a requested limit (policy default and maximum). */
+export function leaderboardLimit(
+  requested: number | undefined,
+  policy: GamePolicy = DEFAULT_GAME_POLICY,
+): number {
+  const { defaultLimit, maxLimit } = policy.leaderboard;
+  return Math.min(Math.max(Math.trunc(requested ?? defaultLimit), 1), maxLimit);
+}
+
+/** Why a viewer is not ranked, from their own record (undefined = no profile). */
+export function unrankedReason(
+  record: Pick<LeaderboardRecord, "visible"> | undefined,
+): "hidden" | "no_xp" | "unknown" {
+  return !record ? "unknown" : !record.visible ? "hidden" : "no_xp";
+}
+
+/**
+ * Reference implementation of the ranking. A store may rank in its own query language
+ * instead (PostgreSQL: `leaderboard_page()`, migration 0004); tests hold the two equal.
+ */
 export function rankLeaderboard(
   records: readonly LeaderboardRecord[],
   options: { viewerId?: string; limit?: number } = {},
   policy: GamePolicy = DEFAULT_GAME_POLICY,
 ): Leaderboard {
-  const { defaultLimit, maxLimit, minXp } = policy.leaderboard;
-  const limit = Math.min(Math.max(Math.trunc(options.limit ?? defaultLimit), 1), maxLimit);
+  const { minXp } = policy.leaderboard;
+  const limit = leaderboardLimit(options.limit, policy);
 
   const ranked = records.filter((r) => r.visible && r.xp >= minXp).sort(compareRecords);
   const ranks: number[] = [];
@@ -99,10 +119,7 @@ export function rankLeaderboard(
   const viewer: Leaderboard["viewer"] =
     viewerIndex >= 0
       ? { ranked: true, rank: ranks[viewerIndex]!, xp: ranked[viewerIndex]!.xp }
-      : {
-          ranked: false,
-          reason: !viewerRecord ? "unknown" : !viewerRecord.visible ? "hidden" : "no_xp",
-        };
+      : { ranked: false, reason: unrankedReason(viewerRecord) };
 
   return {
     metric: "lifetime_xp",

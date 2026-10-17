@@ -16,10 +16,12 @@ import type postgres from "postgres";
 import {
   emptyGameState,
   emptyProgress,
+  unrankedReason,
   validateHandle,
   type ChallengeProgress,
   type EncounterState,
   type GameEvent,
+  type Leaderboard,
   type LeaderboardRecord,
   type LearnerProgress,
 } from "@/domain";
@@ -412,28 +414,73 @@ export class PostgresLeaderboardSource implements LeaderboardSource {
       reachedAt: iso(r.reached_at)!,
       visible: true,
     }));
-    // The viewer's own record, read under their own row-level security, so the board can
-    // explain why they are unranked (hidden or no XP yet).
     if (viewerId && UUID.test(viewerId) && !records.some((r) => r.playerId === viewerId)) {
-      const own = await scoped(this.sql, viewerId, async (tx) => {
-        const [p] = await tx<{ handle: string; leaderboard_visible: boolean }[]>`
-          SELECT handle, leaderboard_visible FROM players WHERE id = ${viewerId}`;
-        if (!p) return undefined;
-        const [x] = await tx<{ xp: number | null; reached_at: Date | null }[]>`
-          SELECT sum(amount)::integer AS xp, max(awarded_at) AS reached_at FROM xp_ledger
-          WHERE player_id = ${viewerId} AND path_id = ${pathId}`;
-        const xp = x?.xp ?? 0;
-        return {
-          playerId: viewerId,
-          handle: p.handle,
-          xp,
-          reachedAt: xp > 0 ? iso(x?.reached_at)! : null,
-          visible: p.leaderboard_visible,
-        };
-      });
+      const own = await this.ownRecord(pathId, viewerId);
       if (own) records.push(own);
     }
     return records;
+  }
+
+  /**
+   * One page ranked in PostgreSQL (`leaderboard_page()`, migration 0004) from the maintained
+   * XP totals, so a view reads at most `limit` + 1 rows instead of every player's ledger.
+   * The viewer is identified by the session's `app.player_id`, never by a parameter.
+   */
+  async page(
+    pathId: string,
+    viewerId: string | undefined,
+    options: { limit: number; minXp: number },
+  ): Promise<Leaderboard> {
+    const query = (tx: Tx) => tx<
+      { handle: string; xp: number; rank: string; is_viewer: boolean; total_ranked: string }[]
+    >`SELECT handle, xp, rank, is_viewer, total_ranked
+      FROM leaderboard_page(${pathId}, ${options.limit}, ${options.minXp})`;
+    const viewer = viewerId && UUID.test(viewerId) ? viewerId : undefined;
+    const rows = viewer
+      ? await scoped(this.sql, viewer, query)
+      : await this.sql.begin(async (tx) => {
+          await tx.unsafe(`SET LOCAL ROLE ${APP_ROLE}`);
+          return query(tx);
+        });
+
+    const toEntry = (r: (typeof rows)[number]) => ({
+      rank: Number(r.rank),
+      handle: r.handle,
+      xp: r.xp,
+      isViewer: r.is_viewer,
+    });
+    const entries = rows.slice(0, options.limit).map(toEntry);
+    const mine = rows.find((r) => r.is_viewer);
+    return {
+      metric: "lifetime_xp",
+      entries,
+      viewer: mine
+        ? { ranked: true, rank: Number(mine.rank), xp: mine.xp }
+        : {
+            ranked: false,
+            reason: unrankedReason(viewer ? await this.ownRecord(pathId, viewer) : undefined),
+          },
+      totalRanked: rows.length ? Number(rows[0]!.total_ranked) : 0,
+    };
+  }
+
+  /** The viewer's own record, read under their own row-level security (even if hidden). */
+  private ownRecord(pathId: string, viewerId: string): Promise<LeaderboardRecord | undefined> {
+    return scoped(this.sql, viewerId, async (tx) => {
+      const [p] = await tx<{ handle: string; leaderboard_visible: boolean }[]>`
+        SELECT handle, leaderboard_visible FROM players WHERE id = ${viewerId}`;
+      if (!p) return undefined;
+      const [t] = await tx<{ xp: number; reached_at: Date }[]>`
+        SELECT xp, reached_at FROM player_path_xp
+        WHERE player_id = ${viewerId} AND path_id = ${pathId}`;
+      return {
+        playerId: viewerId,
+        handle: p.handle,
+        xp: t?.xp ?? 0,
+        reachedAt: t ? iso(t.reached_at)! : null,
+        visible: p.leaderboard_visible,
+      };
+    });
   }
 }
 

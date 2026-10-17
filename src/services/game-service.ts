@@ -21,6 +21,7 @@ import {
   emptyGameState,
   gameView,
   isEncounterKind,
+  leaderboardLimit,
   leaderboardRecord,
   maxPathXp,
   rankLeaderboard,
@@ -438,6 +439,15 @@ export class GameService {
     viewerId: string | undefined,
     options: { limit?: number } = {},
   ): Promise<Leaderboard & { persistent: boolean }> {
+    if (this.leaderboardSource?.page) {
+      return {
+        ...(await this.leaderboardSource.page(this.pathId, viewerId, {
+          limit: leaderboardLimit(options.limit, this.policy),
+          minXp: this.policy.leaderboard.minXp,
+        })),
+        persistent: this.leaderboardSource.durable,
+      };
+    }
     if (this.leaderboardSource) {
       const records = await this.leaderboardSource.records(this.pathId, viewerId);
       return {

@@ -1,11 +1,11 @@
 # Local backend session — handoff
 
-- **Date:** 17 October 2026. Local laptop session on Windows 11 with normal Claude Code, not Claude Cloud.
+- **Date:** 17 October 2026. Two local sessions on the owner's Windows 11 laptop with normal Claude Code, not Claude Cloud. Session 1 handled recovery, Windows fixes and the CSP. Session 2 handled leaderboard totals and account-write rate limits.
 - **Repository:** https://github.com/SyedAmaan001/Code-Dungeon-.git
 - **Local path:** `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1\.claude\worktrees\code-dungeon-recovery-b0a626`. This is a git worktree of the checkout at `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1`, which stays on `main`.
 - **Branch:** `claude/tender-cerf-ooekni`, tracking `origin/claude/tender-cerf-ooekni`. `main` is only the three documentation commits and is an ancestor of this branch. Never treat `main` as the application.
 - **Starting commit:** `a431bed`, "fix(ui): phone map status line under tagged rooms; scroll-reveal coverage", the remote tip on 17 October 2026.
-- **Current commit:** the code is at `b82b2c7`, and the tip is one docs-only commit after it (`git log -3 --oneline`). Push status is in §8.
+- **Current commit:** session 1 ended at `1e917f1` (CI green). Session 2's commit sits on top of it; see `git log -3 --oneline` and §8.
 
 ## 1. Verified Phase 1–6 status (re-run here, not copied from the reports)
 
@@ -13,11 +13,11 @@
 |---|---|---|
 | Next.js 16 / TypeScript / quality tooling | Implemented and verified | lint, typecheck, format: exit 0 |
 | 25-level Python Fundamentals pack, validator, 6 deterministic evaluators | Implemented and verified | `content:validate`: 0 errors, 1 warning (AI-only review). `content:verify-python`: 148/148 with CPython 3.13.6 |
-| Learning and game engines (XP, mastery, unlocks, encounters, lives, checkpoints, quests, achievements, items, leaderboard ranking) | Implemented and verified | Vitest: 277 of 277 pass with PostgreSQL (273 existing plus 4 new CSP tests) |
-| PostgreSQL schema (migrations 0001–0003), RLS, `SET LOCAL ROLE code_dungeon_app`, one-transaction saves, idempotent submissions, concurrency, rollback, cross-player isolation, shared rate limit, account deletion | Implemented and verified locally | `tests/db/*` against PostgreSQL 16.15. Migrations applied twice: "3 applied", then "0 applied, 3 already up to date" |
+| Learning and game engines (XP, mastery, unlocks, encounters, lives, checkpoints, quests, achievements, items, leaderboard ranking) | Implemented and verified | Vitest: 303 of 303 pass with PostgreSQL after session 2 |
+| PostgreSQL schema (migrations **0001–0005**), RLS, `SET LOCAL ROLE code_dungeon_app`, one-transaction saves, idempotent submissions, concurrency, rollback, cross-player isolation, shared rate limits, account deletion, maintained leaderboard totals | Implemented and verified locally | `tests/db/*` against PostgreSQL 16.15. On a clean disposable database: "5 applied", then "0 applied, 5 already up to date" |
 | Auth: dev sign-in (HMAC cookie), Supabase Auth code (Google OAuth with PKCE, magic link, `/auth/callback`, `/auth/confirm`, `safeNext`, HttpOnly cookies, config guards) | Implemented. Supabase is **integrated against a local mock only** | Unit tests plus the `supabase-mock` Playwright project (§4) |
 | Real Google OAuth, real Supabase email, real Supabase admin deletion, `SET LOCAL ROLE` on hosted Supabase | **Not verified**, blocked on approval (no Supabase project exists, DEC-013, R-44, R-47) | None possible without a project |
-| Game interface (map, rooms, journal, collection, leaderboard, profile, Onyx preview theme) | Implemented. The owner dislikes it and it **will be redesigned separately** | Not modified in this session apart from the CSP header |
+| Game interface (map, rooms, journal, collection, leaderboard, profile, Onyx preview theme) | Implemented. The owner dislikes it and it **will be redesigned separately** | Not modified in either local session, apart from the CSP header and account actions' error messages |
 | Human content review | **0 of 25** levels (DEC-011). `content:release-check` exits 1 by design | Checklist test passes |
 | Hosting, staging, production | Deferred. Nothing is provisioned | None |
 
@@ -40,9 +40,9 @@
 - **Proxy:** `src/proxy.ts` refreshes the session, redirects early and **now sends the CSP**. The policy itself is in `src/csp.ts`.
 - **Database:** `db/migrations/*.sql`, `src/db/migrate.ts`, `scripts/db/`.
 - **Backend contracts for the redesigned interface:** **`docs/API_CONTRACTS.md`**, new in this session.
-- Decisions are in `docs/decision.md` (DEC-001…019), risks in `docs/risk-register.md`, issues in `docs/issues.md`.
+- Decisions are in `docs/decision.md` (DEC-001…021), risks in `docs/risk-register.md` (to R-59), issues in `docs/issues.md` (to I-25).
 
-## 3. What this session did
+## 3. What session 1 did
 
 | Commit | Change | Why |
 |---|---|---|
@@ -52,7 +52,7 @@
 
 CSP details: `script-src 'self' 'nonce-<per request>' 'strict-dynamic'`, plus `'unsafe-eval'` under `next dev` only. It also keeps `object-src 'none'; base-uri 'self'; frame-ancestors 'none'`. Every route is already dynamic (the root layout reads the theme cookie), so every page gets its nonce. Styles are not restricted, because motion and GSAP set inline styles. `form-action` is not set, so the Google OAuth redirect after a no-JS form post keeps working.
 
-## 4. Test results in this session (Node 24.20.0, PostgreSQL 16.15, Python 3.13.6)
+## 4. Session 1 test results (Node 24.20.0, PostgreSQL 16.15, Python 3.13.6)
 
 | Check | Result |
 |---|---|
@@ -85,6 +85,85 @@ e2e notes, so nobody repeats the investigation:
 - Two earlier failures came from the `seedPlayer` helper spawning `npx`, which on this laptop resolves to the nvm shim that wants Node 22. It now uses `process.execPath --import tsx`.
 - `game.spec.ts` tests share state and run serially, so a single test can't be run alone.
 
+## 4a. What session 2 did: leaderboard totals and account-write rate limits
+
+**Task 1: leaderboard scaling (migration `0004_player_path_xp.sql`, DEC-020, I-23)**
+
+- **Schema:** `player_path_xp`:
+  - Columns: `player_id`, `path_id`, `xp > 0`, `reached_at`.
+  - Primary key `(player_id, path_id)`, with a foreign key to `player_paths ON DELETE CASCADE`.
+  - Index `(path_id, xp DESC, reached_at)`.
+  - RLS policy for own rows. The app role has `SELECT` only.
+- **Maintenance:** the `xp_ledger_total` `AFTER INSERT` trigger runs `xp_ledger_add_to_total()` (`SECURITY DEFINER`, fixed `search_path`). It upserts `xp += amount` and `reached_at = greatest(...)` in the same transaction as the award. Duplicate awards fail on the ledger primary key first, and a rolled-back transaction rolls the total back too. Concurrent awards are serialised by the upsert's row lock. Same-player submissions were already serialised by the `player_paths FOR UPDATE` lock.
+- **Backfill:** inside the migration's single transaction, `LOCK TABLE xp_ledger IN SHARE ROW EXCLUSIVE MODE`, then create the trigger, then `INSERT … SELECT sum(amount), max(awarded_at) … GROUP BY player_id, path_id`. To rebuild after manual ledger edits (R-58), run as the owner: `TRUNCATE player_path_xp;` then the same `INSERT … SELECT`.
+- **Verification query** (expect zero rows):
+
+  ```sql
+  SELECT * FROM (SELECT player_id, path_id, sum(amount)::int xp, max(awarded_at) r
+                 FROM xp_ledger GROUP BY 1, 2) l
+  FULL JOIN player_path_xp t USING (player_id, path_id)
+  WHERE l.xp IS DISTINCT FROM t.xp OR l.r IS DISTINCT FROM t.reached_at;
+  ```
+
+- **Reads:**
+  - `leaderboard_page(path, limit, min_xp)` (`SECURITY DEFINER`) returns `handle, xp, reached_at, rank, is_viewer, total_ranked`. That is the top `limit` rows plus the caller's own row when it is ranked lower: at most `limit + 1` rows. The caller is `app_current_player()`. No player ids are returned.
+  - `leaderboard_records()` keeps its 0001 signature and reads the totals.
+  - `PostgresLeaderboardSource.page()` uses `leaderboard_page()`. `GameService.leaderboard()` prefers `page()` when the source has one. The in-memory path still uses `rankLeaderboard()`.
+- **Ranking semantics (unchanged):**
+  - Order: XP descending, `reached_at` ascending, `lower(handle) COLLATE "C"`, `handle COLLATE "C"`, then `player_id`.
+  - Rank: `rank()` on (XP, `reached_at`), so "1224" competition ranking.
+  - Only visible players with XP ≥ `minXp` are ranked.
+  - Handles are ASCII by constraint, so this matches JavaScript ordering.
+  - Viewer reasons (`hidden`, `no_xp`, `unknown`) come from the shared domain helper `unrankedReason()`. Limit clamping comes from `leaderboardLimit()`.
+- **Tests** (`tests/db/leaderboard.test.ts`, 9 tests):
+  - Backfill from a ledger written before 0004.
+  - 480 random awards with frequent XP and time ties, compared against the old ledger SQL plus `rankLeaderboard()`. This covers 8 viewer kinds (none, ranked, hidden, no XP, non-existent) × 8 limits (including 0 and −3), and `minXp` values 0, 30 and 60.
+  - At most `limit + 1` rows, and no ids in the function signature.
+  - A duplicate award is rejected and the total is unchanged.
+  - Rollback.
+  - 40 concurrent awards.
+  - Explicit ties (shared rank, case-insensitive handle order).
+  - The deletion cascade.
+  - Concurrent and duplicate real submissions through the services under the application role.
+  - Cross-account tests: `player_path_xp` was added to the isolation table list, and update, delete and insert are refused with `42501`. The migration test checks grants.
+  - **Mutation check:** changing `rank()` to `row_number()` made 3 of these tests fail, so they do detect ranking errors.
+
+**Task 2: account-write rate limits (migration `0005_account_rate_limits.sql`, DEC-021, I-24)**
+
+- **Table and function:**
+  - `account_rate_limits(bucket, window_start, hits)` has RLS with no policy and no grants, so the app role can't touch it.
+  - `account_rate_limit_hit(bucket, window_seconds, limit)` (`SECURITY DEFINER`) counts one hit atomically in a window on the database clock. It cleans up windows older than a day (or two windows, if longer) when a new window starts. It refuses (`42501`) to charge a `player:` bucket that isn't the session's own player.
+- **Buckets:** `player:<uuid>:profile|delete` comes from the verified session. Onboarding uses `identity:<sha256(provider, subject)>:onboarding`, because there is no player yet. Only a hash is stored.
+- **Budget:** `runtime.accountLimiter` = local guard of 20 per 10 minutes, then PostgreSQL at 10 per 10 minutes per action.
+- **Actions** (`src/app/actions/account.ts`): `completeOnboarding` checks the limit after the identity is verified. `updateProfile` and `deleteAccount` check it after the session's player is resolved.
+  - Over the limit: an error message, and nothing is written.
+  - Limit check failure: an error message and the action fails closed, with the error logged server-side (message only).
+  - Signed out: redirected before any budget is charged.
+  - Answer and hint limits are unchanged.
+- **Tests:**
+  - `tests/db/account-rate-limit.test.ts` (8 tests): budget per bucket, 30 concurrent hits → exactly 10 allowed, identity buckets store only a hash, cross-account charging refused, table unreadable by the app role, malformed bucket and invalid limit rejected, cleanup, next window.
+  - `tests/auth/account-actions-rate-limit.test.ts` (9 tests): bucket comes from the session and not the form, repeated and concurrent requests, cross-account independence, database failure, signed-out callers, onboarding, deletion stays usable after typos, deletion refused when the budget is spent.
+  - `tests/db/account-deletion.test.ts` now runs with the real PostgreSQL limiter in front.
+
+**Other session 2 changes**
+
+- `vitest.config.ts` gains `hookTimeout: 60_000`. With 8 database suites seeding in parallel on this laptop, some `beforeAll` hooks exceeded the 10 s default. Every suite passes with more setup time, and no assertion changed.
+- `scripts/db/local-postgres.sh` now initialises new Windows clusters with `-E UTF8 --locale=C`. The existing cluster is WIN1252 and was left alone (I-25, R-59), so migrations must stay ASCII-safe.
+- When starting the database, **don't pipe** `local-postgres.sh start` into another command. The postmaster inherits the pipe and the shell hangs, and killing that shell took PostgreSQL down once (Windows error `0xC0000142`). Redirect to a file instead.
+
+## 4b. Session 2 test results
+
+| Check | Result |
+|---|---|
+| lint / format:check / typecheck | 0 / 0 / 0 |
+| `npm test` with PostgreSQL (`REQUIRE_DB_TESTS=1`) | **31 files, 303 passed** (26 new) |
+| content:validate / verify-python | 0 errors, 1 warning / 148 of 148 |
+| Migrations on a clean disposable database | "5 applied", then "0 applied, 5 already up to date". `db:status` lists all 5 as applied. Dev database upgraded with "2 applied" (it holds 0 players) |
+| `npm run build` | pass |
+| `npm audit --omit=dev` | 0 vulnerabilities |
+| `npx playwright test --timeout=180000` | **35 passed** (11.2 min): onboarding, profile, deletion and leaderboard journeys run through the new limiter and SQL ranking |
+| CI for session 1 (`1e917f1`) | success (GitHub Actions run 39024106490) |
+
 ## 5. Local setup (Windows laptop): exact commands
 
 Prerequisites already on this laptop:
@@ -97,12 +176,12 @@ From Git Bash in the worktree:
 
 ```bash
 export PATH="/c/Users/syeda/AppData/Local/Author Software/nvm/installs/v24.20.0:$PATH"
-bash scripts/db/local-postgres.sh start      # NOT `npm run db:local` — npm picks WSL bash here
+bash scripts/db/local-postgres.sh start > /tmp/pg.txt 2>&1   # never pipe it; not `npm run db:local` (WSL bash)
 export DATABASE_URL=postgresql://postgres@127.0.0.1:54329/code_dungeon_dev
 export TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:54329/postgres
 export REQUIRE_DB_TESTS=1 NEXT_TELEMETRY_DISABLED=1
 npm run db:migrate && npm test               # unit + DB tests
-npx playwright test                          # e2e (builds a production copy; ~10 min)
+npx playwright test --timeout=180000         # e2e (builds a production copy; ~10 min)
 bash scripts/db/local-postgres.sh stop
 ```
 
@@ -118,14 +197,16 @@ bash scripts/db/local-postgres.sh stop
 
 ## 7. Known risks and gaps
 
-- **Leaderboard scaling:** `leaderboard_records()` sums the whole `xp_ledger` on every leaderboard view. That's fine for a playtest. Add a per-player path total (a trigger or materialised table) before public scale.
-- Profile update, onboarding and account deletion actions have **no rate limit**; only answers and hints have one. Magic-link sending relies on Supabase's own limits. Low risk, because each needs a verified session (or Supabase).
-- The fixed-window shared limiter can allow up to 2× the limit across a minute boundary (DEC-016, accepted).
-- CI uses Node 22 and Linux. This laptop uses Node 24 and Windows, so the Windows-only fixes are guarded by the existing tests but not by CI.
+- Leaderboard: viewer ranks below the page and `total_ranked` count the path's totals, which is O(players) per view rather than O(ledger rows). If paths reach very large player counts, consider a cached count. Owner-level ledger edits would desynchronise totals; see R-58 and the verification query in §4a.
+- Fixed-window limiters (DEC-016 and DEC-021) can allow up to 2× a budget across a window boundary. This is accepted.
+- Magic-link sending (`sendMagicLink`) relies on Supabase's own email limits. No Code Dungeon limit applies, because the caller has no verified identity yet.
+- CI uses Node 22, Linux and UTF-8. This laptop uses Node 24, Windows and a WIN1252 cluster (R-59). CI is the reference.
 - npm 11 install-script allow-list: if a fresh `npm ci` ever breaks esbuild or tsx, run `npm install-scripts approve esbuild unrs-resolver` locally, but don't commit that blindly.
+- Real providers are still unverified (§6).
 
 ## 8. Push status and next task
 
-- **Push:** `a431bed..b82b2c7` was pushed (fast-forward) to `origin/claude/tender-cerf-ooekni` on 17 October 2026, followed by a docs-only commit that records this. Nothing was merged and `main` was not touched. CI (GitHub Actions, Linux, Node 22) runs on that push. Its result was not checked in this session, so check the Actions tab for the run on this branch.
-- **Next task:** leaderboard scaling, then rate limits for profile, onboarding and deletion actions. Exact scope is in `docs/NEXT_CHAT_PROMPT.md`.
-- **After that:** Phase 7 still needs owner approval: a Supabase project, a Google OAuth client, an email sender and a Vercel preview with a cost plan (`docs/PHASE_6_REPORT.md` §8). Until it's approved, keep to non-billable backend work.
+- **Session 1:** `a431bed..1e917f1` was pushed (fast-forward). CI run 39024106490 succeeded.
+- **Session 2:** one commit on top of `1e917f1` (leaderboard totals, account-write limits, docs). It is pushed to `origin/claude/tender-cerf-ooekni` only if the remote hadn't moved. The push outcome and CI state are recorded in a final docs-only commit; check with `git log -3 --oneline` and `gh run list`. Nothing was merged and `main` was not touched.
+- **Next task:** the hosted-staging approval package, with nothing provisioned: `docs/cloud-plan.md`, a credential-free deployment smoke test and a production configuration preflight. Exact scope is in `docs/NEXT_CHAT_PROMPT.md`.
+- **After that:** Phase 7 provisioning, once the owner approves the plan (Supabase project, Google OAuth client, email sender, Vercel preview). Also still waiting on people: human content review (DEC-011), launch jurisdictions (DEC-010) and confirmation of DEC-014.

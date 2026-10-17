@@ -12,6 +12,7 @@ const PLAYER_TABLES = [
   "encounters",
   "level_progress",
   "player_achievements",
+  "player_path_xp",
   "player_paths",
   "players",
   "quest_progress",
@@ -19,6 +20,9 @@ const PLAYER_TABLES = [
   "submissions",
   "xp_ledger",
 ];
+
+/** Reachable by the application only through a SECURITY DEFINER function (0005). */
+const SERVER_ONLY_TABLES = ["account_rate_limits"];
 
 describeDb("migrations", () => {
   let db: TestDatabase;
@@ -29,7 +33,13 @@ describeDb("migrations", () => {
 
   it("apply to an empty database, then re-run as a no-op", async () => {
     const first = await migrate(db.sql, MIGRATIONS_DIR);
-    const all = ["0001_initial", "0002_age_check", "0003_action_rate_limits"];
+    const all = [
+      "0001_initial",
+      "0002_age_check",
+      "0003_action_rate_limits",
+      "0004_player_path_xp",
+      "0005_account_rate_limits",
+    ];
     expect(first).toEqual({ applied: all, alreadyApplied: [] });
     const second = await migrate(db.sql, MIGRATIONS_DIR);
     expect(second).toEqual({ applied: [], alreadyApplied: all });
@@ -57,11 +67,12 @@ describeDb("migrations", () => {
       SELECT relname, relrowsecurity FROM pg_class
       WHERE relkind = 'r' AND relnamespace = 'public'::regnamespace AND relname <> 'schema_migrations'
       ORDER BY relname`;
-    expect(tables.map((t) => t.relname)).toEqual(PLAYER_TABLES);
+    expect(tables.map((t) => t.relname)).toEqual([...PLAYER_TABLES, ...SERVER_ONLY_TABLES].sort());
     expect(tables.every((t) => t.relrowsecurity)).toBe(true);
     const policies = await db.sql<
       { tablename: string }[]
     >`SELECT tablename FROM pg_policies WHERE schemaname = 'public'`;
+    // Server-only tables have RLS and deliberately no policy: the app role sees nothing.
     expect(new Set(policies.map((p) => p.tablename))).toEqual(new Set(PLAYER_TABLES));
   });
 
@@ -79,12 +90,28 @@ describeDb("migrations", () => {
       SELECT has_table_privilege('code_dungeon_app', 'xp_ledger', 'UPDATE') AS ledger_update,
              has_table_privilege('code_dungeon_app', 'xp_ledger', 'DELETE') AS ledger_delete,
              has_table_privilege('code_dungeon_app', 'schema_migrations', 'SELECT') AS migrations_select,
-             has_function_privilege('public', 'leaderboard_records(text)', 'EXECUTE') AS public_leaderboard`;
+             has_function_privilege('public', 'leaderboard_records(text)', 'EXECUTE') AS public_leaderboard,
+             has_function_privilege('public', 'leaderboard_page(text, integer, integer)', 'EXECUTE') AS public_page,
+             has_function_privilege('code_dungeon_app', 'xp_ledger_add_to_total()', 'EXECUTE') AS app_trigger_fn,
+             has_table_privilege('code_dungeon_app', 'player_path_xp', 'INSERT') AS totals_insert,
+             has_table_privilege('code_dungeon_app', 'player_path_xp', 'UPDATE') AS totals_update,
+             has_table_privilege('code_dungeon_app', 'player_path_xp', 'DELETE') AS totals_delete,
+             has_table_privilege('code_dungeon_app', 'account_rate_limits', 'SELECT') AS limits_select,
+             has_table_privilege('code_dungeon_app', 'account_rate_limits', 'INSERT') AS limits_insert,
+             has_function_privilege('public', 'account_rate_limit_hit(text, integer, integer)', 'EXECUTE') AS public_limit_fn`;
     expect(grants).toEqual({
       ledger_update: false,
       ledger_delete: false,
       migrations_select: false,
       public_leaderboard: false,
+      public_page: false,
+      app_trigger_fn: false,
+      totals_insert: false,
+      totals_update: false,
+      totals_delete: false,
+      limits_select: false,
+      limits_insert: false,
+      public_limit_fn: false,
     });
   });
 });

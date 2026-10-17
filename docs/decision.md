@@ -272,3 +272,24 @@
 - Security/privacy/cost impact: one HttpOnly, SameSite=Lax preference cookie, no personal data; no new service; $0.
 - Revisit trigger: the owner reviews the preview and decides whether Onyx replaces Fantasy, stays optional, or is dropped.
 - Links/tests/evidence: `src/app/theme-onyx.css`, `src/app/app.css`, `src/ui/theme.ts`, `src/ui/onyx-motion.tsx`; `tests/ui/theme.test.ts`; `e2e/theme.spec.ts` (switch and persistence, tampered cookie, axe on map/room/challenge/profile, phone width, reduced motion, motion completes); `e2e/theme-production.spec.ts` (cascade order in the production build).
+
+### DEC-020 — Leaderboard reads maintained XP totals and ranks in SQL
+- Status: DEFAULT (local backend session, 17 October 2026; migration 0004)
+- Options considered: trigger on `xp_ledger` (chosen); explicit write in `PostgresPlayerStore.write()`; materialised view refreshed on a schedule.
+- Decision: `player_path_xp` keeps each player's XP total per path and the latest award time (`reached_at`, the domain's reach time). An `AFTER INSERT` trigger on `xp_ledger` (SECURITY DEFINER) adds every award in the same transaction. The application role can only read its own totals. `leaderboard_page()` ranks in SQL by the exact rules of `rankLeaderboard()` and returns the top N plus the caller's own row, identifying the caller from `app.player_id`. `leaderboard_records()` keeps its signature and now reads the totals. `rankLeaderboard()` stays the reference implementation, and the tests hold the two equal.
+- Why: a trigger can't be bypassed by a future write path. It needs no write grant for the app role, so totals can't be forged. It is atomic with the award, so rollbacks and duplicate awards (rejected by the ledger key) leave no trace. A materialised view would be stale between refreshes.
+- Consequences/trade-offs: an owner-level `UPDATE` or `DELETE` on `xp_ledger` (never done by the app, which has no such grant) would not adjust totals. The handoff has a verification query. Viewer ranks outside the top N use a count over the path's totals (O(players), not O(ledger rows)).
+- Security/privacy/cost impact: no player ids are returned by `leaderboard_page()`. RLS is on the new table and it is covered by the cross-account tests. $0.
+- Revisit trigger: path sizes where counting totals per view becomes measurable.
+- Links/tests/evidence: `db/migrations/0004_player_path_xp.sql`, `src/services/postgres-player-store.ts` (`PostgresLeaderboardSource.page`), `tests/db/leaderboard.test.ts`.
+
+### DEC-021 — Shared rate limit for account writes
+- Status: DEFAULT (local backend session, 17 October 2026; migration 0005)
+- Decision: profile update, onboarding and account deletion are each limited to 10 per 10 minutes per bucket, shared across instances in PostgreSQL. A process-local guard of 20 per 10 minutes runs first.
+  - Buckets are `player:<id>:<action>` from the verified session, or `identity:<sha256(provider, subject)>:onboarding` before a player exists.
+  - The table is reachable only through `account_rate_limit_hit()`, which uses the database clock and refuses to charge another player's bucket.
+  - Requests fail closed: if the limit can't be checked, nothing changes.
+  - The answer and hint limit (DEC-016) is unchanged.
+- Why: onboarding has no player row yet, so the per-player table from 0003 can't hold it. A separate budget keeps account changes from consuming the game budget. The database clock keeps windows identical across instances.
+- Consequences/trade-offs: fixed windows allow up to 2× the budget across a window boundary, as in DEC-016. Rows of deleted accounts expire within a day.
+- Links/tests/evidence: `db/migrations/0005_account_rate_limits.sql`, `src/services/postgres-rate-limit.ts`, `src/app/actions/account.ts`, `tests/db/account-rate-limit.test.ts`, `tests/auth/account-actions-rate-limit.test.ts`.

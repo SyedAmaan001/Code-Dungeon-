@@ -6,7 +6,7 @@
  * under a lock, lets the caller compute the new records, and persists them together — or
  * persists nothing if anything fails (the callback throws or a write is rejected).
  */
-import type { LeaderboardRecord } from "@/domain";
+import type { Leaderboard, LeaderboardRecord } from "@/domain";
 import { emptyGameState, emptyProgress } from "@/domain";
 import { GameStateConflictError, type GameStateRecord, type GameStateStore } from "./game-store";
 import {
@@ -43,6 +43,15 @@ export interface LeaderboardSource {
   readonly durable: boolean;
   /** Visible players with XP on the path, plus the viewer's own record (even if hidden). */
   records(pathId: string, viewerId?: string): Promise<LeaderboardRecord[]>;
+  /**
+   * Optional: one page ranked by the store itself, by the same rules as `rankLeaderboard`
+   * (`limit` already clamped by the policy). Used instead of `records` when present.
+   */
+  page?(
+    pathId: string,
+    viewerId: string | undefined,
+    options: { limit: number; minXp: number },
+  ): Promise<Leaderboard>;
 }
 
 export function emptyRecords(pathId: string): PlayerRecords {

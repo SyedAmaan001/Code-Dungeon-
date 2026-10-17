@@ -13,5 +13,8 @@ export default defineConfig({
     include: ["tests/**/*.test.ts"],
     environment: "node",
     testTimeout: 20_000,
+    // Database suites create, migrate and seed a throwaway database in beforeAll; with every
+    // suite doing so in parallel this can exceed the 10 s default on slower machines.
+    hookTimeout: 60_000,
   },
 });

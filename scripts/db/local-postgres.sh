@@ -43,7 +43,10 @@ case "${1:-}" in
     mkdir -p "$DIR"
     [ "$(id -u)" = "0" ] && chown -R postgres:postgres "$DIR"
     if [ ! -f "$DIR/data/PG_VERSION" ]; then
-      as_pg "$BIN/initdb" -D "$DIR/data" -U postgres -A trust --auth-host=trust >/dev/null
+      # Windows defaults to the WIN1252 code page; use UTF-8 like CI and hosted PostgreSQL.
+      if [ -n "$WINDOWS" ]; then enc="-E UTF8 --locale=C"; else enc=""; fi
+      # shellcheck disable=SC2086
+      as_pg "$BIN/initdb" -D "$DIR/data" -U postgres -A trust --auth-host=trust $enc >/dev/null
       if [ -n "$WINDOWS" ]; then echo "unix_socket_directories = ''" >>"$DIR/data/postgresql.conf"; fi
     fi
     if ! as_pg "$BIN/pg_ctl" -D "$DIR/data" status >/dev/null 2>&1; then

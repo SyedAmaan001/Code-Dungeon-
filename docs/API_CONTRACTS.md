@@ -19,6 +19,7 @@ Shared rules:
 | A request body is `unknown` until a strict Zod schema accepts it. Unknown keys are rejected | `src/services/learning-service.ts`, `src/learning/evaluation/evaluators.ts` |
 | Answer keys never leave the server. Pages receive `PublicLevel` (projection) and `explanation` only after a correct answer | `src/learning/projection.ts`, `LevelResult` |
 | Answers and hints are rate-limited at 60 per minute per process, then 40 per minute per player, shared through PostgreSQL | `src/services/runtime.ts`, `src/services/postgres-rate-limit.ts` |
+| Account writes (onboarding, profile, deletion) are rate-limited at 20 per 10 minutes per process, then 10 per 10 minutes per action, shared through PostgreSQL (migration 0005, DEC-021) | `src/app/actions/account.ts`, `src/services/postgres-rate-limit.ts` |
 
 ## 2. Session and player profile
 
@@ -35,6 +36,13 @@ Shared rules:
 | `completeOnboarding` | `handle`, `birthYear`, `birthMonth`, `visible=on` (optional) | Redirects to `/play`, or `{status:"error",message}` / `{status:"too_young"}`. Stores no age data, only `{policy, at}` of the check. Sets an `cd_age_gate` cookie for 24 hours after an under-13 answer |
 | `updateProfile` | `handle`, `visible=on` (optional) | `{status:"saved"}` / `{status:"error",message}` |
 | `deleteAccount` | `confirmHandle` (must equal the handle), `acknowledge=on` | Redirects to `/account-deleted`, or `{status:"error",message}`. One transaction deletes the player (cascading to every player table) and the Supabase user. If the provider refuses, nothing is deleted |
+
+**Rate limits on these three actions (DEC-021):**
+- The budget is 10 attempts per 10 minutes per action. The bucket is the session's player (`player:<id>:profile` / `player:<id>:delete`), or for onboarding the verified sign-in identity, hashed (`identity:<sha256>:onboarding`). Form fields never choose the bucket.
+- Every attempt counts, including a mistyped deletion confirmation. Ten attempts leave room to correct typos.
+- Over the limit, the result is `{status:"error", message:"Too many attempts in a short time. Nothing was changed; wait a few minutes."}` and nothing is written.
+- If the limit can't be checked (for example, the database is unreachable), the result is `{status:"error", message:"That could not be done just now. Nothing was changed; try again later."}`. The action fails closed.
+- A signed-out caller is redirected to `/sign-in` before any budget is charged.
 | `setTheme` (`appearance.ts`) | `theme` | Display cookie only, with no database write |
 
 ## 3. Learning path and levels (reads)
@@ -102,8 +110,9 @@ All of these are read through `getView` / `levelRoom` and change only as a side 
 
 - Only players who opted in (`leaderboard_visible`, off by default, DEC-014 proposed) and have XP ≥ `minXp` are ranked. Only the handle is exposed, never ids or emails.
 - Ties share a rank when XP and the time it was reached are equal.
-- **Pagination:** top-N only. `limit` is clamped to the policy's `maxLimit`, and the page uses 50. There is no cursor or offset.
-- **Scaling note:** `leaderboard_records()` aggregates the whole `xp_ledger` on each call. That's fine for a playtest. Add a materialised total or a `player_path_xp` table before large public use (`docs/LOCAL_BACKEND_HANDOFF.md`, risks).
+- Order: XP highest first, then the earliest time that total was reached, then handle (case-insensitive). Ranks are competition ranks ("1224") on (XP, reach time). `totalRanked` counts every ranked player.
+- **Pagination:** top-N only. `limit` is clamped by the policy (default 10, maximum 100), and the page uses 50. There is no cursor or offset. When the viewer is ranked below the page, `viewer` still carries their exact rank.
+- **Storage (migration 0004, DEC-020):** totals are kept in `player_path_xp`, maintained by a trigger in the same transaction as every XP award. `leaderboard_page(path, limit, minXp)` ranks in SQL and returns at most `limit` + 1 rows: the page plus the viewer. The viewer is taken from the session (`app.player_id`), never from a parameter, and no player ids are returned. `rankLeaderboard()` in `src/domain/game/leaderboard.ts` is still the reference implementation, and `tests/db/leaderboard.test.ts` keeps the two equal.
 
 ## 8. Authentication routes and actions
 
@@ -123,4 +132,4 @@ All of these are read through `getView` / `levelRoom` and change only as a side 
 - Actions never throw to the browser. Unexpected failures are logged server-side (message only) and return `{status:"error"}`.
 - Pages throw to `src/app/play/error.tsx`.
 - `signed_out` from an action means the session expired: send the player to `/sign-in?next=<current path>`.
-- `rate_limited` means wait. The limits are per minute.
+- `rate_limited` (answers and hints) means wait. Those limits are per minute. Account actions report their limit as an `error` message instead (§2).

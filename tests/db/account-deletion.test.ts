@@ -11,7 +11,7 @@ import {
   PostgresPlayerStore,
   type AccountProfile,
 } from "@/services/postgres-player-store";
-import { PostgresRateLimiter } from "@/services/postgres-rate-limit";
+import { PostgresBucketRateLimiter, PostgresRateLimiter } from "@/services/postgres-rate-limit";
 import { createTestDatabase, describeDb, type TestDatabase } from "../support/db";
 import { loadOrThrow, VALID_SMALL } from "../support/packs";
 
@@ -38,7 +38,8 @@ vi.mock("@/auth/supabase-admin", () => ({
   deleteSupabaseUser: (cfg: unknown, id: string) => deleteSupabaseUser(cfg, id),
 }));
 let accounts: PostgresPlayerAccounts;
-vi.mock("@/services/runtime", () => ({ getRuntime: () => ({ accounts }) }));
+let accountLimiter: PostgresBucketRateLimiter;
+vi.mock("@/services/runtime", () => ({ getRuntime: () => ({ accounts, accountLimiter }) }));
 
 const { deleteAccount } = await import("@/app/actions/account");
 
@@ -47,6 +48,7 @@ const PLAYER_TABLES = [
   "level_progress",
   "challenge_progress",
   "xp_ledger",
+  "player_path_xp",
   "submissions",
   "encounters",
   "checkpoints",
@@ -101,6 +103,8 @@ describeDb("account deletion", () => {
   beforeAll(async () => {
     db = await createTestDatabase();
     accounts = new PostgresPlayerAccounts(db.sql);
+    // The production limiter (10 per 10 minutes per player) runs in front of every deletion.
+    accountLimiter = new PostgresBucketRateLimiter(db.sql, 10, 10 * 60);
     const pack = loadOrThrow(VALID_SMALL);
     pack.meta.quests.forEach((q) => (q.status = "published"));
     pack.meta.achievements.forEach((x) => (x.status = "published"));

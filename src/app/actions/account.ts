@@ -2,6 +2,7 @@
 /**
  * Onboarding (handle + neutral 13+ age check, DEC-010), profile settings and account
  * deletion. The player id always comes from the verified session, never from the form.
+ * Each write is rate-limited per player (or per verified identity before onboarding).
  */
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -11,7 +12,27 @@ import { DEV_PROVIDER, DEV_SESSION_COOKIE } from "@/auth/dev-session";
 import { SUPABASE_PROVIDER } from "@/auth/identity";
 import { getIdentity, playerForAction, supabaseServerClient } from "@/auth/server";
 import { deleteSupabaseUser } from "@/auth/supabase-admin";
+import { identityBucket, playerBucket, type AccountAction } from "@/services/postgres-rate-limit";
 import { getRuntime } from "@/services/runtime";
+
+const TOO_MANY = "Too many attempts in a short time. Nothing was changed; wait a few minutes.";
+const UNAVAILABLE = "That could not be done just now. Nothing was changed; try again later.";
+
+/**
+ * Charge one account write to its rate-limit bucket (shared across server instances).
+ * Fails closed: if the limit cannot be checked, the write does not happen.
+ */
+async function accountLimit(bucket: string, action: AccountAction): Promise<string | null> {
+  try {
+    return (await getRuntime().accountLimiter.allow(bucket)) ? null : TOO_MANY;
+  } catch (err) {
+    console.error(
+      `[code-dungeon] ${action} rate limit check failed`,
+      err instanceof Error ? err.message : "unknown error",
+    );
+    return UNAVAILABLE;
+  }
+}
 
 export type OnboardingState =
   { status: "idle" } | { status: "error"; message: string } | { status: "too_young" };
@@ -28,6 +49,12 @@ export async function completeOnboarding(
   const { accounts } = getRuntime();
   if (await accounts.playerIdForIdentity(id.identity.provider, id.identity.subject))
     redirect("/play");
+
+  const limited = await accountLimit(
+    identityBucket(id.identity.provider, id.identity.subject, "onboarding"),
+    "onboarding",
+  );
+  if (limited) return { status: "error", message: limited };
 
   const jar = await cookies();
   if (jar.get(AGE_GATE_COOKIE)?.value === "blocked") return { status: "too_young" };
@@ -67,6 +94,8 @@ export async function updateProfile(
 ): Promise<ProfileState> {
   const player = await playerForAction();
   if (!player) redirect("/sign-in");
+  const limited = await accountLimit(playerBucket(player.playerId, "profile"), "profile");
+  if (limited) return { status: "error", message: limited };
   const result = await getRuntime().accounts.update(player.playerId, {
     handle: String(formData.get("handle") ?? ""),
     visible: formData.get("visible") === "on",
@@ -89,6 +118,9 @@ export async function deleteAccount(
 ): Promise<DeleteAccountState> {
   const player = await playerForAction();
   if (!player) redirect("/sign-in");
+  // Generous enough to retry typos; stops a script hammering the identity provider.
+  const limited = await accountLimit(playerBucket(player.playerId, "delete"), "delete");
+  if (limited) return { status: "error", message: limited };
   if (String(formData.get("confirmHandle") ?? "") !== player.handle)
     return { status: "error", message: `Type your handle, ${player.handle}, exactly to confirm.` };
   if (formData.get("acknowledge") !== "on")
