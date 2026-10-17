@@ -16,7 +16,7 @@ You are the lead engineer continuing Code Dungeon on the owner's Windows laptop 
 | Local worktree | `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1\.claude\worktrees\code-dungeon-recovery-b0a626` |
 | Main checkout | `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1`. It stays on `main` (docs only). Don't work there |
 | Branch | `claude/tender-cerf-ooekni`, tracking origin |
-| History | Session 1 ended at `1e917f1` (CI green). Session 2 added leaderboard totals and account-write limits in the commit after it, plus possibly one docs-only commit recording the push |
+| History | Session 1 ended at `1e917f1` (CI green). Session 2 pushed `bd5ca83` (leaderboard totals in migration 0004, account-write limits in migration 0005; CI run 39026427130 green), then one docs-only commit recording that |
 
 **First, verify:**
 1. Run `git fetch && git status -sb && git log -5 --oneline`.

@@ -5,7 +5,7 @@
 - **Local path:** `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1\.claude\worktrees\code-dungeon-recovery-b0a626`. This is a git worktree of the checkout at `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1`, which stays on `main`.
 - **Branch:** `claude/tender-cerf-ooekni`, tracking `origin/claude/tender-cerf-ooekni`. `main` is only the three documentation commits and is an ancestor of this branch. Never treat `main` as the application.
 - **Starting commit:** `a431bed`, "fix(ui): phone map status line under tagged rooms; scroll-reveal coverage", the remote tip on 17 October 2026.
-- **Current commit:** session 1 ended at `1e917f1` (CI green). Session 2's commit sits on top of it; see `git log -3 --oneline` and §8.
+- **Current commit:** session 1 ended at `1e917f1` (CI green). Session 2's code is `bd5ca83` (CI green), followed by one docs-only commit. Working tree clean.
 
 ## 1. Verified Phase 1–6 status (re-run here, not copied from the reports)
 
@@ -163,6 +163,7 @@ e2e notes, so nobody repeats the investigation:
 | `npm audit --omit=dev` | 0 vulnerabilities |
 | `npx playwright test --timeout=180000` | **35 passed** (11.2 min): onboarding, profile, deletion and leaderboard journeys run through the new limiter and SQL ranking |
 | CI for session 1 (`1e917f1`) | success (GitHub Actions run 39024106490) |
+| CI for session 2 (`bd5ca83`) | success (run 39026427130: both jobs) |
 
 ## 5. Local setup (Windows laptop): exact commands
 
@@ -207,6 +208,6 @@ bash scripts/db/local-postgres.sh stop
 ## 8. Push status and next task
 
 - **Session 1:** `a431bed..1e917f1` was pushed (fast-forward). CI run 39024106490 succeeded.
-- **Session 2:** one commit on top of `1e917f1` (leaderboard totals, account-write limits, docs). It is pushed to `origin/claude/tender-cerf-ooekni` only if the remote hadn't moved. The push outcome and CI state are recorded in a final docs-only commit; check with `git log -3 --oneline` and `gh run list`. Nothing was merged and `main` was not touched.
+- **Session 2:** `1e917f1..bd5ca83` was pushed (fast-forward) on 17 October 2026. **CI run 39026427130 succeeded**: checks in 1m15s and e2e in 2m53s, on Linux with Node 22 and UTF-8 PostgreSQL 16. After that came one docs-only commit recording this. Nothing was merged and `main` was not touched.
 - **Next task:** the hosted-staging approval package, with nothing provisioned: `docs/cloud-plan.md`, a credential-free deployment smoke test and a production configuration preflight. Exact scope is in `docs/NEXT_CHAT_PROMPT.md`.
 - **After that:** Phase 7 provisioning, once the owner approves the plan (Supabase project, Google OAuth client, email sender, Vercel preview). Also still waiting on people: human content review (DEC-011), launch jurisdictions (DEC-010) and confirmation of DEC-014.
