@@ -7,6 +7,9 @@
 #   npm run db:local -- reset    stop and delete all local data
 #
 # Requires PostgreSQL 15+ server binaries (e.g. apt install postgresql-16, brew install postgresql@16).
+# Windows (Git Bash): extract the EnterpriseDB "binaries" zip so .local/pgsql/bin/initdb.exe exists;
+# the cluster then listens on TCP only (no Unix socket, which breaks on paths with spaces). Run this
+# script with Git Bash (`bash scripts/db/local-postgres.sh start`): `npm run db:local` may pick WSL bash.
 # Development only: trust authentication on the loopback interface, no password, never exposed.
 set -euo pipefail
 
@@ -16,6 +19,7 @@ PORT="${PGPORT:-54329}"
 DB="code_dungeon_dev"
 
 find_bin() {
+  [ -x "$ROOT/.local/pgsql/bin/initdb.exe" ] && { echo "$ROOT/.local/pgsql/bin"; return; }
   if command -v pg_config >/dev/null 2>&1 && [ -x "$(pg_config --bindir)/initdb" ]; then pg_config --bindir; return; fi
   for d in /usr/lib/postgresql/*/bin /opt/homebrew/opt/postgresql@*/bin /usr/local/opt/postgresql@*/bin; do
     [ -x "$d/initdb" ] && { echo "$d"; return; }
@@ -24,6 +28,8 @@ find_bin() {
   exit 1
 }
 BIN="$(find_bin)"
+PATH="$BIN:$PATH"
+if [ -x "$BIN/initdb.exe" ]; then WINDOWS=1; else WINDOWS=; fi
 
 # PostgreSQL refuses to run as root; in containers run it as the postgres user.
 as_pg() {
@@ -38,13 +44,20 @@ case "${1:-}" in
     [ "$(id -u)" = "0" ] && chown -R postgres:postgres "$DIR"
     if [ ! -f "$DIR/data/PG_VERSION" ]; then
       as_pg "$BIN/initdb" -D "$DIR/data" -U postgres -A trust --auth-host=trust >/dev/null
+      if [ -n "$WINDOWS" ]; then echo "unix_socket_directories = ''" >>"$DIR/data/postgresql.conf"; fi
     fi
     if ! as_pg "$BIN/pg_ctl" -D "$DIR/data" status >/dev/null 2>&1; then
-      as_pg "$BIN/pg_ctl" -D "$DIR/data" -l "$DIR/server.log" -w \
-        -o "-p $PORT -k $DIR -c listen_addresses=127.0.0.1" start >/dev/null
+      if [ -n "$WINDOWS" ]; then
+        # pg_ctl.exe does not quote the data directory when it spawns postgres, so use relative paths.
+        (cd "$DIR" && "$BIN/pg_ctl" -D data -l server.log -w \
+          -o "-p $PORT -c listen_addresses=127.0.0.1" start >/dev/null)
+      else
+        as_pg "$BIN/pg_ctl" -D "$DIR/data" -l "$DIR/server.log" -w \
+          -o "-p $PORT -k $DIR -c listen_addresses=127.0.0.1" start >/dev/null
+      fi
     fi
-    psql "postgresql://postgres@127.0.0.1:$PORT/postgres" -tAc "SELECT 1 FROM pg_database WHERE datname = '$DB'" | grep -q 1 \
-      || psql "postgresql://postgres@127.0.0.1:$PORT/postgres" -qc "CREATE DATABASE $DB" >/dev/null
+    psql -tAc "SELECT 1 FROM pg_database WHERE datname = '$DB'" "postgresql://postgres@127.0.0.1:$PORT/postgres" | grep -q 1 \
+      || psql -qc "CREATE DATABASE $DB" "postgresql://postgres@127.0.0.1:$PORT/postgres" >/dev/null
     echo "PostgreSQL running. Add to .env.local (never commit it):"
     echo "  DATABASE_URL=$(url)"
     echo "  TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:$PORT/postgres"
