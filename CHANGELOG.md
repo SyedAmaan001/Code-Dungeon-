@@ -1,5 +1,13 @@
 # Changelog
 
+## Hosted-staging approval package (2026-10-18, local session 3)
+
+- `docs/cloud-plan.md`: proposed Supabase + Vercel + Google OAuth + Resend staging with current pricing (read 18 October 2026, sources listed), free vs paid options, secrets, database and auth setup, verification, privacy, rollback and an owner checklist. **Nothing was created.**
+- `npm run smoke -- <url>`: read-only, credential-free deployment smoke test (headers, per-response CSP nonce, signed-out redirect, sign-in page, forged sign-in code, no secrets or answer keys in pages or scripts). 15/15 against the local production build in Supabase mode.
+- `npm run config:check`: production configuration preflight reusing the app's own auth and release rules; reports variable names, never values.
+- `DATABASE_PREPARE=false` for transaction-mode poolers (Supabase port 6543).
+- Tests: 318 Vitest with PostgreSQL (15 new). No change to game rules, content or the interface.
+
 ## Leaderboard totals and account-write rate limits (2026-10-17, local session 2)
 
 - Leaderboard scaling (migration 0004, DEC-020): `player_path_xp` keeps XP totals per player and path, maintained by a trigger in the same transaction as each award and backfilled from the ledger; `leaderboard_page()` ranks in SQL and returns only the top N plus the viewer. Ranking rules unchanged and proven equal to `rankLeaderboard()` (random, tie, duplicate, rollback, concurrency, deletion and RLS tests).

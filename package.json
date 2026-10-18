@@ -25,7 +25,9 @@
     "db:status": "tsx scripts/db/migrate.ts --status",
     "content:release-check": "tsx scripts/content-release-check.ts",
     "test:e2e": "playwright test",
-    "content:review-checklist": "tsx scripts/content-review-checklist.ts"
+    "content:review-checklist": "tsx scripts/content-review-checklist.ts",
+    "config:check": "tsx scripts/config-check.ts",
+    "smoke": "tsx scripts/smoke.ts"
   },
   "dependencies": {
     "@fontsource-variable/cinzel": "5.3.0",

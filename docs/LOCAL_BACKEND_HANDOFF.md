@@ -1,11 +1,11 @@
 # Local backend session — handoff
 
-- **Date:** 17 October 2026. Two local sessions on the owner's Windows 11 laptop with normal Claude Code, not Claude Cloud. Session 1 handled recovery, Windows fixes and the CSP. Session 2 handled leaderboard totals and account-write rate limits.
+- **Date:** 17 October 2026. Two local sessions on the owner's Windows 11 laptop with normal Claude Code, not Claude Cloud. Session 1 handled recovery, Windows fixes and the CSP. Session 2 handled leaderboard totals and account-write rate limits. Session 3 (18 October) prepared the hosted-staging approval package; nothing was provisioned.
 - **Repository:** https://github.com/SyedAmaan001/Code-Dungeon-.git
 - **Local path:** `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1\.claude\worktrees\code-dungeon-recovery-b0a626`. This is a git worktree of the checkout at `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1`, which stays on `main`.
 - **Branch:** `claude/tender-cerf-ooekni`, tracking `origin/claude/tender-cerf-ooekni`. `main` is only the three documentation commits and is an ancestor of this branch. Never treat `main` as the application.
 - **Starting commit:** `a431bed`, "fix(ui): phone map status line under tagged rooms; scroll-reveal coverage", the remote tip on 17 October 2026.
-- **Current commit:** session 1 ended at `1e917f1` (CI green). Session 2's code is `bd5ca83` (CI green), followed by one docs-only commit. Working tree clean.
+- **Current commit:** session 2 ended at `2e77d40` (CI green). Session 3's commit is on top of it; see `git log -3 --oneline` and §8.
 
 ## 1. Verified Phase 1–6 status (re-run here, not copied from the reports)
 
@@ -13,7 +13,7 @@
 |---|---|---|
 | Next.js 16 / TypeScript / quality tooling | Implemented and verified | lint, typecheck, format: exit 0 |
 | 25-level Python Fundamentals pack, validator, 6 deterministic evaluators | Implemented and verified | `content:validate`: 0 errors, 1 warning (AI-only review). `content:verify-python`: 148/148 with CPython 3.13.6 |
-| Learning and game engines (XP, mastery, unlocks, encounters, lives, checkpoints, quests, achievements, items, leaderboard ranking) | Implemented and verified | Vitest: 303 of 303 pass with PostgreSQL after session 2 |
+| Learning and game engines (XP, mastery, unlocks, encounters, lives, checkpoints, quests, achievements, items, leaderboard ranking) | Implemented and verified | Vitest: 318 of 318 pass with PostgreSQL after session 3 |
 | PostgreSQL schema (migrations **0001–0005**), RLS, `SET LOCAL ROLE code_dungeon_app`, one-transaction saves, idempotent submissions, concurrency, rollback, cross-player isolation, shared rate limits, account deletion, maintained leaderboard totals | Implemented and verified locally | `tests/db/*` against PostgreSQL 16.15. On a clean disposable database: "5 applied", then "0 applied, 5 already up to date" |
 | Auth: dev sign-in (HMAC cookie), Supabase Auth code (Google OAuth with PKCE, magic link, `/auth/callback`, `/auth/confirm`, `safeNext`, HttpOnly cookies, config guards) | Implemented. Supabase is **integrated against a local mock only** | Unit tests plus the `supabase-mock` Playwright project (§4) |
 | Real Google OAuth, real Supabase email, real Supabase admin deletion, `SET LOCAL ROLE` on hosted Supabase | **Not verified**, blocked on approval (no Supabase project exists, DEC-013, R-44, R-47) | None possible without a project |
@@ -39,6 +39,7 @@
 - **Writes:** server actions in `src/app/actions/` (`game.ts`, `account.ts`, `auth.ts`, `appearance.ts`). Route handlers are only `src/app/auth/{callback,confirm}`.
 - **Proxy:** `src/proxy.ts` refreshes the session, redirects early and **now sends the CSP**. The policy itself is in `src/csp.ts`.
 - **Database:** `db/migrations/*.sql`, `src/db/migrate.ts`, `scripts/db/`.
+- **Deployment checks:** `src/deploy/preflight.ts` (`npm run config:check`) and `src/deploy/smoke.ts` (`npm run smoke -- <url>`). The staging proposal is `docs/cloud-plan.md`.
 - **Backend contracts for the redesigned interface:** **`docs/API_CONTRACTS.md`**, new in this session.
 - Decisions are in `docs/decision.md` (DEC-001…021), risks in `docs/risk-register.md` (to R-59), issues in `docs/issues.md` (to I-25).
 
@@ -165,6 +166,53 @@ e2e notes, so nobody repeats the investigation:
 | CI for session 1 (`1e917f1`) | success (GitHub Actions run 39024106490) |
 | CI for session 2 (`bd5ca83`) | success (run 39026427130: both jobs) |
 
+## 4c. What session 3 did: hosted-staging approval package (no provisioning)
+
+- **`docs/cloud-plan.md`** is the plan `docs/EXECUTION.md` requires before any resource is created. It covers:
+  - Proposed resources: Supabase project `code-dungeon-staging` in `ap-south-1`, a Vercel project with functions in `bom1`, a Google OAuth web client, and Resend as custom SMTP.
+  - Option A: free-tier private staging at $0, recommended now.
+  - Option B: paid tiers at about $45–65/month, before any public use.
+  - Pricing read on 18 October 2026, with source URLs.
+  - Secrets per variable, the database connection strategy, the R-44 verification SQL, sign-in configuration, the verification run, data and privacy, rollback and cleanup, and an owner checklist.
+- **Points the owner must decide:**
+  - Vercel Hobby is "for personal, non-commercial use" (R-60).
+  - Supabase Free has no backups and pauses after a week of inactivity (R-61).
+  - The region depends on the launch jurisdictions (DEC-010).
+- **`DATABASE_PREPARE=false`** (`src/db/client.ts`, `.env.example`, I-26). A Vercel deployment needs Supabase's IPv4 shared pooler in transaction mode (port 6543), which doesn't support prepared statements; this setting turns them off.
+  - The default is unchanged.
+  - Every app query already runs inside `scoped()` transactions, so `SET LOCAL ROLE` stays per-transaction.
+  - The DB suite passes 63/63 with `DATABASE_PREPARE=false`. That proves the driver setting only, not a real pooler.
+- **`npm run config:check`** (`src/deploy/preflight.ts`, `scripts/config-check.ts`): a production preflight that reuses `readAuthConfig`, `readAdminConfig` and `parseContentRelease`. It reports **names, never values**, and exits 1 on errors.
+  - Errors:
+    - `AUTH_MODE` is not `supabase`
+    - a missing or invalid `SUPABASE_SECRET_KEY`
+    - a `NEXT_PUBLIC_` secret
+    - a non-https `APP_URL`
+    - `DATABASE_URL` missing, invalid, or remote without `sslmode=require`
+    - port 6543 without `DATABASE_PREPARE=false`
+    - a bad `CONTENT_RELEASE`
+  - Warnings: a pooler with `DATABASE_POOL_MAX` above 2, a leftover `DEV_AUTH_SECRET`, and `CONTENT_RELEASE=development`.
+  - `.env*` files load through `@next/env`, imported as the CommonJS default; it is a dependency of `next`.
+- **`npm run smoke -- <url>`** (`src/deploy/smoke.ts`, `scripts/smoke.ts`): GET requests only, no credentials, no writes. Its 15 checks cover:
+  - security headers and a per-response nonce
+  - the signed-out `/play` redirect and `/sign-in`
+  - a forged `/auth/callback` code being refused
+  - forbidden strings in the HTML and every same-origin script
+- **Verified locally:** `next build` and `next start` in Supabase mode against the repo's Supabase Auth mock (`e2e/mock-supabase/server.ts`): **15/15 PASS**, scanning 11 scripts. `config:check` gave 0 errors and 1 warning with the mock-backed env, and 2 errors and exit 1 with an empty env.
+- **Tests:** `tests/deploy/preflight.test.ts` (9) and `tests/deploy/smoke.test.ts` (6, using a fake deployment where each check is shown to fail when its behaviour breaks).
+
+### Session 3 test results
+
+| Check | Result |
+|---|---|
+| lint / format:check / typecheck | 0 / 0 / 0 |
+| `npm test` with PostgreSQL | **33 files, 318 passed** (15 new) |
+| DB suite with `DATABASE_PREPARE=false` | 8 files, 63 passed |
+| content:validate / verify-python | 0 errors, 1 warning / 148 of 148 |
+| `npm run build` / `npm audit --omit=dev` | pass / 0 vulnerabilities |
+| `npm run smoke -- http://localhost:3200` (production build, Supabase mock) | 15 passed, 0 failed |
+| e2e | not re-run. No proxy, auth or page code changed, and the DB client default is unchanged. Last run: 35/35 in session 2 |
+
 ## 5. Local setup (Windows laptop): exact commands
 
 Prerequisites already on this laptop:
@@ -192,6 +240,8 @@ bash scripts/db/local-postgres.sh stop
 
 ## 6. Still unverified: external providers (needs owner approval)
 
+The full proposal, with costs, settings and an owner checklist, is in **`docs/cloud-plan.md`**.
+
 - **Supabase project** (free tier), **Google OAuth client**, **email sender** and the `SUPABASE_SECRET_KEY`: DEC-013, R-47, I-17. Then repeat the `supabase-mock` journeys against the real project, and check `SET LOCAL ROLE` and `code_dungeon_app` on hosted Supabase (R-44).
 - **Hosting / Vercel preview:** O-1b. Nothing is provisioned. Cost is still $0.
 - Owner decisions still open: launch jurisdictions (DEC-010), confirming leaderboard opt-in (DEC-014), human content review (DEC-011), and whether to move the answer-key checklist to a private repository before any public release (R-53).
@@ -207,7 +257,7 @@ bash scripts/db/local-postgres.sh stop
 
 ## 8. Push status and next task
 
-- **Session 1:** `a431bed..1e917f1` was pushed (fast-forward). CI run 39024106490 succeeded.
-- **Session 2:** `1e917f1..bd5ca83` was pushed (fast-forward) on 17 October 2026. **CI run 39026427130 succeeded**: checks in 1m15s and e2e in 2m53s, on Linux with Node 22 and UTF-8 PostgreSQL 16. After that came one docs-only commit recording this. Nothing was merged and `main` was not touched.
-- **Next task:** the hosted-staging approval package, with nothing provisioned: `docs/cloud-plan.md`, a credential-free deployment smoke test and a production configuration preflight. Exact scope is in `docs/NEXT_CHAT_PROMPT.md`.
-- **After that:** Phase 7 provisioning, once the owner approves the plan (Supabase project, Google OAuth client, email sender, Vercel preview). Also still waiting on people: human content review (DEC-011), launch jurisdictions (DEC-010) and confirmation of DEC-014.
+- **Session 1:** `a431bed..1e917f1` pushed. CI run 39024106490 green.
+- **Session 2:** `1e917f1..2e77d40` pushed. CI runs 39026427130 and 39026645172 green.
+- **Session 3:** one commit on top of `2e77d40`, pushed only if the remote hadn't moved. A final docs-only commit records the push and CI outcome; check with `git log -3 --oneline` and `gh run list`. Nothing was merged, `main` was not touched, and no external resource was created.
+- **Next task:** **blocked on the owner.** They need to review and approve `docs/cloud-plan.md` (Option A or B, region, Vercel terms) and create the provider accounts themselves. After approval, the next chat runs Phase 7 verification as set out in `docs/NEXT_CHAT_PROMPT.md`. Without approval there is no further backend task that needs no decision. The remaining items are owner or person decisions: DEC-010, DEC-011 human content review, DEC-014, R-53, and the postponed interface redesign.
