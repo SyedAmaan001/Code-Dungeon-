@@ -1,5 +1,7 @@
 # Prompt for the next Claude Code chat
 
+> **Update (18 October 2026):** the owner approved Option A in Mumbai (DEC-022), and migration 0006 (Data API lockdown) was added. The most current continuation, for Antigravity or any agent, is **`docs/ANTIGRAVITY_PROMPT.md`**. Use that one.
+
 Copy everything below the line into a new local Claude Code conversation opened in the worktree folder. **Use it only after the owner has reviewed and approved `docs/cloud-plan.md`.** Until then there is no unblocked backend task: the work is waiting on the owner.
 
 ---

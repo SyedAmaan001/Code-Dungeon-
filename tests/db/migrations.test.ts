@@ -39,6 +39,7 @@ describeDb("migrations", () => {
       "0003_action_rate_limits",
       "0004_player_path_xp",
       "0005_account_rate_limits",
+      "0006_data_api_lockdown",
     ];
     expect(first).toEqual({ applied: all, alreadyApplied: [] });
     const second = await migrate(db.sql, MIGRATIONS_DIR);

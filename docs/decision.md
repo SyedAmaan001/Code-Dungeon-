@@ -293,3 +293,12 @@
 - Why: onboarding has no player row yet, so the per-player table from 0003 can't hold it. A separate budget keeps account changes from consuming the game budget. The database clock keeps windows identical across instances.
 - Consequences/trade-offs: fixed windows allow up to 2× the budget across a window boundary, as in DEC-016. Rows of deleted accounts expire within a day.
 - Links/tests/evidence: `db/migrations/0005_account_rate_limits.sql`, `src/services/postgres-rate-limit.ts`, `src/app/actions/account.ts`, `tests/db/account-rate-limit.test.ts`, `tests/auth/account-actions-rate-limit.test.ts`.
+
+### DEC-022 — Hosted staging approved: Option A (free tier), Mumbai
+- Status: **APPROVED by the owner** (18 October 2026, in the local Claude Code session)
+- Decision: carry out `docs/cloud-plan.md` **Option A**. That means Supabase Free, Vercel Hobby and a free email tier, in the **Mumbai** region (Supabase `ap-south-1`, Vercel `bom1`), for a private staging run.
+  - The owner creates every account and pastes every secret into provider dashboards (or a git-ignored local file); secrets never go into chat or the repository.
+  - Accounts at approval time: a Supabase organisation exists, a Vercel account exists but is not yet connected to GitHub, and Google Cloud and the email sender are not created yet.
+- Accepted with it: Supabase Free has no backups and pauses after a week of inactivity (R-61). Vercel Hobby is for non-commercial use (R-60); the owner chose it for a private, unpaid staging run.
+- Before the app is connected, the Supabase Data API is turned off and migration 0006 removes Data API role grants on Code Dungeon objects (see `docs/cloud-plan.md` §4).
+- Revisit trigger: real learners, any public use, or commercial launch. Then move to Option B (paid tiers with backups).

@@ -1,5 +1,11 @@
 # Changelog
 
+## Staging approved; Data API lockdown (2026-10-18, local session 3 continued)
+
+- Owner approved `docs/cloud-plan.md` Option A in Mumbai (DEC-022). Nothing provisioned by Claude yet.
+- Migration 0006: revokes Supabase Data API role grants (anon, authenticated, service_role) on all Code Dungeon objects and their future defaults; no-op on plain PostgreSQL. 322 Vitest with PostgreSQL (4 new).
+- `docs/ANTIGRAVITY_PROMPT.md`: continuation prompt for the Antigravity agent.
+
 ## Hosted-staging approval package (2026-10-18, local session 3)
 
 - `docs/cloud-plan.md`: proposed Supabase + Vercel + Google OAuth + Resend staging with current pricing (read 18 October 2026, sources listed), free vs paid options, secrets, database and auth setup, verification, privacy, rollback and an owner checklist. **Nothing was created.**

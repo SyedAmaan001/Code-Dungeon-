@@ -13,8 +13,8 @@
 |---|---|---|
 | Next.js 16 / TypeScript / quality tooling | Implemented and verified | lint, typecheck, format: exit 0 |
 | 25-level Python Fundamentals pack, validator, 6 deterministic evaluators | Implemented and verified | `content:validate`: 0 errors, 1 warning (AI-only review). `content:verify-python`: 148/148 with CPython 3.13.6 |
-| Learning and game engines (XP, mastery, unlocks, encounters, lives, checkpoints, quests, achievements, items, leaderboard ranking) | Implemented and verified | Vitest: 318 of 318 pass with PostgreSQL after session 3 |
-| PostgreSQL schema (migrations **0001–0005**), RLS, `SET LOCAL ROLE code_dungeon_app`, one-transaction saves, idempotent submissions, concurrency, rollback, cross-player isolation, shared rate limits, account deletion, maintained leaderboard totals | Implemented and verified locally | `tests/db/*` against PostgreSQL 16.15. On a clean disposable database: "5 applied", then "0 applied, 5 already up to date" |
+| Learning and game engines (XP, mastery, unlocks, encounters, lives, checkpoints, quests, achievements, items, leaderboard ranking) | Implemented and verified | Vitest: 322 of 322 pass with PostgreSQL after session 3 |
+| PostgreSQL schema (migrations **0001–0006**), RLS, `SET LOCAL ROLE code_dungeon_app`, one-transaction saves, idempotent submissions, concurrency, rollback, cross-player isolation, shared rate limits, account deletion, maintained leaderboard totals | Implemented and verified locally | `tests/db/*` against PostgreSQL 16.15. On a clean disposable database: "5 applied", then "0 applied, 5 already up to date" |
 | Auth: dev sign-in (HMAC cookie), Supabase Auth code (Google OAuth with PKCE, magic link, `/auth/callback`, `/auth/confirm`, `safeNext`, HttpOnly cookies, config guards) | Implemented. Supabase is **integrated against a local mock only** | Unit tests plus the `supabase-mock` Playwright project (§4) |
 | Real Google OAuth, real Supabase email, real Supabase admin deletion, `SET LOCAL ROLE` on hosted Supabase | **Not verified**, blocked on approval (no Supabase project exists, DEC-013, R-44, R-47) | None possible without a project |
 | Game interface (map, rooms, journal, collection, leaderboard, profile, Onyx preview theme) | Implemented. The owner dislikes it and it **will be redesigned separately** | Not modified in either local session, apart from the CSP header and account actions' error messages |
@@ -212,6 +212,14 @@ e2e notes, so nobody repeats the investigation:
 | `npm run build` / `npm audit --omit=dev` | pass / 0 vulnerabilities |
 | `npm run smoke -- http://localhost:3200` (production build, Supabase mock) | 15 passed, 0 failed |
 | e2e | not re-run. No proxy, auth or page code changed, and the DB client default is unchanged. Last run: 35/35 in session 2 |
+
+## 4d. Session 3, continued: approval and Data API lockdown
+
+- **Owner approval:** Option A, Mumbai (DEC-022). Accounts: the Supabase organisation exists; the Vercel account exists but isn't connected to GitHub; Google Cloud and the email sender aren't created yet. **No project or resource has been created yet.**
+- **Migration `0006_data_api_lockdown.sql`** (I-27): if the roles `anon`, `authenticated` and `service_role` exist, it revokes all their privileges on tables, sequences and functions in `public`, and their default privileges for future objects. It also revokes `EXECUTE` on functions from `PUBLIC` by default, re-granting `app_current_player()` to `code_dungeon_app`. On plain PostgreSQL it is a no-op.
+- **Tests:** `tests/db/data-api-lockdown.test.ts` (4) simulates the hosted roles and defaults, then checks: no privilege leaks, an `anon` caller is refused with `42501` on `schema_migrations` and the `SECURITY DEFINER` functions, future objects stay closed, and app grants are kept.
+- **Results:** lint, format and typecheck 0 / 0 / 0. `npm test` with PostgreSQL: **34 files, 322 passed**.
+- **Stopped here** because the 5-hour usage window reached 63%, approaching the owner's 80% stop rule. Continuation for the Antigravity agent: **`docs/ANTIGRAVITY_PROMPT.md`**.
 
 ## 5. Local setup (Windows laptop): exact commands
 

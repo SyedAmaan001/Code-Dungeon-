@@ -1,6 +1,7 @@
 # Code Dungeon — hosted staging plan (for owner approval)
 
-- **Status:** PROPOSAL. **Nothing in this document has been created.** No account, project, key or paid resource exists. Each resource below needs the owner's explicit approval, and most need the owner to create the account themselves.
+- **Status:** **Option A APPROVED for Mumbai (DEC-022, 18 October 2026).** Nothing has been created by Claude; the owner creates accounts and resources.
+- **Original status:** PROPOSAL. **Nothing in this document has been created.** No account, project, key or paid resource exists. Each resource below needs the owner's explicit approval, and most need the owner to create the account themselves.
 - **Purpose:** this is Phase 7 of `docs/PHASE_6_REPORT.md` §8: a private hosted staging environment. It is the first time real Google sign-in, real Supabase email and real account deletion can be verified (R-47, R-51), and the first check of the database roles on a managed host (R-44).
 - **Pricing date:** 18 October 2026, read from the official pages listed in §9. Prices and limits change, so re-check them on the day you approve.
 - **Rules this follows:** `CLAUDE.md` § Security and spending; `docs/EXECUTION.md` (cloud-plan requirement); DEC-009 (Supabase Auth: Google plus magic link); DEC-013 (Supabase and Vercel intended, nothing provisioned); DEC-015 (account deletion needs a server-only key).
@@ -66,10 +67,11 @@ Before every deployment, run `npm run config:check` with the deployment's variab
    - Vercel functions use IPv4, and Supabase's direct connection is IPv6-only unless you buy the IPv4 add-on. So the app uses the **shared pooler in transaction mode (port 6543)**.
    - Every query the app runs is inside a transaction (`scoped()` in `src/services/postgres-player-store.ts`). So `SET LOCAL ROLE` and `set_config(..., true)`, which only last for one transaction, behave correctly through that pooler.
    - The DB test suite passes with `DATABASE_PREPARE=false` locally (63/63). That proves the driver setting, not the pooler itself.
-2. **Migrations (0001–0005):**
+2. **Turn off the Data API first.** The app never uses Supabase's REST or GraphQL data endpoints. In the Supabase dashboard, open Integrations › Data API and turn **Enable Data API** off, before running migrations. Migration 0006 also revokes every privilege the API roles (`anon`, `authenticated`, `service_role`) hold on Code Dungeon objects, and their defaults for future objects. That way the publishable key can never reach our tables or `SECURITY DEFINER` functions even if the Data API is turned back on. Source: https://supabase.com/docs/guides/api/hardening-data-api
+3. **Migrations (0001–0006):**
    - Run them from the laptop over the **shared pooler in session mode (port 5432)**, as the project's `postgres` user: `DATABASE_URL=<session-pooler URL>?sslmode=require npm run db:migrate`, then `npm run db:status`.
    - Migrations run once each, in their own transaction, behind an advisory lock. Re-running is a no-op.
-3. **R-44 check: must pass before the app is pointed at the project.** Supabase's `postgres` role is not a superuser. Run these as that role and record the results:
+4. **R-44 check: must pass before the app is pointed at the project.** Supabase's `postgres` role is not a superuser. Run these as that role and record the results:
 
    ```sql
    SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname IN ('postgres', 'code_dungeon_app');
@@ -79,7 +81,7 @@ Before every deployment, run `npm run config:check` with the deployment's variab
 
    - If `SET LOCAL ROLE` is refused, the connecting role is missing membership of `code_dungeon_app`. PostgreSQL 16+ doesn't give a role's creator the right to `SET` to it unless that is granted explicitly. The fix is an additive migration granting membership with `SET` to the connecting role. Write and test it then, against the real version, rather than guessing now.
    - Also run `tests/db` locally against PostgreSQL of the **same major version** as the Supabase project.
-4. **Backups:** Free has none, and Pro keeps daily backups for 7 days. Before moving staging data anywhere important, take a `pg_dump` over the session pooler.
+5. **Backups:** Free has none, and Pro keeps daily backups for 7 days. Before moving staging data anywhere important, take a `pg_dump` over the session pooler.
 
 ## 5. Sign-in configuration
 
@@ -105,7 +107,7 @@ Before every deployment, run `npm run config:check` with the deployment's variab
    - Account deletion, which removes both the game rows and the Supabase user.
 
    Record the results. Until then, R-47 and R-51 stay open.
-4. Run the R-44 queries (§4.3).
+4. Run the R-44 queries (§4.4).
 
 ## 7. Data and privacy
 
