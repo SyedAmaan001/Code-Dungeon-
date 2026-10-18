@@ -5,7 +5,7 @@
 - **Local path:** `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1\.claude\worktrees\code-dungeon-recovery-b0a626`. This is a git worktree of the checkout at `C:\Users\syeda\Desktop\PROJECTS\CODE DUNGEON V1`, which stays on `main`.
 - **Branch:** `claude/tender-cerf-ooekni`, tracking `origin/claude/tender-cerf-ooekni`. `main` is only the three documentation commits and is an ancestor of this branch. Never treat `main` as the application.
 - **Starting commit:** `a431bed`, "fix(ui): phone map status line under tagged rooms; scroll-reveal coverage", the remote tip on 17 October 2026.
-- **Current commit:** session 2 ended at `2e77d40` (CI green). Session 3's commit is on top of it; see `git log -3 --oneline` and §8.
+- **Current commit:** the code is at `c7574b5` (CI green), followed by one docs-only commit. Working tree clean.
 
 ## 1. Verified Phase 1–6 status (re-run here, not copied from the reports)
 
@@ -259,5 +259,5 @@ The full proposal, with costs, settings and an owner checklist, is in **`docs/cl
 
 - **Session 1:** `a431bed..1e917f1` pushed. CI run 39024106490 green.
 - **Session 2:** `1e917f1..2e77d40` pushed. CI runs 39026427130 and 39026645172 green.
-- **Session 3:** one commit on top of `2e77d40`, pushed only if the remote hadn't moved. A final docs-only commit records the push and CI outcome; check with `git log -3 --oneline` and `gh run list`. Nothing was merged, `main` was not touched, and no external resource was created.
+- **Session 3:** `2e77d40..c7574b5` pushed (fast-forward) on 18 October 2026. **CI run 39097422077 green**: checks in 1m23s, e2e in 3m58s. One docs-only commit after it records this. Nothing was merged, `main` was not touched, and no external resource was created.
 - **Next task:** **blocked on the owner.** They need to review and approve `docs/cloud-plan.md` (Option A or B, region, Vercel terms) and create the provider accounts themselves. After approval, the next chat runs Phase 7 verification as set out in `docs/NEXT_CHAT_PROMPT.md`. Without approval there is no further backend task that needs no decision. The remaining items are owner or person decisions: DEC-010, DEC-011 human content review, DEC-014, R-53, and the postponed interface redesign.
