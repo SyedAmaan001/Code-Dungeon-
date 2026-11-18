@@ -1,5 +1,21 @@
 # Changelog
 
+## Game-dev toolchain and Unity research (2026-11-18, cloud session)
+
+- Research and documentation only. **No application code, migrations, curriculum or game rules changed.**
+- New docs:
+  - `docs/GAMEDEV_TOOLCHAIN.md`
+  - `docs/OPEN_SOURCE_REUSE_AUDIT.md`
+  - `docs/UNITY_WORLD_ARCHITECTURE.md`
+  - `docs/UNITY_INTEGRATION_PLAN.md`
+  - `docs/UNITY_REFERENCE_BOARD.md`
+  - `docs/REVERSE_ENGINEERING_METHOD.md`
+  - `docs/reverse-engineering/` (investigation 001: the client bundle holds no answer keys or secrets)
+  - `docs/GAMEDEV_NEXT_STEPS.md`
+  - `docs/NEXT_GAMEDEV_SESSION_PROMPT.md`
+- DEC-023 proposed (Unity WebGL world client, backend authoritative). Risks R-62 to R-67 added.
+- Tooling verified in the cloud container only (ephemeral): gamedev-skills router, disciplines, genres, workflows and unity; REA 6.9.0 MCP connected. Unity is not installed; laptop steps are listed.
+
 ## Staging approved; Data API lockdown (2026-10-18, local session 3 continued)
 
 - Owner approved `docs/cloud-plan.md` Option A in Mumbai (DEC-022). Nothing provisioned by Claude yet.

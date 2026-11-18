@@ -302,3 +302,23 @@
 - Accepted with it: Supabase Free has no backups and pauses after a week of inactivity (R-61). Vercel Hobby is for non-commercial use (R-60); the owner chose it for a private, unpaid staging run.
 - Before the app is connected, the Supabase Data API is turned off and migration 0006 removes Data API role grants on Code Dungeon objects (see `docs/cloud-plan.md` §4).
 - Revisit trigger: real learners, any public use, or commercial launch. Then move to Option B (paid tiers with backups).
+
+### DEC-023 — Unity world client: WebGL inside the Next.js shell, backend stays authoritative
+- Status: **PROPOSED**. Awaiting the owner (game-dev toolchain session, 18 November 2026)
+- Context/problem: the owner wants a hybrid cinematic RPG with explorable 3D worlds. The backend (learning engine, game engine, PostgreSQL) works, and it must stay the authority for identity, XP, progression, quests, achievements and the leaderboard. `docs/API_CONTRACTS.md` exposes server actions, not an HTTP API.
+- Options considered:
+  - (a) Unity WebGL embedded in an authenticated Next.js page, talking to the shell through a JS bridge (chosen).
+  - (b) A standalone Unity desktop client with a new HTTP API and bearer tokens.
+  - (c) three.js inside Next.js instead of Unity.
+  - (d) Unity writing directly to Supabase.
+- Decision (proposed):
+  - (a) Unity 6.3 LTS + URP, built for WebGL, hosted on `/play/world`.
+  - Unity is presentation only. It receives a whitelisted `WorldSnapshot` and sends *requests* (`RequestEnterLevel`) that become ordinary navigation, so server lock checks apply.
+  - The challenge UI stays DOM.
+  - No new endpoints for the first slice.
+  - (b) is deferred; (d) is rejected outright.
+- Why: it reuses the existing session, Zod validation, rate limits and RLS with no second code path. It keeps secrets out of the client and keeps learning content accessible. (c) was the alternative if the owner prefers a pure web stack; the owner's prompt asks for Unity.
+- Consequences/trade-offs: the `/play/world` route needs `'wasm-unsafe-eval'` in its CSP (R-63). Web performance and download size limit the visual ambition (R-62). Phones fall back to the 2D map.
+- Security/privacy/cost impact: Unity holds no credentials. $0 for the slice; Git LFS, Unity CI and build hosting are future costs that need approval.
+- Revisit trigger: approval of a standalone or desktop client, or WebGL performance failing on the reference laptop.
+- Links/tests/evidence: `docs/UNITY_WORLD_ARCHITECTURE.md`, `docs/UNITY_INTEGRATION_PLAN.md`, `docs/OPEN_SOURCE_REUSE_AUDIT.md`, `docs/GAMEDEV_TOOLCHAIN.md`.
