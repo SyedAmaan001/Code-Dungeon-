@@ -118,8 +118,8 @@ Steps taken:
 |---|---|
 | Unity Editor or Hub in the container | None (`which unity`, a filesystem search). 4 vCPU, 15 GB RAM, no GPU |
 | Unity project in this repository | None. No `ProjectVersion.txt` anywhere |
-| Unity projects on the Mac | **Not yet inventoried.** Runbook T-02 is pending |
-| Unity MCP / Pipeline connection | Not configured anywhere we can see. The ChatGPT Unity connection does not carry over to Claude Code |
+| Unity projects on the Mac | `unity projects --long --all` → `total: 0` (owner Mac report, 19 Nov) |
+| Unity Pipeline connection | `com.unity.pipeline` 1.0.0 installed in the disposable Mac project; Editor `ready`, 23 command groups exposed; all 8 T-03 checks reported passing (owner Mac report, 19 Nov) |
 
 Unity Editor-control options, in order of recommendation:
 1. **Unity CLI + `com.unity.pipeline` (official).** Unity's own `unity-cli` skill says: *"When you can run shell commands, use `unity command` and the rest of this CLI, not the Unity MCP server."* It needs Unity 6.0+. The package is added with `unity pipeline install`. Avoid Editors 6000.5.0–6000.5.2, where the Pipeline server cannot start (documented in the official `new-unity-project` skill). The Windows install script is `irm https://unity.com/install.ps1 | iex`. **The owner should run it**, because it is a remote script that changes the system.
@@ -129,7 +129,7 @@ Unity Editor-control options, in order of recommendation:
    - IvanMurzak `Unity-MCP`: Apache-2.0 (LICENSE checked), Unity 2022.3+, OpenUPM package and `unity-mcp-cli`.
    - These are fallbacks only, with reviewed permissions.
 
-The eight connector checks in the prompt (scene names, hierarchy, components, settings, console, create/remove/read back a test object) are **not done**. They need the laptop with an Editor open. They are task T-03 in `docs/GAMEDEV_NEXT_STEPS.md`.
+The eight Editor connector checks were reported **PASS** by the owner's local Mac Claude session on 19 November 2026. Details and the unsaved-`Untitled` scene qualification are in `docs/MAC_U0_RUNBOOK.md` §3 results. The checks ran only in the disposable `~/UnityScratch/ConnectorTest`; no existing project or Code Dungeon app files were modified.
 
 ## 5. Original Windows owner-action checklist (historical; superseded for this owner by §7)
 
@@ -173,9 +173,9 @@ The owner confirmed these checks directly in macOS Terminal. This is separate fr
 | Unity Editor | 6000.3.28f1 (Unity 6.3 LTS), arm64 | Installed at `/Applications/Unity/Hub/Editor/6000.3.28f1/Unity.app` |
 | Web Build Support | Listed as `Web` by `unity editors --installed` | Installed |
 | Unity authentication | `unity auth status` reports signed in | Verified |
-| Unity Pipeline package | Not yet verified/installed in a project | Pending T-03 |
+| Unity Pipeline package | `com.unity.pipeline` 1.0.0 installed in disposable ConnectorTest project | T-03 PASS (Mac report) |
 | Existing Unity project inventory | `unity projects --long --all` → no projects; JSON `total: 0`; no Unity Hub projects file | **Done (T-02)**. Nothing opened or changed |
-| Unity Editor connector checks | Not yet run | Pending T-03 |
+| Unity Editor connector checks | 8/8 reported PASS; see `docs/MAC_U0_RUNBOOK.md` | T-03 PASS (Mac report; scene-path qualification recorded) |
 | REA and gamedev skills on the Mac | See "T-01 results" below | **Done (T-01)** |
 
 Commands reported by the owner:
