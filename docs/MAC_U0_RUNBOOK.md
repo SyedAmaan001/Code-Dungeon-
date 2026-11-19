@@ -121,6 +121,16 @@ unity command script eval 'return UnityEngine.GameObject.Find("CD_ConnectorTest"
 
 If `script eval` is rejected, inspect `unity command script eval --help`. Use either the positional C# argument or `--code` exactly as that installed CLI reports; do not guess a third `-- --code` form. If the Editor never reaches `ready` and `unity status` reports Safe Mode, follow the official recovery: fix compile errors, don't fall back to editing files by hand. **Use a fallback MCP server (CoplayDev or IvanMurzak) only after the owner approves it.**
 
+### T-03 results — owner Mac report, 19 November 2026
+
+The local Mac Claude Code session reported all eight checks passing in `~/UnityScratch/ConnectorTest` (Unity 6000.3.28f1, URP 17.3.0, Apple Silicon). The Editor was the only running Unity Editor, `ready` on port 7800, PID 11542; it exposed 23 command groups. `com.unity.pipeline` 1.0.0 was added to `Packages/manifest.json` after the CLI's automatic setup step initially failed with `PIPELINE_INSTALL_FAILED`; a subsequent `unity pipeline install` succeeded. The optional Cinemachine setup step failed with `CINEMACHINE_SETUP_FAILED`; Cinemachine was not installed in the throwaway project. T-03 did not require Cinemachine.
+
+**Scene qualification:** check 1 returned an empty open-scene path because Unity opened an unsaved `Untitled` scene rather than `SampleScene`. A follow-up query confirmed one loaded scene and two root objects. The scene remained `isDirty=False`; it was not saved. This confirms command connectivity but does not verify saved-scene path retrieval. T-04 must explicitly create and open `Boot` and `OvergrownGate`, then verify their paths.
+
+**CLI 1.0.1 differences observed:** `projects create` uses `--output-dir` (not `--path`); `script eval` uses `--code "<C#>"` (not a positional snippet); the create command attempts Pipeline setup itself; the automatic Cinemachine setup is optional and failed. Inventory uses `unity projects --long --all`; module details need `unity editors --installed --long`.
+
+The local session reported `unity auth status` hung for more than two minutes and was left running in the background; project creation and Editor control succeeded regardless. Do not start duplicate auth processes. Temporary artifacts were saved in the local session scratchpad (`t03_results.txt`, `commands.txt`, `status.json`, `pipe.json`).
+
 ## Step 4: what T-04 needs (not part of this runbook)
 
 T-04 creates `unity/CodeDungeon/` **inside a local checkout of `claude/tender-cerf-ooekni` on the Mac**, so that Unity, git and the feature branch see the same files:
@@ -137,4 +147,11 @@ Then follow `docs/NEXT_GAMEDEV_SESSION_PROMPT.md` Step 4 in a **local** Claude C
 |---|---|---|---|---|
 | 1 | Skills bundles + 8 standalone skills; `rea setup` after approved dry-run | 0 | No clash warning; REA 6.9.0, MCP registered, doctor healthy. Frida install script blocked (see toolchain §7) | `skills` selects with `-s/--skill` |
 | 2 | `unity --version`; `unity editors --installed --long`; `unity projects --long --all` | 0 | 1.0.1; 6000.3.28f1 arm64 + Web; no projects (`total: 0`) | No `projects list`: plain `unity projects`, `--all` for every page, `--long` for columns; modules only with `--long` |
-| 3.1–3.8 | | | | |
+| 3.1 | Scene names | PASS (qualified) | Open-scene path list empty because Editor opened an unsaved `Untitled` scene; follow-up confirmed 1 loaded scene and 2 root objects | T-04 must explicitly create and open `Boot` and `OvergrownGate` |
+| 3.2 | Hierarchy | PASS | `Main Camera`, `Directional Light` | Ran in unsaved `Untitled` scene; no save performed |
+| 3.3 | Main camera components | PASS | `Transform`, `Camera`, `AudioListener` | — |
+| 3.4 | Project settings | PASS | product `ConnectorTest`; Linear color space; `StandaloneOSX`; URP asset `PC_RPAsset` | — |
+| 3.5 | Console errors | PASS | 0 errors, 0 warnings, compile OK; error log empty | — |
+| 3.6 | Create `CD_ConnectorTest` | PASS | Instance ID `-2368` | — |
+| 3.7 | Delete test object | PASS | `deleted` | — |
+| 3.8 | Read back deletion | PASS | `absent` | — | |
