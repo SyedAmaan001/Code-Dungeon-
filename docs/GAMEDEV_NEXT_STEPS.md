@@ -1,6 +1,6 @@
 # Code Dungeon — game-development next steps and backlog
 
-- **Status:** updated 19 November 2026 after DEC-023 approval and Mac environment verification. Read with `docs/GAMEDEV_TOOLCHAIN.md`, `docs/OPEN_SOURCE_REUSE_AUDIT.md`, `docs/UNITY_WORLD_ARCHITECTURE.md` and `docs/UNITY_INTEGRATION_PLAN.md`.
+- **Status:** updated 19 November 2026 after DEC-023 approval and Mac U0 toolchain, project-inventory and Editor-control reports. Read with `docs/GAMEDEV_TOOLCHAIN.md`, `docs/OPEN_SOURCE_REUSE_AUDIT.md`, `docs/UNITY_WORLD_ARCHITECTURE.md` and `docs/UNITY_INTEGRATION_PLAN.md`.
 - **Separate track:** the hosted-staging work (Phase 7, `docs/ANTIGRAVITY_PROMPT.md`) is a different track and is untouched by this work.
 
 ## 1. Waiting on the owner (blocking)
@@ -20,7 +20,7 @@
 |---|---|---|---|---|---|
 | P0 | T-01 | Repeat the toolchain setup on the Mac (`docs/MAC_U0_RUNBOOK.md` Step 1; **DONE 2026-11-19**, see toolchain §7); record versions in `docs/GAMEDEV_TOOLCHAIN.md` | U0 | O-G2, O-G3 | `claude plugin list` has no clash warning; `claude mcp get rea` Connected; `unity --version` |
 | P0 | T-02 | Inventory Unity on the Mac (runbook Step 2; **DONE 2026-11-19**: no existing projects) (`unity editors`, Hub projects); confirm no existing project would be affected | U0 | T-01 | Documented list; owner confirms the purpose of any existing project |
-| P0 | T-03 | Editor-control verification (runbook Step 3; next, after the owner's Unity Hub licence check): in a **throwaway** project, run the 8 checks (scene names, hierarchy, components, settings, console, create/remove/read back `CD_ConnectorTest`) through `unity command` | U0 | T-01 | All 8 pass, outputs pasted into the toolchain doc |
+| P0 | T-03 | Editor-control verification in disposable `~/UnityScratch/ConnectorTest`; 8 checks reported PASS on Mac (19 Nov 2026), with unsaved `Untitled` scene-path qualification documented in `docs/MAC_U0_RUNBOOK.md` | U0 | T-01, T-02 | 8/8 checks reported PASS; Pipeline 1.0.0 installed; Editor ready; T-04 must verify explicitly opening saved scenes |
 | P0 | T-04 | In a **local Mac checkout** of the branch, create `unity/CodeDungeon/` (URP template, Unity 6.3 LTS), `.gitignore`, `.gitattributes` (LFS patterns), pinned `manifest.json`, asmdefs, test runners | U1 | DEC-023, T-03 | Batch-mode compile and EditMode test pass; empty WebGL build loads in Chromium |
 | P0 | T-05 | `ThirdPersonMotor` + `PlayerInputReader` (Input System) + grey-box ground and colliders | U2 | T-04 | PlayMode tests: walk, stop, slope, step, bounds |
 | P0 | T-06 | Cinemachine 3 follow rig with deoccluder; gate-reveal camera | U2 | T-05 | Clipping PlayMode test; owner plays the grey box |
