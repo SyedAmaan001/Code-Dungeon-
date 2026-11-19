@@ -304,7 +304,7 @@
 - Revisit trigger: real learners, any public use, or commercial launch. Then move to Option B (paid tiers with backups).
 
 ### DEC-023 — Unity world client: WebGL inside the Next.js shell, backend stays authoritative
-- Status: **PROPOSED**. Awaiting the owner (game-dev toolchain session, 18 November 2026)
+- Status: **CONFIRMED — approved by the owner in chat on 19 November 2026**
 - Context/problem: the owner wants a hybrid cinematic RPG with explorable 3D worlds. The backend (learning engine, game engine, PostgreSQL) works, and it must stay the authority for identity, XP, progression, quests, achievements and the leaderboard. `docs/API_CONTRACTS.md` exposes server actions, not an HTTP API.
 - Options considered:
   - (a) Unity WebGL embedded in an authenticated Next.js page, talking to the shell through a JS bridge (chosen).
@@ -322,3 +322,5 @@
 - Security/privacy/cost impact: Unity holds no credentials. $0 for the slice; Git LFS, Unity CI and build hosting are future costs that need approval.
 - Revisit trigger: approval of a standalone or desktop client, or WebGL performance failing on the reference laptop.
 - Links/tests/evidence: `docs/UNITY_WORLD_ARCHITECTURE.md`, `docs/UNITY_INTEGRATION_PLAN.md`, `docs/OPEN_SOURCE_REUSE_AUDIT.md`, `docs/GAMEDEV_TOOLCHAIN.md`.
+
+- Approval record (2026-11-19): the owner explicitly approved option (a), Unity 6.3 LTS + URP WebGL hosted on `/play/world`, with Unity presentation-only, a whitelisted `WorldSnapshot`, the DOM challenge UI retained, no new endpoints for the first slice, and the existing backend remaining authoritative. Standalone desktop client remains deferred; direct Unity writes to Supabase remain rejected.
