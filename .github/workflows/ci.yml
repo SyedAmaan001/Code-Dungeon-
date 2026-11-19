@@ -64,7 +64,9 @@ jobs:
 
   e2e:
     name: End-to-end (browser, dev sign-in, PostgreSQL)
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to 26.04, which Playwright 1.56.1 cannot install Chromium on.
+    # Unpin when @playwright/test is upgraded to a release that supports the newer image.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
       postgres:

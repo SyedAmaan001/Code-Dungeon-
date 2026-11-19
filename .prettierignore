@@ -9,3 +9,5 @@ docs/
 .next-e2e/
 test-results/
 playwright-report/
+# Unity project: files are written by the Unity Editor in its own format.
+unity/
