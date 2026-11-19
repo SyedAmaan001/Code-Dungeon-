@@ -1,0 +1,14 @@
+{
+    "name": "CodeDungeon.Runtime.Camera",
+    "rootNamespace": "CodeDungeon.Camera",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -174,6 +174,7 @@ The owner confirmed these checks directly in macOS Terminal. This is separate fr
 | Web Build Support | Listed as `Web` by `unity editors --installed` | Installed |
 | Unity authentication | `unity auth status` reports signed in | Verified |
 | Unity Pipeline package | `com.unity.pipeline` 1.0.0 installed in disposable ConnectorTest project | T-03 PASS (Mac report) |
+| Code Dungeon Unity project (T-04) | `unity/CodeDungeon/` created on branch `claude/tender-cerf-ooekni`: URP blank template, URP 17.3.0, Input System 1.20.1, Cinemachine 3.1.7, Test Framework 1.6.0, Pipeline 1.0.0 | **T-04 PASS** (local Mac session; see below and `docs/UNITY_SLICE_REPORT.md`) |
 | Existing Unity project inventory | `unity projects --long --all` → no projects; JSON `total: 0`; no Unity Hub projects file | **Done (T-02)**. Nothing opened or changed |
 | Unity Editor connector checks | 8/8 reported PASS; see `docs/MAC_U0_RUNBOOK.md` | T-03 PASS (Mac report; scene-path qualification recorded) |
 | REA and gamedev skills on the Mac | See "T-01 results" below | **Done (T-01)** |
@@ -248,3 +249,34 @@ Source: reported by the owner's local Mac Claude Code session (transcript pasted
 3. npm printed a deprecation warning for `prebuild-install@7.1.3` (harmless).
 
 **Before T-03:** the owner checks the Unity licence in Unity Hub (Settings → Licenses). See the runbook's licence preflight.
+
+### T-04 results on the owner's Mac — 19 November 2026
+
+Source: a local Claude Code session on the owner's Mac, run directly in the repository checkout `~/Projects/Code-Dungeon` on `claude/tender-cerf-ooekni`. Full commands and outputs are in `docs/UNITY_SLICE_REPORT.md` §3.
+
+- **Baseline re-checked:**
+  - Node v26.13.0, Claude Code 2.1.311, Unity CLI 1.0.1.
+  - Editor 6000.3.28f1 arm64 + Web Build Support.
+  - `unity doctor` checks pass.
+- **ConnectorTest:** the T-03 ConnectorTest Editor was closed gracefully with `unity close --if-saved`. The project is kept on disk.
+- **Project creation:** `unity projects create CodeDungeon --output-dir <repo>/unity --editor-version 6000.3.28f1 --template com.unity.template.urp-blank --no-cloud --non-interactive` exited 0.
+  - **The Pipeline and Cinemachine setup steps both succeeded this time.** In T-03 the Pipeline step needed a retry and Cinemachine failed.
+  - Cloud linking and VCS were skipped.
+- **Ten gates:**
+  - Editor `ready`.
+  - Pipeline commands visible.
+  - Saved scenes opened by exact path, in build order Boot → OvergrownGate.
+  - Packages resolved; 0 console errors.
+  - Batch compile exit 0.
+  - EditMode 1/1 passed.
+  - PlayMode run completed (0 tests, assembly compiled as a test assembly).
+  - WebGL build succeeded (≈13.6 MiB Brotli `Build/`).
+  - Loaded in headless Google Chrome 157 with 0 JS exceptions.
+
+**CLI 1.0.1 findings (new):**
+- `unity build --target WebGL` has no built-in command-line build (exit 2). Use `unity build --create-profile WebGL`, then `unity build --profile WebGL`. The profile is `Assets/Settings/Build Profiles/WebGL.asset`.
+- According to its `--help`, `unity build` has an uncommitted-changes guard, so `--allow-dirty-build` was passed (not observed failing). It writes `unity-build.provenance.json` beside the output.
+- Per the official skill docs, `unity test` refuses a project that is open in an Editor, so the Editor was closed gracefully before the batch runs (not observed failing).
+- `unity command script eval --code '<C#>'` rejected one longer lambda-heavy snippet with "Give either code or file, not both". `--file <path.cs>` worked.
+- A first IL2CPP WebGL build of the empty project took about 12 minutes on the Mac.
+

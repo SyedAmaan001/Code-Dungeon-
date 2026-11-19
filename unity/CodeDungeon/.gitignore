@@ -1,0 +1,61 @@
+# Unity project ignores for unity/CodeDungeon (the repository root .gitignore covers the Next.js app).
+
+# Unity-generated folders
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Build output (WebGL and other players) — never committed
+/[Bb]uild/
+/[Bb]uilds/
+/[Bb]uild-*/
+
+# Test results (EditMode/PlayMode XML, coverage)
+/[Tt]est[Rr]esults/
+/CodeCoverage/
+
+# Asset meta data should only be ignored when the corresponding asset is also ignored
+!/[Aa]ssets/**/*.meta
+
+# Generated IDE and solution files
+.vs/
+.vscode/
+.idea/
+.gradle/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+ExportedObj/
+.consulo/
+
+# Unity crash reports and debug symbols
+sysinfo.txt
+crashlytics-build.properties
+*_BurstDebugInformation_DoNotShip/
+mono_crash.*
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Gradle / Android Studio (if ever enabled)
+/[Aa]ssets/[Pp]lugins/[Aa]ndroid/gradleOut*
+
+# OS files
+.DS_Store
