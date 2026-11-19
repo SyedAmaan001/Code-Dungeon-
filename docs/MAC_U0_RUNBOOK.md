@@ -3,7 +3,7 @@
 - **Run where:** the owner's Mac (macOS 26.6 arm64, Unity CLI 1.0.1, Unity 6000.3.28f1; see `docs/GAMEDEV_TOOLCHAIN.md` §7), in Terminal or in a **local** Claude Code session on the Mac.
 - **Not runnable** from the GitHub-connected cloud session. That session is a Linux container with no Unity and no access to the Mac's filesystem (`list_computer_folders` returned no shared folder on 19 November 2026).
 - **Written:** 19 November 2026, from Unity's official `unity-cli` skill (plugin 0.1.9-beta). **The CLI on the Mac is 1.0.1 and may spell options differently.** Run the `--help` check shown before each step and follow the CLI over this file. Record any difference in §5.
-- **Safety:** Steps 1–2 are read-only, except the reviewed tool installs in step 1. Step 3 creates one throwaway project **outside the repository** with no Unity Cloud link. Nothing here touches an existing Unity project or the Code Dungeon repository.
+- **Safety:** Steps 1–2 are read-only, except the reviewed tool installs in step 1. License preflight only inspects Unity Hub. Step 3 creates one throwaway project **outside the repository** with no Unity Cloud link. `script eval` executes arbitrary C# in the running Editor with your user permissions, so run only the listed snippets against this disposable project. Nothing here touches an existing Unity project or the Code Dungeon repository.
 
 ## Step 1: T-01 skills and REA (local Claude Code tooling)
 
@@ -62,6 +62,15 @@ unity projects                               # list known projects; do not open 
 ```
 
 For each project listed, note its path and Editor version. **Do not open, upgrade or install packages into any of them.** The owner states the purpose of each one.
+
+## License preflight (before T-03 project creation)
+
+`unity auth status` proves account sign-in; it does **not** prove that a Unity Editor license is activated. Unity's `projects create` prerequisite includes an active license.
+
+1. Open Unity Hub.
+2. Open **Settings/Preferences → Licenses**.
+3. Confirm an active eligible license is listed for this Mac. If you are using Unity Personal, Unity says signing in to Unity Hub activates it; verify that the license appears in the Licenses view.
+4. Do not start a paid trial or select a paid subscription to get past this check. If no eligible license is shown, stop and resolve licensing in Unity Hub before creating the throwaway project.
 
 ## Step 3: T-03 Editor-control (Pipeline) verification in a throwaway project
 
