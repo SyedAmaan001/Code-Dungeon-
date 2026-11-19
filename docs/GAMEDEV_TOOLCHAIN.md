@@ -1,6 +1,6 @@
 # Code Dungeon — game-development toolchain
 
-- **Status:** verified on 18 November 2026 in a **Claude Code cloud session** (Linux container), not on the owner's Windows laptop. The master prompt assumed local Claude Code on Windows; no owner computer was attached to the session (`list_computer_folders` returned none). Everything below says where it was verified.
+- **Status:** research/tooling baseline verified in a Claude Code cloud session on 18 November 2026; owner Mac environment independently verified on 19 November 2026 (see §7). The original handoff assumed Windows; that assumption is superseded by the Mac verification.
 - **Scope:** agent tooling only. No application code, migrations, game rules or curriculum were changed.
 - **Rule:** nothing here is "working" without the check in the *Evidence* column.
 
@@ -131,7 +131,7 @@ Unity Editor-control options, in order of recommendation:
 
 The eight connector checks in the prompt (scene names, hierarchy, components, settings, console, create/remove/read back a test object) are **not done**. They need the laptop with an Editor open. They are task T-03 in `docs/GAMEDEV_NEXT_STEPS.md`.
 
-## 5. Owner actions on the Windows laptop (in order)
+## 5. Original Windows owner-action checklist (historical; superseded for this owner by §7)
 
 1. Update Node in nvm to **24.22.1 or newer** (REA's `engines` field), then run `node --version`.
 2. Skills (no name clash):
@@ -159,3 +159,46 @@ The eight connector checks in the prompt (scene names, hierarchy, components, se
 ## 6. Cost
 
 $0. Every tool used here is free and open source, or Unity's free plugin. Nothing was bought, subscribed to or provisioned. The cloud session uses the owner's Claude session credits only.
+
+## 7. Owner Mac verification — 19 November 2026
+
+The owner confirmed these checks directly in macOS Terminal. This is separate from the ephemeral Linux cloud session in §§1–3.
+
+| Tool / component | Verified result | Status |
+|---|---|---|
+| macOS | 26.6, Apple Silicon (`arm64`) | Verified |
+| Node.js | 26.13.0 | Meets REA requirement `^22.23.4 || ^24.22.1 || >=26.12.1` |
+| Claude Code CLI | 2.1.311 | Installed on Mac |
+| Unity CLI | 1.0.1 | Installed; command available after sourcing `~/.zshrc` |
+| Unity Editor | 6000.3.28f1 (Unity 6.3 LTS), arm64 | Installed at `/Applications/Unity/Hub/Editor/6000.3.28f1/Unity.app` |
+| Web Build Support | Listed as `Web` by `unity editors --installed` | Installed |
+| Unity authentication | `unity auth status` reports signed in | Verified |
+| Unity Pipeline package | Not yet verified/installed in a project | Pending T-03 |
+| Existing Unity project inventory | Not yet checked with `unity projects` | Pending T-02 |
+| Unity Editor connector checks | Not yet run | Pending T-03 |
+| REA and gamedev skills on the Mac | Not yet verified | Pending T-01 |
+
+Commands reported by the owner:
+
+```bash
+node -v                       # v26.13.0
+claude --version              # 2.1.311
+unity --version               # 1.0.1
+unity doctor
+unity auth status
+unity editors --installed
+```
+
+The WebGL module initially timed out while resolving/connecting to Unity's CDN, then installed successfully on retry. Do not repeat the Editor or WebGL installation unless a fresh diagnostic shows a problem.
+
+### Repository-connected Claude workflow vs local Unity
+
+The owner says the GitHub repository is connected to Claude, so ordinary repository edits/reviews can be performed in that connected workspace without cloning at this stage. However, the Unity Editor and CLI verified above are installed on the owner's Mac. They operate on project files accessible to that Mac; a remote GitHub-connected Claude workspace does not automatically share the Mac's filesystem.
+
+Therefore:
+- Keep remote repository edits on `claude/tender-cerf-ooekni`; do not require a clone for ordinary documentation/source work in the connected workspace.
+- T-03 must use a throwaway Unity project on the Mac and the locally installed Editor.
+- Before T-04 creates `unity/CodeDungeon/`, make the approved feature-branch checkout available to the Mac's filesystem (a local clone/worktree or an explicitly shared local workspace). Do not claim a local Unity build/test from a remote session that cannot access the Mac's Editor.
+- Do not create the production Unity project in an unrelated scratch folder and forget to bring it into the feature branch.
+
+The Unity Pipeline package is required to control a running Editor through `unity command`; installing the CLI alone does not prove Editor control. See the official setup flow in Unity's docs: open a project in the Editor, run `unity pipeline install`, then verify the running Editor/Pipeline connection.
