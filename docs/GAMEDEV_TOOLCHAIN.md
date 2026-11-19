@@ -9,7 +9,7 @@
 | Tool | Version | Where verified | Status | Evidence |
 |---|---|---|---|---|
 | Claude Code CLI | 2.1.327 | cloud container | Present | `claude --version` |
-| Node.js | 22.23.5 (container) | cloud container | Present | `node --version`. The laptop uses Node 24 via nvm (`docs/LOCAL_BACKEND_HANDOFF.md`) |
+| Node.js | 22.23.5 (container); owner Mac 26.13.0 (§7) | cloud + owner Mac | Present | `node --version` in each environment |
 | gamedev-skills marketplace `awesome-gamedev-agent-skills` | git `c6ca6c41c839` (release 2.0.0, 2026-11-11) | cloud container | Installed | `claude plugin marketplace add …` succeeded |
 | `router@awesome-gamedev-agent-skills` | `c6ca6c41c839` | cloud container | Installed, **routing verified** | Headless test in §2.3 |
 | `disciplines@…` (15 skills) | `c6ca6c41c839` | cloud container | Installed | `claude plugin details` |
@@ -21,7 +21,7 @@
 | Unity Editor / Unity Hub / Unity CLI | — | cloud container | **Not present** (no Editor, no GPU; Unity is not installed in the container) | §4 |
 | Unity MCP / Unity Pipeline connection | — | — | **Not configured.** Needs the laptop | §4 |
 
-**The container is ephemeral.** Plugins, the REA registration and the global npm package installed here are lost when this session's container is reclaimed. They prove the commands and the configuration; the owner must repeat §5 on the Windows laptop for local use.
+**The cloud container is ephemeral.** Plugins, the REA registration and the global npm package installed there are lost when the session is reclaimed. They prove the commands and configuration only. The owner Mac has its own verified Unity/Node/Claude installation in §7; remaining Mac setup and editor checks are tracked in `docs/MAC_U0_RUNBOOK.md`. §5 is a historical Windows checklist.
 
 ## 2. Game-development skills (gamedev-skills/awesome-gamedev-agent-skills)
 
@@ -94,7 +94,7 @@ So the router detects Unity from `Assets/` and `ProjectSettings/ProjectVersion.t
 - Repository https://github.com/morluto/rea at commit `6752875`. Licence **MIT**, checked from `LICENSE` ("Copyright (c) 2026 morluto"). The repo also has `THIRD_PARTY_NOTICES.md`, a `licenses/` folder and `DISCLAIMER.md`.
 - npm package `rea-agents` 6.9.0. The `engines` field requires Node `^22.23.4 || ^24.22.1 || >=26.12.1`.
   - Container: Node 22.23.5, which is OK.
-  - **Laptop: check `node --version` is at least 24.22.1** before setup. The handoff records nvm Node 24.20.0, which is **too old** for REA. Update nvm Node before setup.
+  - **Owner Mac:** Node 26.13.0 was verified on 19 November 2026 and meets the package requirement. REA is not yet installed on that Mac; follow `docs/MAC_U0_RUNBOOK.md` Step 1.
 
 Steps taken:
 1. **Read-only plan first:** `npx -y rea-agents@6.9.0 setup --client claude_code --dry-run --json`.
@@ -118,7 +118,7 @@ Steps taken:
 |---|---|
 | Unity Editor or Hub in the container | None (`which unity`, a filesystem search). 4 vCPU, 15 GB RAM, no GPU |
 | Unity project in this repository | None. No `ProjectVersion.txt` anywhere |
-| Unity projects on the laptop | **Unknown.** The laptop was not attached. Owner action in §5 |
+| Unity projects on the Mac | **Not yet inventoried.** Runbook T-02 is pending |
 | Unity MCP / Pipeline connection | Not configured anywhere we can see. The ChatGPT Unity connection does not carry over to Claude Code |
 
 Unity Editor-control options, in order of recommendation:
