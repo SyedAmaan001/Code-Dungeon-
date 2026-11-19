@@ -1,6 +1,6 @@
 # Code Dungeon — Unity integration plan and first vertical slice
 
-- **Status:** PROPOSED, 18 November 2026. Waiting for owner approval (DEC-023, PENDING in `docs/decision.md`). Nothing has been built.
+- **Status:** DEC-023 approved by the owner on 19 November 2026. Implementation has not started; U0 verification gates still apply.
 - **Architecture:** `docs/UNITY_WORLD_ARCHITECTURE.md`. **Reuse choices:** `docs/OPEN_SOURCE_REUSE_AUDIT.md`. **Backlog:** `docs/GAMEDEV_NEXT_STEPS.md`.
 
 ## 1. Goal of the slice: prove the technology, set a visual baseline
