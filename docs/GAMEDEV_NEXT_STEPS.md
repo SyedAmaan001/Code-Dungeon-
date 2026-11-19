@@ -1,6 +1,6 @@
 # Code Dungeon — game-development next steps and backlog
 
-- **Status:** 18 November 2026, after the toolchain and research session (cloud). Read with `docs/GAMEDEV_TOOLCHAIN.md`, `docs/OPEN_SOURCE_REUSE_AUDIT.md`, `docs/UNITY_WORLD_ARCHITECTURE.md` and `docs/UNITY_INTEGRATION_PLAN.md`.
+- **Status:** updated 19 November 2026 after DEC-023 approval and Mac environment verification. Read with `docs/GAMEDEV_TOOLCHAIN.md`, `docs/OPEN_SOURCE_REUSE_AUDIT.md`, `docs/UNITY_WORLD_ARCHITECTURE.md` and `docs/UNITY_INTEGRATION_PLAN.md`.
 - **Separate track:** the hosted-staging work (Phase 7, `docs/ANTIGRAVITY_PROMPT.md`) is a different track and is untouched by this work.
 
 ## 1. Waiting on the owner (blocking)
@@ -8,8 +8,8 @@
 | # | Decision or action | Why it blocks | Recommendation |
 |---|---|---|---|
 | O-G1 | Approve **DEC-023** (Unity world client, WebGL inside the Next.js shell, backend authoritative) | Phases U1–U5 | **APPROVED 2026-11-19**; revisit standalone builds later |
-| O-G2 | Run the laptop setup in `docs/GAMEDEV_TOOLCHAIN.md` §5: update Node ≥ 24.22.1, skills without the `unity` clash, REA, Unity Hub and **Unity 6.3 LTS** with the WebGL module, Unity CLI; Unity sign-in and licence choice | U0 | Unity Personal if eligible under the current terms (the owner confirms) |
-| O-G3 | Pick how the gamedev `unity` skills coexist with Unity's official `unity` plugin | Name clash | Standalone skills through `npx skills add` (§5 step 2) |
+| O-G2 | Complete Mac toolchain/editor verification (`docs/MAC_U0_RUNBOOK.md` Steps 1–3): gamedev skills without the `unity` clash, REA, Unity project inventory and Pipeline connector checks | U0 | Node 26.13.0, Unity CLI 1.0.1, Unity 6.3 LTS + Web Build Support, and Unity sign-in are already verified (19 Nov 2026) |
+| O-G3 | Pick how the gamedev `unity` skills coexist with Unity's official `unity` plugin | Name clash | Standalone skills through `npx skills add` (Mac runbook Step 1) |
 | O-G4 | Allow Unity tests in GitHub Actions (needs a Unity licence secret, GameCI) or keep Unity tests local | CI coverage | Local first; decide after U2 |
 | O-G5 | After U4, review the visual baseline (palette, materials, lighting) | Art scaling | — |
 | O-G6 | Licence file of Unity Starter Assets (if we want to adapt its controller) | Movement option B | Not required: build our own motor (default) |
