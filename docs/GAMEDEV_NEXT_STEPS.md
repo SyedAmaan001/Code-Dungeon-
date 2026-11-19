@@ -7,7 +7,7 @@
 
 | # | Decision or action | Why it blocks | Recommendation |
 |---|---|---|---|
-| O-G1 | Approve **DEC-023** (Unity world client, WebGL inside the Next.js shell, backend authoritative) | Phases U1–U5 | Approve as proposed; revisit standalone builds later |
+| O-G1 | Approve **DEC-023** (Unity world client, WebGL inside the Next.js shell, backend authoritative) | Phases U1–U5 | **APPROVED 2026-11-19**; revisit standalone builds later |
 | O-G2 | Run the laptop setup in `docs/GAMEDEV_TOOLCHAIN.md` §5: update Node ≥ 24.22.1, skills without the `unity` clash, REA, Unity Hub and **Unity 6.3 LTS** with the WebGL module, Unity CLI; Unity sign-in and licence choice | U0 | Unity Personal if eligible under the current terms (the owner confirms) |
 | O-G3 | Pick how the gamedev `unity` skills coexist with Unity's official `unity` plugin | Name clash | Standalone skills through `npx skills add` (§5 step 2) |
 | O-G4 | Allow Unity tests in GitHub Actions (needs a Unity licence secret, GameCI) or keep Unity tests local | CI coverage | Local first; decide after U2 |
