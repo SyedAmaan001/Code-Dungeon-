@@ -3,7 +3,7 @@
 - **Scope:** the Unity project at `unity/CodeDungeon/` only. The Next.js app's notices are in `docs/ASSETS.md`.
 - **Recorded:** 19 November 2026, T-04 scaffold, on the owner's Mac (Unity 6000.3.28f1).
 - **Method:** every licence below was read from the `LICENSE.md` / `license.txt` / `Third Party Notices.md` file inside the resolved package in `Library/PackageCache/<package>@<hash>/`, not from a website or aggregator. Versions come from `Packages/packages-lock.json` after resolution.
-- **No third-party art, audio, fonts, models or code** are in `Assets/` at T-04. The only non-project assets are the files the Unity URP template generated (`Assets/Settings/*`, `Assets/Scenes/SampleScene.unity`, `Assets/TutorialInfo/*`, `Assets/Readme.asset`, `Assets/InputSystem_Actions.inputactions`), which come from the Unity template package `com.unity.template.urp-blank` 17.1.0 and are used under Unity's terms in a Unity project.
+- **No third-party art, audio, fonts, models or code** are in `Assets/` at T-04. The only non-project assets are the files the Unity URP template generated (`Assets/Settings/*`, `Assets/Scenes/SampleScene.unity`, `Assets/InputSystem_Actions.inputactions`; the template's `Assets/TutorialInfo/` and `Assets/Readme.asset` were removed on 19 November 2026), which come from the Unity template package `com.unity.template.urp-blank` 17.1.0 and are used under Unity's terms in a Unity project.
 
 ## Licence key
 

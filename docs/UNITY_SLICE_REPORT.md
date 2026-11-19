@@ -197,7 +197,7 @@ Console notes:
 ## 4. Limitations and follow-ups
 
 - The browser check used **headless Chrome with software rendering**, not a headed browser with a real GPU and not the Next.js shell. The `/play/world` integration, CSP and react-unity-webgl are U3.
-- `Assets/TutorialInfo/Layout.wlt` (a template file, kept unmodified) contains the template author's path `/Users/danielbrauer/...`. It is Unity's content, not ours; remove `TutorialInfo/` later if wanted.
+- **Resolved 19 November 2026 (owner request, cloud session):** `Assets/TutorialInfo/` (whose `Layout.wlt` held the template author's path `/Users/danielbrauer/...`) and `Assets/Readme.asset`, the only asset that referenced it, were deleted. Nothing else referenced either GUID. `companyName` changed from `DefaultCompany` to `Code Dungeon` (Project Settings → Player). The app identifiers (`com.Unity-Technologies.com.unity.template.urp-blank`) are unchanged; they only matter for non-web builds. **Not yet re-verified in the Editor**: the next Mac session should open the project and confirm 0 console errors and EditMode 1/1.
 - The unused template packages (`ai.navigation`, `visualscripting`, `multiplayer.center`, `collab-proxy`, `timeline`) were kept, as T-04 asked to preserve the template. Pruning them is a T-13 build-size item.
 - Git LFS is not installed. `.gitattributes` holds patterns only, and no binary art exists.
 - Unity tests run only on the owner's Mac. CI is owner decision O-G4.
