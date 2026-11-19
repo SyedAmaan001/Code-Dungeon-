@@ -136,6 +136,6 @@ Then follow `docs/NEXT_GAMEDEV_SESSION_PROMPT.md` Step 4 in a **local** Claude C
 
 | Step | Command | Exit | Output (short) | CLI-1.0.1 spelling differences |
 |---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
+| 1 | Skills bundles + 8 standalone skills; `rea setup` after approved dry-run | 0 | No clash warning; REA 6.9.0, MCP registered, doctor healthy. Frida install script blocked (see toolchain §7) | `skills` selects with `-s/--skill` |
+| 2 | `unity --version`; `unity editors --installed --long`; `unity projects --long --all` | 0 | 1.0.1; 6000.3.28f1 arm64 + Web; no projects (`total: 0`) | No `projects list`: plain `unity projects`, `--all` for every page, `--long` for columns; modules only with `--long` |
 | 3.1–3.8 | | | | |

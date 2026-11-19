@@ -46,7 +46,11 @@ You are the Unity technical director and engineer for **Code Dungeon**, an exist
 - Unity 6.3 LTS Editor 6000.3.28f1 (arm64) and Web Build Support are installed.
 - Owner is signed in to Unity.
 - DEC-023 was explicitly approved in chat on 19 November 2026.
-- Still pending on the Mac: REA setup, gamedev skill setup/verification, existing Unity project inventory (T-02), and Pipeline/editor-control checks (T-03).
+- **T-01 and T-02 are done on the Mac** (19 November 2026, see `docs/GAMEDEV_TOOLCHAIN.md` §7):
+  - skills installed without the clash, and REA set up after the owner approved the dry-run;
+  - no existing Unity projects.
+- Still pending: the Unity Hub licence check (owner), then T-03 (Pipeline/editor-control checks).
+- Open owner items: the blocked Frida install script, and the stale Antigravity REA 6.8.0 registration.
 
 If anything is missing, give exact click-by-click instructions and wait.
 

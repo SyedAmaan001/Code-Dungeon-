@@ -18,9 +18,9 @@
 
 | Pri | ID | Task | Phase | Depends on | Done when |
 |---|---|---|---|---|---|
-| P0 | T-01 | Repeat the toolchain setup on the Mac (`docs/MAC_U0_RUNBOOK.md` Step 1; not run yet); record versions in `docs/GAMEDEV_TOOLCHAIN.md` | U0 | O-G2, O-G3 | `claude plugin list` has no clash warning; `claude mcp get rea` Connected; `unity --version` |
-| P0 | T-02 | Inventory Unity on the Mac (runbook Step 2; not run yet) (`unity editors`, Hub projects); confirm no existing project would be affected | U0 | T-01 | Documented list; owner confirms the purpose of any existing project |
-| P0 | T-03 | Editor-control verification (runbook Step 3; not run yet): in a **throwaway** project, run the 8 checks (scene names, hierarchy, components, settings, console, create/remove/read back `CD_ConnectorTest`) through `unity command` | U0 | T-01 | All 8 pass, outputs pasted into the toolchain doc |
+| P0 | T-01 | Repeat the toolchain setup on the Mac (`docs/MAC_U0_RUNBOOK.md` Step 1; **DONE 2026-11-19**, see toolchain §7); record versions in `docs/GAMEDEV_TOOLCHAIN.md` | U0 | O-G2, O-G3 | `claude plugin list` has no clash warning; `claude mcp get rea` Connected; `unity --version` |
+| P0 | T-02 | Inventory Unity on the Mac (runbook Step 2; **DONE 2026-11-19**: no existing projects) (`unity editors`, Hub projects); confirm no existing project would be affected | U0 | T-01 | Documented list; owner confirms the purpose of any existing project |
+| P0 | T-03 | Editor-control verification (runbook Step 3; next, after the owner's Unity Hub licence check): in a **throwaway** project, run the 8 checks (scene names, hierarchy, components, settings, console, create/remove/read back `CD_ConnectorTest`) through `unity command` | U0 | T-01 | All 8 pass, outputs pasted into the toolchain doc |
 | P0 | T-04 | In a **local Mac checkout** of the branch, create `unity/CodeDungeon/` (URP template, Unity 6.3 LTS), `.gitignore`, `.gitattributes` (LFS patterns), pinned `manifest.json`, asmdefs, test runners | U1 | DEC-023, T-03 | Batch-mode compile and EditMode test pass; empty WebGL build loads in Chromium |
 | P0 | T-05 | `ThirdPersonMotor` + `PlayerInputReader` (Input System) + grey-box ground and colliders | U2 | T-04 | PlayMode tests: walk, stop, slope, step, bounds |
 | P0 | T-06 | Cinemachine 3 follow rig with deoccluder; gate-reveal camera | U2 | T-05 | Clipping PlayMode test; owner plays the grey box |

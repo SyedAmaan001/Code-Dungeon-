@@ -174,9 +174,9 @@ The owner confirmed these checks directly in macOS Terminal. This is separate fr
 | Web Build Support | Listed as `Web` by `unity editors --installed` | Installed |
 | Unity authentication | `unity auth status` reports signed in | Verified |
 | Unity Pipeline package | Not yet verified/installed in a project | Pending T-03 |
-| Existing Unity project inventory | Not yet checked with `unity projects` | Pending T-02 |
+| Existing Unity project inventory | `unity projects --long --all` → no projects; JSON `total: 0`; no Unity Hub projects file | **Done (T-02)**. Nothing opened or changed |
 | Unity Editor connector checks | Not yet run | Pending T-03 |
-| REA and gamedev skills on the Mac | Not yet verified | Pending T-01 |
+| REA and gamedev skills on the Mac | See "T-01 results" below | **Done (T-01)** |
 
 Commands reported by the owner:
 
@@ -209,3 +209,42 @@ The Unity Pipeline package is required to control a running Editor through `unit
 - Therefore T-01 (Mac skills and REA), T-02 (Mac project inventory), T-03 (Pipeline checks) and T-04 (project creation) were **not run** and are not claimed.
 - Done remotely: `docs/MAC_U0_RUNBOOK.md`, exact commands for T-01–T-03, written from Unity's official `unity-cli` skill (plugin 0.1.9-beta). Its option spellings are **unverified against Unity CLI 1.0.1**; the runbook checks `--help` before each step.
 - Noted from the official skill: `unity setup claude` installs Unity's plugin as `unity@claude-plugins-official`. That is also named `unity`, so the §2.2 clash applies on the Mac too.
+
+### T-01 and T-02 results on the owner's Mac — 19 November 2026
+
+Source: reported by the owner's local Mac Claude Code session (transcript pasted 19 Nov 2026; not re-run from the cloud). Environment: Darwin 25.6.0 arm64 (macOS 26.6, build 25G72), Node v26.13.0, Claude Code 2.1.311, Unity CLI 1.0.1.
+
+**T-01: skills**
+- Official Unity plugin `unity@synced` 0.1.9-beta is present (manifest author Unity Technologies, repo `Unity-Technologies/unity-agent-plugin`).
+- The gamedev marketplace was not configured, so it was added at user scope.
+- `router`, `disciplines`, `genres` and `workflows` from `awesome-gamedev-agent-skills` are installed at `c6ca6c41c839` and enabled. **`unity@awesome-gamedev-agent-skills` was not installed.**
+- Standalone skills were added with `skills` CLI 1.9.0, selection flag `-s, --skill`, into `~/.claude/skills/`. The eight are `unity-csharp-scripting`, `unity-input-system`, `unity-physics`, `unity-animation`, `unity-scriptableobjects`, `unity-navmesh`, `unity-build-pipeline` and `unity-build-size`. `unity-tilemap-2d` was not installed. The CLI's scan rated all eight Safe / 0 alerts.
+- `claude plugin list` shows no clash warning. The official `unity:*` skills load alongside the standalone ones, so **R-65 is resolved on the Mac.**
+
+**T-01: REA**
+- `npm install --global rea-agents@6.9.0` → `rea --version` 6.9.0 at `/opt/homebrew/bin/rea`.
+- The `--dry-run` plan had two local actions:
+  1. Update `~/.claude.json` with an MCP server running `/opt/homebrew/bin/node /opt/homebrew/bin/rea mcp`, backed up to `~/.claude.json.rea.backup`.
+  2. Install the skill at `~/.claude/skills/reverse-engineer-anything`.
+- No provider or Hopper action was planned.
+- **The owner approved the plan**, and it was applied.
+- Result: the `rea` MCP is registered at user scope and `rea doctor --client claude_code --skill` reports `healthy: true` (skill aligned, version 62, 255 tools). The remaining warnings are only the providers deliberately not installed (Ghidra, IDA, JADX, Kuna, Hopper).
+- Claude Code must be restarted to load the MCP tools.
+
+**T-02: inventory (read-only)**
+- `unity editors --installed --long`: 6000.3.28f1 (arm64) at `/Applications/Unity/Hub/Editor/6000.3.28f1/Unity.app`, module Web Build Support.
+- `unity projects --long --all`: **no projects**. The JSON listing gives `total: 0`, and there is no Unity Hub projects file. The T-03 throwaway project will be the first.
+
+**Differences between CLI 1.0.1 and the runbook:**
+- `unity projects` has no `list` subcommand; the plain command lists projects.
+- It pages 10 at a time unless `--all` is given.
+- `--long` adds the version, modified, cloud, pipeline and VCS columns.
+- `editors --installed` shows modules only with `--long`.
+- The `skills` CLI selection flag is `-s/--skill`.
+
+**Open items (owner decisions, not blocking T-03):**
+1. npm **blocked the install script of `frida@17.23.2`**, an REA dependency that downloads a native binary. It was left blocked, so REA's live-instrumentation (Frida) features may not work; static analysis is unaffected. Only allow it if needed: `npm install -g --allow-scripts=frida rea-agents@6.9.0`.
+2. Antigravity has an **older REA registration** in `~/.gemini/config/mcp_config.json` (`npx -y rea-agents@6.8.0 mcp`), which doctor flags as stale. It is outside T-01 and untouched; update or remove it later in Antigravity.
+3. npm printed a deprecation warning for `prebuild-install@7.1.3` (harmless).
+
+**Before T-03:** the owner checks the Unity licence in Unity Hub (Settings → Licenses). See the runbook's licence preflight.
