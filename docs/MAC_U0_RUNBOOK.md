@@ -78,39 +78,40 @@ unity status --until-ready --project-path ~/UnityScratch/ConnectorTest --format 
 unity command --project-path ~/UnityScratch/ConnectorTest    # list the Editor's Pipeline commands (save this output)
 ```
 
-Then the eight checks. Each `script eval` snippet uses fully qualified names, and each command is pinned to the throwaway project with `--project-path`.
+Then the eight checks. Each `script eval` snippet uses fully qualified names, and each command is pinned to the throwaway project with `--project-path`. The current Unity Technologies CLI skill documents the C# snippet as a positional argument followed by `--project-path`; some Unity Learn examples use `--code` instead. Run `unity command script eval --help` first on CLI 1.0.1 and follow its exact form. Do not combine the two forms.
 
 ```bash
 P=~/UnityScratch/ConnectorTest
 
 # 1. Scene names (open scenes + Build Profile scene list)
-unity command script eval --project-path "$P" 'return string.Join(", ", System.Linq.Enumerable.Select(System.Linq.Enumerable.Range(0, UnityEngine.SceneManagement.SceneManager.sceneCount), i => UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).path)) + " | build: " + string.Join(", ", System.Linq.Enumerable.Select(UnityEditor.EditorBuildSettings.scenes, s => s.path));'
+unity command script eval 'return string.Join(", ", System.Linq.Enumerable.Select(System.Linq.Enumerable.Range(0, UnityEngine.SceneManagement.SceneManager.sceneCount), i => UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).path)) + " | build: " + string.Join(", ", System.Linq.Enumerable.Select(UnityEditor.EditorBuildSettings.scenes, s => s.path));' --project-path "$P"
 
 # 2. Hierarchy (root objects of the active scene)
-unity command script eval --project-path "$P" 'return string.Join(", ", System.Linq.Enumerable.Select(UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects(), g => g.name));'
+unity command script eval 'return string.Join(", ", System.Linq.Enumerable.Select(UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects(), g => g.name));' --project-path "$P"
 
 # 3. Components on the main camera
-unity command script eval --project-path "$P" 'var c = UnityEngine.Camera.main; return c == null ? "no main camera" : string.Join(", ", System.Linq.Enumerable.Select(c.GetComponents<UnityEngine.Component>(), x => x.GetType().FullName));'
+unity command script eval 'var c = UnityEngine.Camera.main; return c == null ? "no main camera" : string.Join(", ", System.Linq.Enumerable.Select(c.GetComponents<UnityEngine.Component>(), x => x.GetType().FullName));' --project-path "$P"
 
 # 4. Project settings
-unity command script eval --project-path "$P" 'return "product=" + UnityEditor.PlayerSettings.productName + " colorSpace=" + UnityEditor.PlayerSettings.colorSpace + " target=" + UnityEditor.EditorUserBuildSettings.activeBuildTarget + " rp=" + (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline == null ? "builtin" : UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline.name);'
+unity command script eval 'return "product=" + UnityEditor.PlayerSettings.productName + " colorSpace=" + UnityEditor.PlayerSettings.colorSpace + " target=" + UnityEditor.EditorUserBuildSettings.activeBuildTarget + " rp=" + (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline == null ? "builtin" : UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline.name);' --project-path "$P"
 
 # 5. Console errors
-unity command console get --project-path "$P"         # if 1.0.1 names it differently, use the name from `unity command`
+unity command console status --project-path "$P"       # expect groundTruth.consoleErrors = 0
+unity logs --console --level error --project-path "$P"    # should show no errors
 
 # 6. Create the test object
-unity command script eval --project-path "$P" 'var g = new UnityEngine.GameObject("CD_ConnectorTest"); return g.GetInstanceID().ToString();'
+unity command script eval 'var g = new UnityEngine.GameObject("CD_ConnectorTest"); return g.GetInstanceID().ToString();' --project-path "$P"
 
 # 7. Delete it
-unity command script eval --project-path "$P" 'var g = UnityEngine.GameObject.Find("CD_ConnectorTest"); if (g == null) return "not found"; UnityEngine.Object.DestroyImmediate(g); return "deleted";'
+unity command script eval 'var g = UnityEngine.GameObject.Find("CD_ConnectorTest"); if (g == null) return "not found"; UnityEngine.Object.DestroyImmediate(g); return "deleted";' --project-path "$P"
 
 # 8. Read back that it is gone
-unity command script eval --project-path "$P" 'return UnityEngine.GameObject.Find("CD_ConnectorTest") == null ? "absent" : "STILL PRESENT";'
+unity command script eval 'return UnityEngine.GameObject.Find("CD_ConnectorTest") == null ? "absent" : "STILL PRESENT";' --project-path "$P"
 ```
 
 **Pass** means every command exits 0, steps 1–4 return real values, step 6 returns an id, step 7 returns `deleted`, and step 8 returns `absent`. **Do not save the scene.** The test project is disposable; the owner may delete `~/UnityScratch/ConnectorTest` afterwards.
 
-If `script eval` is rejected (for example a different argument form in 1.0.1), look at `unity command script eval --help` and the documented `-- --code '<C#>'` form. If the Editor never reaches `ready` and `unity status` reports Safe Mode, follow the official recovery: fix compile errors, don't fall back to editing files by hand. **Use a fallback MCP server (CoplayDev or IvanMurzak) only after the owner approves it.**
+If `script eval` is rejected, inspect `unity command script eval --help`. Use either the positional C# argument or `--code` exactly as that installed CLI reports; do not guess a third `-- --code` form. If the Editor never reaches `ready` and `unity status` reports Safe Mode, follow the official recovery: fix compile errors, don't fall back to editing files by hand. **Use a fallback MCP server (CoplayDev or IvanMurzak) only after the owner approves it.**
 
 ## Step 4: what T-04 needs (not part of this runbook)
 
