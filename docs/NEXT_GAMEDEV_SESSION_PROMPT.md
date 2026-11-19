@@ -34,7 +34,7 @@ You are the Unity technical director and engineer for **Code Dungeon**, an exist
   - **Clash:** the gamedev `unity` plugin shadows Unity's official `unity` plugin (0.1.9-beta, synced from claude.ai, 33 skills including `unity-cli`).
   - On the laptop, install the gamedev Unity skills as standalone skills, not as the `unity` plugin.
 - **REA:** `rea-agents` 6.9.0 (MIT) was set up in the cloud with `rea setup --client claude_code` after a reviewed `--dry-run`. MCP showed Connected and doctor was healthy. No native providers (no Hopper/Ghidra/IDA). Investigation 001 (our own `.next/static`) found no answer keys or secrets. The Mac has Node 26.13.0, which meets REA's requirement; REA is not yet installed on the Mac.
-- **Owner's Mac Unity environment (verified 19 Nov):** macOS 26.6 arm64; Unity CLI 1.0.1; Unity 6.3 LTS Editor 6000.3.28f1 arm64; Web Build Support installed; Unity account signed in. `unity doctor`, `unity auth status`, and `unity editors --installed` were run by the owner. **Unity Pipeline is not yet verified in a project.** The cloud-connected Claude workspace has not been shown to have access to this Mac Editor/filesystem.
+- **Owner's Mac Unity environment (verified 19 Nov):** macOS 26.6 arm64; Node 26.13.0; Claude Code 2.1.311; Unity CLI 1.0.1; Unity 6.3 LTS Editor 6000.3.28f1 arm64; Web Build Support installed; Unity account signed in. T-01 skills/REA and T-02 project inventory are reported complete. T-03's eight Editor checks are reported PASS in the disposable ConnectorTest project; `com.unity.pipeline` 1.0.0 was installed. See `docs/MAC_U0_RUNBOOK.md` for exact results and the unsaved-`Untitled` scene qualification.
 - **Remote session, 19 November 2026:** the GitHub-connected cloud session (Linux x86_64, no Unity) confirmed it has **no access to the Mac** (`list_computer_folders` empty). So it ran none of T-01–T-04. It wrote `docs/MAC_U0_RUNBOOK.md` from Unity's official `unity-cli` skill; the syntax is not yet checked against CLI 1.0.1.
 - **Backend baseline (cloud, no PostgreSQL):** lint, typecheck and format clean; Vitest 25 files passed / 9 skipped, 255 tests passed / 67 skipped; content 0 errors (1 existing warning); `next build` OK. On the laptop with the DB, expect 34 files / 322 tests (`docs/ANTIGRAVITY_PROMPT.md` §4).
 
@@ -58,7 +58,7 @@ If anything is missing, give exact click-by-click instructions and wait.
 
 **Step 2 (T-02).** On the owner's Mac, run `unity --version`, `unity editors --installed`, and inspect `unity projects --help` before using the read-only project-list command supported by CLI 1.0.1. List existing Unity projects and **do not modify any**. Do not infer that the remote Claude workspace can see the Mac's registered projects.
 
-**Step 3 (T-03).** On the Mac, create a throwaway project **outside the repository** (for example `~/UnityScratch/ConnectorTest`; use `unity projects create --help` to verify CLI 1.0.1 syntax and use `--no-cloud` so no Unity Cloud project is created), open it in Unity 6.3, install the Pipeline package with `unity pipeline install`, and verify through `unity command`:
+**Step 3 (T-03) — COMPLETE (owner Mac report, 19 Nov 2026).** Eight Editor-control checks were reported PASS in `~/UnityScratch/ConnectorTest`; Pipeline package 1.0.0 was installed after a retry. See `docs/MAC_U0_RUNBOOK.md` §3 results. The empty `Untitled` scene path needs explicit saved-scene verification in T-04.
 1. scene names
 2. hierarchy
 3. GameObject components
@@ -70,7 +70,7 @@ If anything is missing, give exact click-by-click instructions and wait.
 
 Paste the outputs into `docs/GAMEDEV_TOOLCHAIN.md` §4. If the CLI route fails, try a fallback MCP only after the owner approves it.
 
-**Step 4: first implementation task (T-04), DEC-023 is approved.** Before creating `unity/CodeDungeon/`, ensure the approved feature branch is checked out in a local Mac directory accessible to Unity. If this session is the remote GitHub-connected workspace and cannot access the Mac filesystem, stop and report that boundary; do not claim the local project/build exists. Once the local branch checkout is available, create `unity/CodeDungeon/`:
+**Step 4: first implementation task (T-04), DEC-023 is approved and T-03 is reported complete.** Follow the dedicated `docs/T04_UNITY_PROJECT_PROMPT.md` in a local Mac Claude Code session. It handles the feature-branch checkout, project scaffold, pinned compatible packages, scenes, assemblies, test harness and verification. Stop after T-04; do not begin T-05/T-06.
 - from Unity 6.3 LTS with the URP template, through the official `new-unity-project` / `unity-cli` skills
 - Unity `.gitignore` (Library, Temp, Logs, UserSettings, Build*)
 - `.gitattributes` with LFS patterns (do not commit binaries yet)
