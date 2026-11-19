@@ -56,12 +56,11 @@ Paste the outputs into `docs/GAMEDEV_TOOLCHAIN.md` §7.
 
 ```bash
 unity --version                              # 1.0.1
-unity editors --installed                    # 6000.3.28f1 arm64 + Web
-unity projects --help                        # confirm the list command and its flags in 1.0.1
-unity projects                               # list known projects; do not open or change any
+unity editors --installed --long             # show 6000.3.28f1 arm64 + Web Build Support
+unity projects --long --all                  # list all known projects; do not open or change any
 ```
 
-For each project listed, note its path and Editor version. **Do not open, upgrade or install packages into any of them.** The owner states the purpose of each one.
+The owner's T-02 result (reported by local Mac Claude session, 19 Nov 2026) was `total: 0`, with no Unity Hub projects file. No existing project was opened, upgraded or changed. For a future inventory, note each listed project's path and Editor version. **Do not open, upgrade or install packages into any existing project.**
 
 ## License preflight (before T-03 project creation)
 
