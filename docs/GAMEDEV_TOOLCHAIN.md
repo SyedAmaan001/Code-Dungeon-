@@ -202,3 +202,10 @@ Therefore:
 - Do not create the production Unity project in an unrelated scratch folder and forget to bring it into the feature branch.
 
 The Unity Pipeline package is required to control a running Editor through `unity command`; installing the CLI alone does not prove Editor control. See the official setup flow in Unity's docs: open a project in the Editor, run `unity pipeline install`, then verify the running Editor/Pipeline connection.
+
+### Remote session record — 19 November 2026
+
+- Environment: GitHub-connected Claude Code cloud session, Linux x86_64. No Unity CLI and no Editor. No owner computer or folder was attached (`list_computer_folders` returned `{"folders":[],"cannot_be_used":[]}`).
+- Therefore T-01 (Mac skills and REA), T-02 (Mac project inventory), T-03 (Pipeline checks) and T-04 (project creation) were **not run** and are not claimed.
+- Done remotely: `docs/MAC_U0_RUNBOOK.md`, exact commands for T-01–T-03, written from Unity's official `unity-cli` skill (plugin 0.1.9-beta). Its option spellings are **unverified against Unity CLI 1.0.1**; the runbook checks `--help` before each step.
+- Noted from the official skill: `unity setup claude` installs Unity's plugin as `unity@claude-plugins-official`. That is also named `unity`, so the §2.2 clash applies on the Mac too.

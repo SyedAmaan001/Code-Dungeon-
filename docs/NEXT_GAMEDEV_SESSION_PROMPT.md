@@ -20,7 +20,8 @@ You are the Unity technical director and engineer for **Code Dungeon**, an exist
 ## 2. Read first
 
 1. `CLAUDE.md`: binding rules.
-2. `docs/GAMEDEV_TOOLCHAIN.md`: what was installed and verified, and how. **§2.2 (the `unity` plugin name clash) and §5 (laptop steps)** matter most.
+2. `docs/GAMEDEV_TOOLCHAIN.md`: what was installed and verified, and how. **§2.2 (the `unity` plugin name clash) and §7 (owner Mac verification)** matter most. §5 is the historical Windows checklist.
+   - `docs/MAC_U0_RUNBOOK.md`: the exact Mac commands for T-01–T-03, including the eight connector checks as `unity command script eval` snippets, with a results log to fill in.
 3. `docs/UNITY_WORLD_ARCHITECTURE.md`: the backend stays authoritative; Unity is presentation only; the JS bridge v0; the CSP constraint.
 4. `docs/UNITY_INTEGRATION_PLAN.md`: the Overgrown Gate slice, phases U0–U5.
 5. `docs/OPEN_SOURCE_REUSE_AUDIT.md`: licences (Cinemachine, URP and Input System are UCL; LitMotion, Yarn Spinner, ink and UniTask are MIT; react-unity-webgl is Apache-2.0; PrimeTween and NavMeshComponents are rejected; Chop Chop is study-only).
@@ -32,8 +33,9 @@ You are the Unity technical director and engineer for **Code Dungeon**, an exist
 - **Skills (cloud container only, ephemeral):** gamedev-skills `router`, `disciplines`, `genres`, `workflows` and `unity` installed at commit `c6ca6c41c839` (release 2.0.0, Apache-2.0). The router was verified: it detected Unity 6.3 in a fake project and picked `unity-csharp-scripting`, `camera-systems`, `level-design` and `rpg`.
   - **Clash:** the gamedev `unity` plugin shadows Unity's official `unity` plugin (0.1.9-beta, synced from claude.ai, 33 skills including `unity-cli`).
   - On the laptop, install the gamedev Unity skills as standalone skills, not as the `unity` plugin.
-- **REA:** `rea-agents` 6.9.0 (MIT) was set up in the cloud with `rea setup --client claude_code` after a reviewed `--dry-run`. MCP showed Connected and doctor was healthy. No native providers (no Hopper/Ghidra/IDA). Investigation 001 (our own `.next/static`) found no answer keys or secrets. **On the laptop REA needs Node ≥ 24.22.1**, but nvm had 24.20.0.
+- **REA:** `rea-agents` 6.9.0 (MIT) was set up in the cloud with `rea setup --client claude_code` after a reviewed `--dry-run`. MCP showed Connected and doctor was healthy. No native providers (no Hopper/Ghidra/IDA). Investigation 001 (our own `.next/static`) found no answer keys or secrets. The Mac has Node 26.13.0, which meets REA's requirement; REA is not yet installed on the Mac.
 - **Owner's Mac Unity environment (verified 19 Nov):** macOS 26.6 arm64; Unity CLI 1.0.1; Unity 6.3 LTS Editor 6000.3.28f1 arm64; Web Build Support installed; Unity account signed in. `unity doctor`, `unity auth status`, and `unity editors --installed` were run by the owner. **Unity Pipeline is not yet verified in a project.** The cloud-connected Claude workspace has not been shown to have access to this Mac Editor/filesystem.
+- **Remote session, 19 November 2026:** the GitHub-connected cloud session (Linux x86_64, no Unity) confirmed it has **no access to the Mac** (`list_computer_folders` empty). So it ran none of T-01–T-04. It wrote `docs/MAC_U0_RUNBOOK.md` from Unity's official `unity-cli` skill; the syntax is not yet checked against CLI 1.0.1.
 - **Backend baseline (cloud, no PostgreSQL):** lint, typecheck and format clean; Vitest 25 files passed / 9 skipped, 255 tests passed / 67 skipped; content 0 errors (1 existing warning); `next build` OK. On the laptop with the DB, expect 34 files / 322 tests (`docs/ANTIGRAVITY_PROMPT.md` §4).
 
 ## 4. Your task, in order (stop at each gate)
@@ -48,7 +50,7 @@ You are the Unity technical director and engineer for **Code Dungeon**, an exist
 
 If anything is missing, give exact click-by-click instructions and wait.
 
-**Step 1 (T-01).** Install the skills without the clash and set up REA, exactly as in `docs/GAMEDEV_TOOLCHAIN.md` §5. Review `rea setup --dry-run` before applying it. Record versions.
+**Step 1 (T-01).** Install the skills without the clash and set up REA, exactly as in `docs/MAC_U0_RUNBOOK.md` Step 1. Review `rea setup --dry-run` before applying it. Record versions.
 
 **Step 2 (T-02).** On the owner's Mac, run `unity --version`, `unity editors --installed`, and inspect `unity projects --help` before using the read-only project-list command supported by CLI 1.0.1. List existing Unity projects and **do not modify any**. Do not infer that the remote Claude workspace can see the Mac's registered projects.
 
